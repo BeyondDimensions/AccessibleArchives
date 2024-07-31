@@ -1,9 +1,8 @@
 # Lighthouse
 
-<div style="text-align: center;">
-  <img src="data/images/logo.png" alt="Logo" />
-  <p>Lighthouse logo</p>
-</div>
+<p align="center">
+  <img src="data/images/logo.png" alt="Lighthouse logo" />
+</p>
 
 ## Overview
 
