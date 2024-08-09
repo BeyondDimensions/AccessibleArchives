@@ -23,10 +23,23 @@ def chat_interface():
         st.chat_message('user').markdown(prompt)
         st.session_state.messages.append({'role': 'user', 'content': prompt})
 
-        response = generate_response(prompt, model_name)
-        st.chat_message('assistant').markdown(response)
-        st.session_state.messages.append(
-            {'role': 'assistant', 'content': response})
+        with st.chat_message("assistant"):
+            response_placeholder = st.empty()
+
+            # Generate the response word by word
+            with st.spinner("Generating response..."):
+                response_stream = generate_response(
+                    prompt, model_name)
+
+                # Initialize with an empty string to avoid duplication
+                current_response = ""
+                for response in response_stream:
+                    # Clear the placeholder content
+                    response_placeholder.markdown(response)
+                    current_response = response
+                # Update the session state with the latest complete response
+                st.session_state.messages.append(
+                    {'role': 'assistant', 'content': current_response})
 
 
 def doc_viewer():
