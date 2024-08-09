@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Upload for Transcription</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Transcription</h1>
+        <div id="alert" class="alert"></div>
+        <form action="/process" method="post" enctype="multipart/form-data">
+            <div class="section">
+                <label for="upload_option">Choose option:</label>
+                <select id="upload_option" name="upload_option" onchange="toggleFileInput()">
+                    <option value="upload">Upload New File</option>
+                    <option value="choose">Choose Existing File</option>
+                </select>
+            </div>
+
+            <div id="upload_section" class="section">
+                <label for="file">Choose file:</label>
+                <input type="file" id="file" name="file">
+            </div>
+
+            <div id="choose_section" class="section hidden">
+                <label for="existing_file">Choose existing file:</label>
+                <select id="existing_file" name="existing_file">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="section">
+                <label for="gpt_version">Choose GPT version:</label>
+                <select id="gpt_version" name="gpt_version">
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                    <option value="gpt-4o-mini">GPT-4o mini</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Process">
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>
