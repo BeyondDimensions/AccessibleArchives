@@ -2,6 +2,7 @@ import os
 import streamlit as st
 from utils.pdf_utils import list_pdfs_in_folder, displayPDF
 from utils.model_utils import generate_response
+from utils.ocr_utils import process_file
 from config import MODELS
 
 
@@ -26,15 +27,12 @@ def chat_interface():
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
 
-            # Generate the response word by word
+            # Generate the response
             with st.spinner("Generating response..."):
-                response_stream = generate_response(
-                    prompt, model_name)
-
+                response_stream = generate_response(prompt, model_name)
                 # Initialize with an empty string to avoid duplication
                 current_response = ""
                 for response in response_stream:
-                    # Clear the placeholder content
                     response_placeholder.markdown(response)
                     current_response = response
                 # Update the session state with the latest complete response
@@ -46,7 +44,7 @@ def doc_viewer():
     st.header("Document Viewer")
 
     # Path to the folder containing PDFs
-    pdf_folder = 'data/pdf_files'
+    pdf_folder = 'data/documents'
 
     # List PDF files in the folder
     pdf_files = list_pdfs_in_folder(pdf_folder)
@@ -59,7 +57,6 @@ def doc_viewer():
         if selected_pdf:
             pdf_path = os.path.join(pdf_folder, selected_pdf)
             st.write(f"### Previewing PDF: {selected_pdf}")
-
             # Display PDF using the defined function
             displayPDF(pdf_path)
 
@@ -70,13 +67,15 @@ def main():
 
     # Tabs setup
     st.sidebar.title("Navigation")
-    tabs = ['Chatbot', 'Document Viewer']
+    tabs = ['Chatbot', 'Document Viewer', 'OCR']
     choice = st.sidebar.selectbox('Select Tab', tabs)
 
     if choice == 'Chatbot':
         chat_interface()
     elif choice == 'Document Viewer':
         doc_viewer()
+    elif choice == 'OCR':
+        process_file()
 
 
 if __name__ == "__main__":

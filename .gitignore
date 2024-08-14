@@ -163,5 +163,3 @@ cython_debug/
 
 # Exclude my files
 credentials.env
-TODO.md
-documents/
