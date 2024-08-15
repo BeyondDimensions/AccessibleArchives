@@ -17,6 +17,7 @@
 - LLM Agnostic!
 - Clear the GPU memory after prompt!
 - Work on generating text and making it LLM agnostic (seq2seq, causal) with RAG!
+- Save documents to (Latex, markdown with custom alignment or plaintext with manual spacing) - with Latex easy to make a pdf
 
 ### Future
 - work on fine-tuning with GPU
