@@ -18,6 +18,11 @@
 - Clear the GPU memory after prompt!
 - Work on generating text and making it LLM agnostic (seq2seq, causal) with RAG!
 - Save documents to (Latex, markdown with custom alignment or plaintext with manual spacing) - with Latex easy to make a pdf
+- Set up RAG - vector database etc.
+- Solve the issue with previewing large pdfs
+- Look up github for more llm ocr stuff, also python solutions like tesseract
+- Add money to my openai account to test API
+
 
 ### Future
 - work on fine-tuning with GPU
