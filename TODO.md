@@ -22,7 +22,7 @@
 - Solve the issue with previewing large pdfs
 - Look up github for more llm ocr stuff, also python solutions like tesseract
 - Add money to my openai account to test API
-
+- Add selecting available chatgpt version from API response
 
 ### Future
 - work on fine-tuning with GPU

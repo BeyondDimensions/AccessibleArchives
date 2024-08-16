@@ -2,15 +2,16 @@ import os
 import base64
 import json
 import streamlit as st
+from PIL import Image
 from openai import OpenAI
 from config import OPENAI_API_KEY
 
-# Define the directories
+# Define directories
 DATA_FOLDER = 'data'
 UPLOAD_FOLDER = os.path.join(DATA_FOLDER, 'uploads')
 TRANSCRIPT_FOLDER = os.path.join(DATA_FOLDER, 'transcripts')
 
-# Ensure the directories exist
+# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(TRANSCRIPT_FOLDER, exist_ok=True)
 
@@ -19,6 +20,19 @@ allowed_versions = ['gpt-4o', 'gpt-4o-mini',
 
 # Initialize OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+def preprocess_image(image_path):
+    """Convert image to grayscale and compress it."""
+    compressed_path = os.path.join(
+        DATA_FOLDER, 'compressed', os.path.basename(image_path))
+    os.makedirs(os.path.dirname(compressed_path), exist_ok=True)
+
+    with Image.open(image_path) as img:
+        img = img.convert("L")  # Convert to grayscale
+        img = img.convert("RGB")  # Convert back to RGB for JPEG saving
+        img.save(compressed_path, "JPEG", quality=85)  # Compress image
+    return compressed_path
 
 
 def process_file():
@@ -35,7 +49,7 @@ def process_file():
             with open(file_path, 'wb') as f:
                 f.write(uploaded_file.getbuffer())
             st.success("File uploaded successfully.")
-            file_to_process = file_path
+            file_to_process = preprocess_image(file_path)
         else:
             file_to_process = None
     else:
@@ -55,40 +69,37 @@ def process_file():
                 try:
                     response = client.chat.completions.create(
                         model=gpt_version,
-                        response_format={"type": "json_object"},
                         messages=[
                             {
                                 "role": "user",
                                 "content": [
-                                    {"type": "text", "text": "Provide JSON file that represents extracted text from this image."},
-                                    {"type": "image_url", "image_url": {
-                                        "url": f"data:image/jpeg;base64,{image_base64}"}}
+                                    {"type": "text", "text": "Provide me please only with a properly aligned markdown transcript that contains everything you can see on an image."},
+                                    {"type": "image_url",
+                                     "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
                                 ]
                             }
                         ]
                     )
 
-                    if response and response.choices and response.choices[0].message:
-                        json_data = json.loads(
-                            response.choices[0].message['content'])
+                    # Extract the content from the response
+                    if response and response.choices:
+                        message_content = response.choices[0].message.content
+                        # Save the content to a markdown file
                         filename_without_extension = os.path.splitext(
                             os.path.basename(file_to_process))[0]
-                        json_filename = os.path.join(
-                            TRANSCRIPT_FOLDER, f"{filename_without_extension}.json")
+                        md_filename = os.path.join(
+                            TRANSCRIPT_FOLDER, f"{filename_without_extension}.md")
 
-                        with open(json_filename, 'w') as file:
-                            json.dump(json_data, file, indent=4)
+                        with open(md_filename, 'w') as file:
+                            file.write(message_content)
 
                         st.success("Image processed successfully.")
-                        st.download_button("Download JSON", data=json.dumps(
-                            json_data, indent=4), file_name=f"{filename_without_extension}.json", mime="application/json")
+                        st.download_button("Download Markdown", data=message_content,
+                                           file_name=f"{filename_without_extension}.md", mime="text/markdown")
 
-                        # Display the extracted text from JSON
+                        # Display the extracted text
                         st.subheader("Extracted Text:")
-                        extracted_text = json_data.get(
-                            'text', 'No text found.')
-                        st.text_area("Extracted Text",
-                                     value=extracted_text, height=300)
+                        st.markdown(message_content)
                     else:
                         st.error("Failed to process the image.")
 
@@ -96,13 +107,11 @@ def process_file():
                     # Handle API error responses
                     if hasattr(e, 'response') and e.response and e.response.text:
                         try:
-                            # Extract error information
                             error_info = json.loads(e.response.text)
                             error_code = error_info.get(
                                 "error", {}).get("code", "unknown_code")
                             error_message = error_info.get("error", {}).get(
                                 "message", "An unknown error occurred.")
-                            # Display the HTTP status code if available
                             http_status_code = e.response.status_code if hasattr(
                                 e.response, 'status_code') else 'unknown_status_code'
                             formatted_error_message = (

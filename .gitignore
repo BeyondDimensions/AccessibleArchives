@@ -163,3 +163,4 @@ cython_debug/
 
 # Exclude my files
 credentials.env
+**/.obsidian/
