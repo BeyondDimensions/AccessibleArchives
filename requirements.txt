@@ -1,5 +1,6 @@
 streamlit
 transformers
-sentencepiece
 python-dotenv
 torch
+pymupdf
+opencv-python

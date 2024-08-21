@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from config import MODELS, HF_API_KEY
+from config.config import MODELS, HF_API_KEY
 import torch
 import time
 

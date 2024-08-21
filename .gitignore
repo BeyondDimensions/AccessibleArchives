@@ -162,5 +162,7 @@ cython_debug/
 #.idea/
 
 # Exclude my files
-credentials.env
+config/credentials.env
 **/.obsidian/
+data/images
+data/compressed

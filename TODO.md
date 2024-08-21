@@ -22,7 +22,14 @@
 - Solve the issue with previewing large pdfs
 - Look up github for more llm ocr stuff, also python solutions like tesseract
 - Add money to my openai account to test API
-- Add selecting available chatgpt version from API response
+- Extract everything in between ```markdown
+- convert to pdf from markdown (tesseract combination)
+- figure out the cost of chatgpt different models and their accuracy
+- invest an hour into checking out llm ocr github (and look for other), gemini?
+- manage folders that we want to keep different extensions of documents
+- keep track of which documents have alredy been processed (if something goes wrong in the script)
+
+- To not save the original images, but only the compressed ones. Also I want to make sure that if a pdf name is something.pdf I want the program to put all the compressed pages under a folder named "something". Also the same thing with creating transcripts and putting in files.
 
 ### Future
 - work on fine-tuning with GPU

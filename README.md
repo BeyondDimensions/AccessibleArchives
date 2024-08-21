@@ -1,7 +1,7 @@
 # Lighthouse
 
 <p align="center">
-  <img src="data/images/logo.png" alt="Lighthouse logo" />
+  <img src="logo.png" alt="Lighthouse logo" />
 </p>
 
 ## Overview
