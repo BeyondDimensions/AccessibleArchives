@@ -53,7 +53,8 @@ def compress_and_convert_image_to_grayscale(image_path):
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Compress and save the grayscale image
-    cv2.imwrite(compressed_path, gray_img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+    cv2.imwrite(compressed_path, gray_img, [
+                int(cv2.IMWRITE_JPEG_QUALITY), 85])
 
     return compressed_path
 

@@ -1,8 +1,8 @@
 ```markdown
-[BSU  
-Archiv der Zentralstelle]  
-(decal with eagle symbol)
+BSTU
+Archiv der Zentralstelle
 
-MfS  HA XXII  
-Nr.  5918
+                  MfS  HA XXII
+                  
+                  Nr.  5918
 ```

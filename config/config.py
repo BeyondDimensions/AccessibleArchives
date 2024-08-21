@@ -26,5 +26,5 @@ IMAGES_FOLDER = os.path.join(DATA_FOLDER, 'images')
 COMPRESSED_FOLDER = os.path.join(DATA_FOLDER, 'compressed')
 TRANSCRIPTS_FOLDER = os.path.join(DATA_FOLDER, 'transcripts')
 
-ALLOWED_VERSIONS = ['chatgpt-4o-latest',
-                    'gpt-4o', 'gpt-4o-2024-08-06', 'gpt-4o-mini']
+ALLOWED_VERSIONS = ['gpt-4o-2024-08-06', 'chatgpt-4o-latest',
+                    'gpt-4o-mini', 'gpt-4o']
