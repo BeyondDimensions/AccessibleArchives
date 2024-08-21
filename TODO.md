@@ -1,7 +1,6 @@
 # TODO
 
 ## Luke
-
 - Make a wider pdf viewer
 - Make it portable (webUI + desktopApp) - work on PyInstaller standalone app
 - Compare hugging face to langchain - which is better?
@@ -21,6 +20,7 @@
 - Keep track of which documents have alredy been processed (if something goes wrong in the script)
 - Do not save the original images, but only the compressed ones, or neither of them?
 - Ask Yochanan about: grayscale (raises up size of file - check for different options), when making a prompt with 50% compression (reduces the size and makes no difference in the output, but maybe reduces the cost)
+- Prompt adjustments: "Please extract and transcribe all visible text and formatting from the following image. The output should be in fully formatted markdown. Use appropriate markdown syntax to represent headings, tables, lists, and any other formatting present in the image. Do not include any introductory or explanatory text, just return the markdown content." - clarily that if it needs to correct something let hi mdo it?
 
 ### Priority
 - Invest an hour into checking out llm ocr github (element link)
