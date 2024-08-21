@@ -27,12 +27,13 @@
 - Look up github for more llm ocr stuff, also python solutions like tesseract
 - Extract everything in between ```markdown
 - Try to host an app in the network!
+- Convert to one pdf the markdown files in data/transcripts/pdfs and also create transcripts/markdown
 
 ### Future
-- work on fine-tuning with GPU
-- work on instruction tuning - how to get over it? - selecting the context and taking it directly into the prompt
+- Work on fine-tuning with GPU
+- Work on instruction tuning - how to get over it? - selecting the context and taking it directly into the prompt
 
-### Usefull sites:
+### Usefull info
 - Figure out the cost of chatgpt different models: https://context.ai/compare/gpt-4o-2024-08-06/gpt-4o-mini
 - gpt-4o-mini is the cheapest ca. 0.004$ per image but gpt-4o-2024-08-06 seems better and to be second the cheapest option - compare to chatgpt-4o-latest (probably the same models)
 - Their accuracy: Comparison folder
