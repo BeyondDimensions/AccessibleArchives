@@ -97,13 +97,6 @@ def get_pdf_input_from_user(input_option):
             return None, None
 
 
-def process_single_pdf_file(pdf_path):
-    """Process a single PDF file and return the processed image paths."""
-    st.write(f"Processing {os.path.basename(pdf_path)}...")
-    compressed_images = convert_and_preprocess_pdf(pdf_path)
-    return compressed_images
-
-
 def generate_transcripts_from_images(images, pdf_name, gpt_version):
     """Process images using the GPT model and save the results."""
     if images:
