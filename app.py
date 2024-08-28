@@ -3,9 +3,7 @@ import streamlit as st
 from utils.pdf_utils import list_pdfs_in_folder, displayPDF
 from utils.model_utils import generate_response
 from utils.ocr_utils import get_pdf_input_from_user, process_and_transcribe_pdf
-from utils.ocr_utils import ensure_directories_exist
-from config.config import MODELS, ORIGINAL_FOLDER, PROCESSED_FOLDER
-from config.config import TRANSCRIPTS_FOLDER, ALLOWED_VERSIONS
+from config.config import MODELS, ALLOWED_VERSIONS, PROCESSED_FOLDER
 
 
 def chat_interface():

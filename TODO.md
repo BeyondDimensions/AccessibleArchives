@@ -26,6 +26,7 @@
 
 ### Usefull info
 - Figure out the cost of chatgpt different models: https://context.ai/compare/gpt-4o-2024-08-06/gpt-4o-mini
+- LLM arena: https://lmarena.ai/
 - gpt-4o-mini is the cheapest ca. 0.004$ per image but gpt-4o-2024-08-06 seems better and to be second the cheapest option ca 0.005$ per image. Chatgpt-4o-latest is more expensive ca 0.009$ (probably the same models) and slightly slower.
 - Their accuracy: Comparison folder
 - 5 images processed comparision: gpt-4o-2024-08-06 (seems to be the fastest - 31s) vs chatgpt-4o-latest (34s)

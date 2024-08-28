@@ -6,7 +6,7 @@ load_dotenv(dotenv_path='config/credentials.env')
 
 HF_API_KEY = os.getenv('HF_API_KEY')
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY_TEST')
 
 DEFAULT_MODEL = ''
 
@@ -26,5 +26,4 @@ TEMP_FOLDER = os.path.join(DATA_FOLDER, 'temp')
 TRANSCRIPTS_FOLDER = os.path.join(DATA_FOLDER, 'transcripts')
 PROCESSED_FOLDER = os.path.join(TRANSCRIPTS_FOLDER, 'pdfs')
 
-ALLOWED_VERSIONS = ['gpt-4o-2024-08-06', 'chatgpt-4o-latest',
-                    'gpt-4o-mini', 'gpt-4o']
+ALLOWED_VERSIONS = ['gpt-4o-2024-08-06', 'chatgpt-4o-latest', 'gpt-4o-mini']
