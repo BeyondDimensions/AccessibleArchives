@@ -15,7 +15,7 @@
 - Try to host an app in the network!
 
 ### Priority
-- Fix the order and fix the pdf (broken pages - marvins task), test chatgpt latest also, tell gpt that there are pages that might be flipped?
+- Fix the order, (``` content ```) extraction problem and fix the pdf (broken pages - marvins task), test chatgpt latest also, tell gpt that there are pages that might be flipped, detect why there is blank page
 - Write a virt manager scirpt to setup the app to run
 - LLM Agnostic!
 - Clear the GPU memory after prompt!
