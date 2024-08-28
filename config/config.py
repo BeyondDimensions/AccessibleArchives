@@ -21,10 +21,10 @@ MODELS = {
 DATA_FOLDER = 'data'
 
 # Subfolders
-PDFS_FOLDER = os.path.join(DATA_FOLDER, 'pdfs')
-IMAGES_FOLDER = os.path.join(DATA_FOLDER, 'images')
-COMPRESSED_FOLDER = os.path.join(DATA_FOLDER, 'compressed')
+ORIGINAL_FOLDER = os.path.join(DATA_FOLDER, 'pdfs')
+TEMP_FOLDER = os.path.join(DATA_FOLDER, 'temp')
 TRANSCRIPTS_FOLDER = os.path.join(DATA_FOLDER, 'transcripts')
+PROCESSED_FOLDER = os.path.join(TRANSCRIPTS_FOLDER, 'pdfs')
 
 ALLOWED_VERSIONS = ['gpt-4o-2024-08-06', 'chatgpt-4o-latest',
                     'gpt-4o-mini', 'gpt-4o']

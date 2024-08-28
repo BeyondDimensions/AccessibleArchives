@@ -4,3 +4,4 @@ python-dotenv
 torch
 pymupdf
 opencv-python
+openai

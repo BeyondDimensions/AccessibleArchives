@@ -4,8 +4,8 @@ from utils.pdf_utils import list_pdfs_in_folder, displayPDF
 from utils.model_utils import generate_response
 from utils.ocr_utils import get_pdf_input_from_user, process_and_transcribe_pdf
 from utils.ocr_utils import ensure_directories_exist
-from config.config import MODELS, PDFS_FOLDER, IMAGES_FOLDER
-from config.config import COMPRESSED_FOLDER, TRANSCRIPTS_FOLDER, ALLOWED_VERSIONS
+from config.config import MODELS, ORIGINAL_FOLDER, PROCESSED_FOLDER
+from config.config import TRANSCRIPTS_FOLDER, ALLOWED_VERSIONS
 
 
 def chat_interface():
@@ -45,7 +45,7 @@ def chat_interface():
 def doc_viewer():
     st.header("Document Viewer")
 
-    pdf_files = list_pdfs_in_folder(PDFS_FOLDER)
+    pdf_files = list_pdfs_in_folder(PROCESSED_FOLDER)
 
     if not pdf_files:
         st.write("No PDF files found in the folder.")
@@ -53,7 +53,7 @@ def doc_viewer():
         selected_pdf = st.selectbox('Select a PDF file', pdf_files)
 
         if selected_pdf:
-            pdf_path = os.path.join(PDFS_FOLDER, selected_pdf)
+            pdf_path = os.path.join(PROCESSED_FOLDER, selected_pdf)
             st.write(f"### Previewing PDF: {selected_pdf}")
             try:
                 displayPDF(pdf_path)
@@ -88,8 +88,8 @@ def process_files():
 def main():
     st.title('Lighthouse')
 
-    ensure_directories_exist(PDFS_FOLDER, IMAGES_FOLDER,
-                             COMPRESSED_FOLDER, TRANSCRIPTS_FOLDER)
+    ensure_directories_exist(
+        ORIGINAL_FOLDER, TRANSCRIPTS_FOLDER)
 
     # Tabs setup
     st.sidebar.title("Navigation")
