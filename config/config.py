@@ -6,7 +6,7 @@ load_dotenv(dotenv_path='config/credentials.env')
 
 HF_API_KEY = os.getenv('HF_API_KEY')
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY_TEST')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY_LIGHTHOUSE')
 
 DEFAULT_MODEL = ''
 

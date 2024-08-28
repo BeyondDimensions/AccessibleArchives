@@ -15,6 +15,8 @@
 - Try to host an app in the network!
 
 ### Priority
+- Fix the order and fix the pdf (broken pages - marvins task), test chatgpt latest also, tell gpt that there are pages that might be flipped?
+- Write a virt manager scirpt to setup the app to run
 - LLM Agnostic!
 - Clear the GPU memory after prompt!
 - Work on generating text and making it LLM agnostic (seq2seq, causal) with RAG!
