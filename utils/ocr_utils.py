@@ -56,6 +56,7 @@ def get_pdf_input_from_user(input_option):
     else:
         uploaded_file = st.file_uploader("Choose a PDF file", type=['pdf'])
         if uploaded_file is not None:
+            ensure_directories_exist(ORIGINAL_FOLDER)
             pdf_path = os.path.join(ORIGINAL_FOLDER, uploaded_file.name)
             with open(pdf_path, 'wb') as f:
                 f.write(uploaded_file.getbuffer())

@@ -164,6 +164,4 @@ cython_debug/
 # Exclude my files
 config/credentials.env
 **/.obsidian/
-data/temp
-data/transcripts/markdown
-data/transcripts/transcription_log.json
+data/

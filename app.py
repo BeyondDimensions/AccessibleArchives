@@ -88,9 +88,6 @@ def process_files():
 def main():
     st.title('Lighthouse')
 
-    ensure_directories_exist(
-        ORIGINAL_FOLDER, TRANSCRIPTS_FOLDER)
-
     # Tabs setup
     st.sidebar.title("Navigation")
     tabs = ['Chatbot', 'Document Viewer', 'OCR Processing']
