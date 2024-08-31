@@ -15,7 +15,7 @@
 - Try to host an app in the network!
 
 ### Priority
-- Fix the order, (``` content ```) extraction problem and fix the pdf (broken pages - marvins task), test chatgpt latest also, tell gpt that there are pages that might be flipped, detect why there is blank page
+- Fix the order, (``` content ```) extraction problem, test chatgpt latest also, detect why there is blank page, send corrected pdf/md files to Marvin
 - Write a virt manager scirpt to setup the app to run
 - LLM Agnostic!
 - Clear the GPU memory after prompt!
@@ -23,6 +23,10 @@
 - Set up RAG - vector database etc.
 
 ### Future
+- Add embedding model selection and fix init database wheel spinnig
+- Let a compputer automatically decide which models are suitable for the computer
+- Switch from Ollama to Hugging face to run a model in the backgorund
+- Use different Database like (Milvus/Qdrant/Faiss)
 - Work on fine-tuning with GPU
 - Work on instruction tuning - how to get over it? - selecting the context and taking it directly into the prompt
 
@@ -34,3 +38,6 @@
 - 5 images processed comparision: gpt-4o-2024-08-06 (seems to be the fastest - 31s) vs chatgpt-4o-latest (34s)
 - 1$ for first API call
 - There is no difference in cost regarding conversion
+- Embedding models leaderboard: https://huggingface.co/spaces/mteb/leaderboard
+- Interesting model is: dunzhang/stella_en_1.5B_v5
+- https://github.com/alejandro-ao/ask-multiple-pdfs - some inspiration from?

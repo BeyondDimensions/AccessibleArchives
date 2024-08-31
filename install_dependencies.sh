@@ -4,4 +4,4 @@
 sudo apt-get update
 
 # Install necesarry packages
-sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended
+sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended ollama

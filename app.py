@@ -1,25 +1,31 @@
 import os
 import streamlit as st
+from utils.db_utils import query_database, initialize_database
 from utils.pdf_utils import list_pdfs_in_folder, displayPDF
-from utils.model_utils import generate_response
 from utils.ocr_utils import ensure_directories_exist
 from utils.ocr_utils import get_pdf_input_from_user, process_and_transcribe_pdf
-from config.config import MODELS, ALLOWED_VERSIONS, PROCESSED_FOLDER
+from config.config import ALLOWED_VERSIONS, PROCESSED_FOLDER
+# from config.config import LLM_MODELS
 
 
 def chat_interface():
     st.header("Ask me a question!")
 
     # Model selection
-    model_name = st.selectbox('Select Model', list(MODELS.keys()))
+    # model_name = st.selectbox('Select Model', list(LLM_MODELS.keys()))
+    with st.spinner("Initializing database..."):
+        try:
+            initialize_database()
+        except Exception as e:
+            st.error(f"Error initializing database: {e}")
 
     # Initialize session state variables if they don't exist
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     # if 'previous_model' not in st.session_state:
     #     st.session_state.previous_model = model_name
-    #
-    # # Clear messages if the selected model has changed
+
+    # Clear messages if the selected model has changed
     # if st.session_state.previous_model != model_name:
     #     st.session_state.messages = []
     #     st.session_state.previous_model = model_name
@@ -40,15 +46,12 @@ def chat_interface():
 
             # Generate the response
             with st.spinner("Generating response..."):
-                response_stream = generate_response(prompt, model_name)
-                # Initialize with an empty string to avoid duplication
-                current_response = ""
-                for response in response_stream:
-                    response_placeholder.markdown(response)
-                    current_response = response
-                # Update the session state with the latest complete response
+                response, sources = query_database(prompt)
+                response_text = response + \
+                    "\n\nSources:\n" + "\n".join(sources)
+                response_placeholder.markdown(response_text)
                 st.session_state.messages.append(
-                    {'role': 'assistant', 'content': current_response})
+                    {'role': 'assistant', 'content': response_text})
 
 
 def doc_viewer():

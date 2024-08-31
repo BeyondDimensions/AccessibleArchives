@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from config.config import MODELS, HF_API_KEY
+from config.config import MODELS, HUGGINGFACEHUB_API_TOKEN
 import torch
 import time
 
@@ -11,7 +11,7 @@ def get_model_and_tokenizer(model_name):
     if model_name not in model_pipes:
         model_info = MODELS[model_name]
         tokenizer = AutoTokenizer.from_pretrained(
-            model_info['path'], token=HF_API_KEY, legacy=False)
+            model_info['path'], token=HUGGINGFACEHUB_API_TOKEN, legacy=False)
 
         # Enable 8-bit quantization
         quant_config = BitsAndBytesConfig(load_in_8bit=True)
@@ -19,7 +19,7 @@ def get_model_and_tokenizer(model_name):
         # Load model with reduced precision
         model = AutoModelForCausalLM.from_pretrained(
             model_info['path'],
-            token=HF_API_KEY,
+            token=HUGGINGFACEHUB_API_TOKEN,
             quantization_config=quant_config,
             torch_dtype=torch.float16
         )

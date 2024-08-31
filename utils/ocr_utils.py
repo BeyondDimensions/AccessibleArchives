@@ -142,11 +142,10 @@ def generate_transcripts_from_images(images, pdf_name, gpt_version, log, temp_fo
                                     {
                                         "type": "text",
                                         "text": (
-                                            "Please extract and transcribe all visible text and formatting from the following image. "
-                                            "The output should be in fully formatted markdown. Use appropriate markdown syntax to represent "
-                                            "headings, tables, lists, and any other formatting present in the image. Do not include any introductory "
-                                            "or explanatory text, just return the markdown content. If you can not transcribe the image give an answer "
-                                            "and say that I should refer to the original document."
+                                            "Please extract and transcribe all visible text and formatting from the following image and save it into a markdown file. "
+                                            "Use appropriate markdown syntax to represent headings, tables, lists, and any other formatting present in the image. "
+                                            "If you can not transcribe the image say that I should refer to the original document. Don't comment anything by yourself, "
+                                            "just give me the extracted and transcribed text."
                                         )
                                     },
                                     {
