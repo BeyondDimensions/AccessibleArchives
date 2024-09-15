@@ -11,3 +11,4 @@ langchain_chroma
 huggingface_hub
 sentence-transformers
 unstructured
+pyinstaller

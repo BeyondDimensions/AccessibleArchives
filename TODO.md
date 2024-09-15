@@ -21,6 +21,8 @@
 - Clear the GPU memory after prompt!
 - Work on generating text and making it LLM agnostic (seq2seq, causal) with RAG!
 - Set up RAG - vector database etc.
+- Cleanup roadmap
+- Do we need CLI?
 
 ### Future
 - Add embedding model selection and fix init database wheel spinnig
