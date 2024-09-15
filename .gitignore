@@ -164,4 +164,5 @@ cython_debug/mistral:7b
 src/utils/credentials.env
 **/.obsidian/
 chroma/
-# *.spec
+.temp_data/
+#*.spec
