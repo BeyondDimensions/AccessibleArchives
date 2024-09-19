@@ -23,6 +23,8 @@
 - Set up RAG - vector database etc.
 - Cleanup roadmap
 - Do we need CLI?
+- Preview docs?
+- Fix chatgpt api
 
 ### Future
 - Add embedding model selection and fix init database wheel spinnig

@@ -1,7 +1,7 @@
-# Lighthouse
+# Accessible Archives
 
 <p align="center">
-  <img src="logo.png" alt="Lighthouse logo" />
+  <img src="logo.png" alt="Accessible archives logo" />
 </p>
 
 ## Overview
@@ -49,7 +49,7 @@ streamlit run app.py
 
 ## Project Structure
 ```bash
-Lighthouse/
+AccessibleArchives/
 │
 ├── data/
 │   ├── documents
