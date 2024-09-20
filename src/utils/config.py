@@ -6,7 +6,7 @@ load_dotenv(dotenv_path='config/credentials.env')
 
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY_LIGHTHOUSE')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 DEFAULT_MODEL = ''
 

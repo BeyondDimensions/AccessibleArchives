@@ -25,6 +25,9 @@
 - Do we need CLI?
 - Preview docs?
 - Fix chatgpt api
+- https://platform.openai.com/docs/guides/batch/overview
+- https://platform.openai.com/docs/guides/vision
+- https://openai.com/api/pricing/
 
 ### Future
 - Add embedding model selection and fix init database wheel spinnig

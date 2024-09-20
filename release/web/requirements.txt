@@ -3,8 +3,6 @@ transformers
 python-dotenv
 torch
 pymupdf
-opencv-python
-openai
 langchain
 langchain-community
 langchain_chroma
@@ -12,3 +10,4 @@ huggingface_hub
 sentence-transformers
 unstructured
 pyinstaller
+requests
