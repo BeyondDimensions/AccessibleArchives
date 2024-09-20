@@ -2,7 +2,6 @@
 **/__pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
 
@@ -166,3 +165,4 @@ src/utils/credentials.env
 chroma/
 .data/
 #*.spec
+*.log
