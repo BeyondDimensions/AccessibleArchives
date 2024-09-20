@@ -1,0 +1,12 @@
+import os
+from ocr.transcription import transcribe_image
+
+
+def test_transcribe_image(data_folder):
+    image_path = os.path.join(data_folder, 'test3.jpg')
+    md_filepath = os.path.join(data_folder, 'test-output3.md')
+
+    result = transcribe_image(image_path=image_path, md_filepath=md_filepath)
+
+    # Add assertions to verify the output
+    assert result == md_filepath

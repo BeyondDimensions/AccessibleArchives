@@ -1,8 +1,4 @@
-# config
 import os
-from dotenv import load_dotenv
-
-load_dotenv(dotenv_path='config/credentials.env')
 
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 

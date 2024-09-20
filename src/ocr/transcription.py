@@ -5,7 +5,7 @@ Use ChatGPT to transcribe images to markdown.
 ```py
 from transcription import transcribe_image
 
-transcribe_image("/mnt/Data/Programming/test.jpg", "/mnt/Data/Programming/tmp/test-output.md")
+transcribe_image("/home/Programming/test.jpg", "/home/Programming/tmp/test-output.md")
 ```
 """
 
@@ -13,11 +13,7 @@ import os
 import base64
 import logging
 import requests
-from utils.config import OPENAI_API_KEY
-
-
-if not OPENAI_API_KEY:
-    raise Exception("Couldn't load API Key for OpenAI")
+from utils import OPENAI_API_KEY
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -80,6 +76,9 @@ def transcribe_image(image_path, md_filepath=None, api_key=OPENAI_API_KEY, gpt_v
     """Process a single image and save the markdown file next to it."""
     try:
         logging.info(f"Processing {image_path}...")
+
+        if not api_key:
+            raise Exception("Couldn't load API Key for OpenAI")
 
         # Send the image to GPT
         image_base64 = encode_image(image_path)
