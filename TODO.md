@@ -26,7 +26,7 @@
 - https://platform.openai.com/docs/guides/batch/overview
 - https://platform.openai.com/docs/guides/vision
 - https://openai.com/api/pricing/
-- Make logging with a FLAG to detect if there is a need to log to streamlit
+- Make an option to use OPEN AI embeddings for RAG
 
 ### Future
 - Add embedding model selection and fix init database wheel spinnig
