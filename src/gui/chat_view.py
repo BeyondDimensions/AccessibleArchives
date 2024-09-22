@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.db_utils import query_database, initialize_database
-from config.config import ALLOWED_VERSIONS
+from utils import logger
+
 
 def chat_view():
     st.header("Ask me a question!")
@@ -11,7 +12,7 @@ def chat_view():
         try:
             initialize_database()
         except Exception as e:
-            st.error(f"Error initializing database: {e}")
+            logger.error(f"Error initializing database: {e}", True)
 
     # Initialize session state variables if they don't exist
     if 'messages' not in st.session_state:

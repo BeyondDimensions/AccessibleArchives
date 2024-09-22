@@ -1,0 +1,14 @@
+transformers
+python-dotenv
+torch
+pymupdf
+langchain
+langchain-community
+langchain_chroma
+huggingface_hub
+sentence-transformers
+unstructured
+pyinstaller
+requests
+pytest
+loguru

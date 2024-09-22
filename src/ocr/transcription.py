@@ -10,18 +10,11 @@ transcribe_image("/home/Programming/test.jpg", "/home/Programming/tmp/test-outpu
 """
 
 import os
-import base64
-import logging
 import requests
-from utils import OPENAI_API_KEY
-
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-
-
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+from utils import logger
+from utils import openai_api_error
+from utils import encode_file_base64
+from utils import OPENAI_API_KEY, DEFAULT_OPENAI_MODEL
 
 
 def extract_markdown_from_response(response_content):
@@ -72,16 +65,16 @@ def openai_api_prompt(api_key, gpt_version, image_base64):
     return requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
 
 
-def transcribe_image(image_path, md_filepath=None, api_key=OPENAI_API_KEY, gpt_version="gpt-4o-2024-08-06"):
+def transcribe_image(image_path, md_filepath=None, api_key=OPENAI_API_KEY, gpt_version=DEFAULT_OPENAI_MODEL):
     """Process a single image and save the markdown file next to it."""
     try:
-        logging.info(f"Processing {image_path}...")
+        logger.info(f"Processing {image_path}...", True)
 
         if not api_key:
             raise Exception("Couldn't load API Key for OpenAI")
 
         # Send the image to GPT
-        image_base64 = encode_image(image_path)
+        image_base64 = encode_file_base64(image_path)
         response = openai_api_prompt(api_key, gpt_version, image_base64)
 
         # Check if the response is successful
@@ -97,15 +90,17 @@ def transcribe_image(image_path, md_filepath=None, api_key=OPENAI_API_KEY, gpt_v
             with open(md_filepath, 'w') as file:
                 file.write(markdown_content)
 
-            logging.info(
-                f"Successfully processed {image_path} and saved {md_filepath}.")
+            logger.success(
+                f"Successfully processed {image_path} and saved {md_filepath}.", True)
         else:
             error_message = f"Failed to process {image_path}. No response received."
-            logging.error(error_message)
+            logger.error(error_message, True)
             raise Exception(error_message)
     except Exception as e:
         error_message = f"Error processing {image_path}: {str(e)}"
-        logging.error(error_message)
+        # TODO Handle OPENAI error
+        openai_api_error(e)
+        logger.error(error_message, True)
         raise Exception(error_message)
 
     return md_filepath
