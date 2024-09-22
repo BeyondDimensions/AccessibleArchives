@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MultiPageDoc",
+  "type": "object",
+  "properties": {
+    "ipfs_id": {
+      "type": "string",
+      "description": "The IPFS CID of the JSON document representing the multi-page document."
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The IPFS CIDs of the pages in this document."
+      },
+      "description": "A list of IPFS CIDs representing the pages."
+    },
+    "content": {
+      "type": "object",
+      "description": "The content of the multi-page document, which can have dynamic structure."
+    },
+    "source": {
+      "type": "object",
+      "description": "Source information for the multi-page document. This can have a dynamic structure."
+    }
+  },
+  "required": ["ipfs_id", "pages", "content", "source"],
+  "additionalProperties": true
+}
