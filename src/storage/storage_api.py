@@ -62,6 +62,7 @@ class Transcript:
 @dataclass_json
 @dataclass
 class PageSource:
+    """Represents the metadata about a Page's origin."""
     original_medium: str
     digitiser: str
     digitisation_date: datetime = field(
@@ -89,8 +90,7 @@ class Page:
 @dataclass_json
 @dataclass
 class CompiledDoc:
-    """A file, based on a MultiPageDoc, in which pages and/or transcripts
-    have been compiled into a more complex format."""
+    """A file comprised of a MultiPageDoc's pages and transcripts."""
 
     ipfs_id: str    # the IPFS ID of the file
     format: str  # the digital file format, expressed by file-name extension
@@ -107,7 +107,7 @@ class CompiledDoc:
 @dataclass_json
 @dataclass
 class MultiPageDoc:
-    """Represents a folder comprising multiple pages"""
+    """Represents a document comprising multiple pages."""
     # IPFS CID of the folder containing the Pages included in this document
     ipfs_id: str
     # IPFS CIDs of the pages and their metadata files, ordered by page number
@@ -129,21 +129,6 @@ class MultiPageDoc:
                 "This IPFS ID does not belong to any page in this MultiPageDoc.")
         return ipfs_api.read()
 
-    def _load_page_metadata(self,) -> None:
-        pages: dict[str, Page] = {}
-        for metadata_ipfs_id in self.pages:
-
-            # load page from metadata
-            page = Page.from_json(bytes.decode(ipfs_api.read(metadata_ipfs_id)))
-            ipfs_id = page.ipfs_id
-            # ensure no duplicate pages
-            if ipfs_id in pages.keys():
-                raise InvalidDocumentCollectionError(
-                    "This MultiPageDoc refers to the same page multiple times!"
-                )
-            pages.update({ipfs_id: page})
-        self._pages = pages
-
     def get_pages(self) -> list[Page]:
         # if we haven't yet loaded our pages and their metadata, do so
         if not hasattr(self, "_pages") or not self._pages:
@@ -160,7 +145,25 @@ class MultiPageDoc:
         return list(self._pages.keys())
 
     def get_page_from_page_number(self, page_number: int) -> Page:
+        """Get a Page, given its page number in this document."""
         return self.get_page_from_ipfs_id(self.pages[page_number])
+
+    def _load_page_metadata(self,) -> None:
+        """Read and validate this MultiPageDoc's Pages' metadata files."""
+        pages: dict[str, Page] = {}
+        for metadata_ipfs_id in self.pages:
+
+            # load page from metadata
+            page = Page.from_json(bytes.decode(
+                ipfs_api.read(metadata_ipfs_id)))
+            ipfs_id = page.ipfs_id
+            # ensure no duplicate pages
+            if ipfs_id in pages.keys():
+                raise InvalidDocumentCollectionError(
+                    "This MultiPageDoc refers to the same page multiple times!"
+                )
+            pages.update({ipfs_id: page})
+        self._pages = pages
 
 
 @dataclass_json
@@ -190,7 +193,71 @@ class DocumentCollection:
 
         _page_ids: list[str] | None = None
         _multipagedoc_ids: list[str] | None = None
-        self.check_path_integrity()
+        self.check_collection_integrity()
+
+    def get_multipagedoc_ids(self) -> list[str]:
+        """Get the IDs of the MultiPageDocs in this DocumentCollection."""
+        if not self._multipagedoc_ids:
+            self._load_multipagedocs()
+        return self._multipagedoc_ids
+
+    def get_multipagedocs(self) -> Iterator[MultiPageDoc]:
+        """Get an iterator over the MultiPageDocs in this DocumentCollection."""
+        for doc_id in self.get_multipagedoc_ids():
+            yield MultiPageDoc.from_json(read_file(join_paths(
+                self.multipagedocs_dir, f"{doc_id}.json"
+            )))
+
+    def get_page_ids(self) -> list[str]:
+        """Get the IDs of the Pages in this DocumentCollection."""
+
+        if not self._page_ids:
+            self._load_pages()
+        return self._page_ids
+
+    def get_pages(self) -> Iterator[Page]:
+        """Get an iterator over the Pages in this DocumentCollection."""
+        for page_ipfs_id in self.get_page_ids():
+            yield self.get_page_from_ipfs_id(page_ipfs_id)
+
+    def get_page_from_ipfs_id(self, ipfs_id: str) -> Page:
+        """Get a Page from this collection, given the IPFS ID of its source."""
+        if ipfs_id not in self.get_page_ids():
+            raise ValueError(
+                "This IPFS ID does not belong to any page in this MultiPageDoc."
+            )
+        return Page.from_json(
+            bytes.decode(read_file(join_paths(
+                self.pagemetadata_dir, ipfs_id + ".json"
+            )))
+        )
+
+    def check_collection_integrity(self, ):
+        """Ensure the data in this DocumentCollection is consistent."""
+        if not path_exists(self.path):
+            error_message = f"Can't find the path {self.path}"
+            raise InvalidDocumentCollectionError(error_message)
+        for subfolder in {
+            self.pages_dir,
+            self.transcripts_dir,
+            self.multipagedocs_dir,
+            self.pagemetadata_dir
+        }:
+            full_path = join_paths(self.path, subfolder)
+            if not path_exists(full_path):
+                error_message = (
+                    f"Collection doesn't have the subfolder {full_path}"
+                )
+                raise InvalidDocumentCollectionError(error_message)
+            if is_file(full_path):
+                error_message = (
+                    f"This path should be a folder, not a file: {full_path}"
+                )
+                raise InvalidDocumentCollectionError(error_message)
+
+        # verify the integrity of pages and their metadata files
+        self._load_pages()
+        self._load_multipagedocs()
 
     def _load_pages(self) -> list[str]:
         page_ids: list[str] = []
@@ -271,62 +338,3 @@ class DocumentCollection:
 
         self._multipagedoc_ids = doc_ids
         return doc_ids
-
-    def get_multipagedoc_ids(self):
-        if not self._multipagedoc_ids:
-            self._load_multipagedocs()
-        return self._multipagedoc_ids
-
-    def get_multipagedocs(self) -> Iterator[MultiPageDoc]:
-        """Get an iterator over the Page objects linked to this MultiPageDoc."""
-        for doc_id in self.get_multipagedoc_ids():
-            yield MultiPageDoc.from_json(read_file(join_paths(
-                self.multipagedocs_dir, f"{doc_id}.json"
-            )))
-
-    def get_page_ids(self) -> list[str]:
-        if not self._page_ids:
-            self._load_pages()
-        return self._page_ids
-
-    def get_pages(self) -> Iterator[Page]:
-        """Get an iterator over the Page objects linked to this MultiPageDoc."""
-        for page_ipfs_id in self.get_page_ids():
-            yield self.get_page_from_ipfs_id(page_ipfs_id)
-
-    def get_page_from_ipfs_id(self, ipfs_id: str) -> Page:
-        if ipfs_id not in self.get_page_ids():
-            raise ValueError(
-                "This IPFS ID does not belong to any page in this MultiPageDoc."
-            )
-        return Page.from_json(
-            bytes.decode(read_file(join_paths(
-                self.pagemetadata_dir, ipfs_id + ".json"
-            )))
-        )
-
-    def check_path_integrity(self, ):
-        if not path_exists(self.path):
-            error_message = f"Can't find the path {self.path}"
-            raise InvalidDocumentCollectionError(error_message)
-        for subfolder in {
-            self.pages_dir,
-            self.transcripts_dir,
-            self.multipagedocs_dir,
-            self.pagemetadata_dir
-        }:
-            full_path = join_paths(self.path, subfolder)
-            if not path_exists(full_path):
-                error_message = (
-                    f"Collection doesn't have the subfolder {full_path}"
-                )
-                raise InvalidDocumentCollectionError(error_message)
-            if is_file(full_path):
-                error_message = (
-                    f"This path should be a folder, not a file: {full_path}"
-                )
-                raise InvalidDocumentCollectionError(error_message)
-
-        # verify the integrity of pages and their metadata files
-        self._load_pages()
-        self._load_multipagedocs()
