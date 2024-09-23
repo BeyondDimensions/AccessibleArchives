@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MultiPageDoc",
+  "type": "object",
+  "properties": {
+    "ipfs_id": {
+      "type": "string",
+      "description": "The IPFS CID of the JSON document representing the multi-page document."
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The IPFS CIDs of the pages' metadta files, sorted by page number."
+      },
+      "description": "A list of IPFS CIDs representing the pages."
+    },
+    "content": {
+      "type": "object",
+      "description": "The content of the multi-page document, which can have dynamic structure."
+    },
+    "source": {
+      "type": "object",
+      "description": "Source information for the multi-page document. This can have a dynamic structure."
+    },
+    "compilations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ipfs_id": {
+            "type": "string",
+            "description": "The IPFS CID of the compiled file."
+          },
+          "format": {
+            "type": "string",
+            "description": "The digital file format, represented by its file-name extension."
+          },
+          "compilation_method": {
+            "type": "string",
+            "description": "How the MultiPageDoc was compiled."
+          },
+          "compilation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp of when this file was compiled."
+          }
+        },
+        "required": ["ipfs_id", "format", "compilation_method", "compilation_date"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["ipfs_id", "pages", "content", "source"],
+  "additionalProperties": true
+}

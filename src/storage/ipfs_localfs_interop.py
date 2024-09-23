@@ -37,7 +37,7 @@ def path_exists(path: str):
 
 def is_file(path):
     if not path_exists(path):
-        raise FileNotFoundError()
+        raise FileNotFoundError(path)
 
     ipfs_id = is_ipfs_path(path)
     if ipfs_id:
@@ -72,9 +72,9 @@ def list_dir(path):
         raise Exception(f"This path is a file, not a directory: {path}")
     ipfs_id = is_ipfs_path(path)
     if ipfs_id:
-        return [item['Name'] for item in ipfs_api.http_client.ls(path)["Objects"][0]['Links']]
+        return set([item['Name'] for item in ipfs_api.http_client.ls(path)["Objects"][0]['Links']])
     else:
-        return os.listdir(path)
+        return set(os.listdir(path))
 
 
 def read_file(path):
@@ -86,3 +86,28 @@ def read_file(path):
     else:
         with open(path, 'rb') as file:
             return file.read()
+
+
+def get_ipfs_cid(path):
+    if not path_exists(path):
+        raise FileNotFoundError(path)
+    ipfs_id = is_ipfs_path(path)
+    if ipfs_id:
+        while "//" in path:
+            path = path.replace("//", "/")
+        if path[-1] == "/":
+            path = path[:-1]
+        components = path.split("/")
+        components.remove("")
+        if len(components) == 2:
+            return components[1]
+        parent_dir = "/"+"/".join(components[:-1])
+
+        ipfs_cid = [item['Hash'] for item in ipfs_api.http_client.ls(
+            parent_dir)["Objects"][0]['Links'] if item['Name'] == components[-1]]
+        if ipfs_cid:
+            return ipfs_cid[0]
+        else:
+            raise Exception("Bug in get_ipfs_cid")
+    else:
+        return ipfs_api.predict_cid(path)

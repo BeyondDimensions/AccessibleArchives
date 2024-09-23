@@ -1,0 +1,15 @@
+{
+  "ipfs_id": "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2",
+  "format": "png",
+  "transcripts": [{
+    "ipfs_id": "QmbHXuQmaEKaZqRmtBvGXxDSLvGJL1KG7fq1qKFAhwR4v2",
+    "transcriber": "ChatGPT",
+    "timestamp": "2024-09-22T17:17:13.338515+00:00"
+  }],
+  "content": {},
+  "source": {
+    "original_medium": "PhotoCopy of BStU archive document",
+    "digitiser": "anonymoys",
+    "digitisation_date": "2024-09-22T17:17:13.338542+00:00"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Page",
+  "type": "object",
+  "properties": {
+    "ipfs_id": {
+      "type": "string",
+      "description": "The IPFS CID of the page."
+    },
+    "format": {
+      "type": "string",
+      "description": "The digital format of this page, represented by its file-name extension."
+    },
+    "transcripts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ipfs_id": {
+            "type": "string",
+            "description": "The IPFS CID of the transcript file."
+          },
+          "transcriber": {
+            "type": "string",
+            "description": "The person who transcribed the page."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the page was transcribed."
+          }
+        },
+        "required": ["ipfs_id", "transcriber", "timestamp"],
+        "additionalProperties": true
+      }
+    },
+    "content": {
+      "type": "object",
+      "description": "The content of the page, which can have dynamic structure."
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "original_medium": {
+          "type": "string",
+          "description": "The original medium of the document."
+        },
+        "digitisation_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date when the document was digitized."
+        },
+        "digitiser": {
+          "type": "string",
+          "description": "The person or entity that digitized the document."
+        }
+      },
+      "required": ["original_medium", "digitisation_date", "digitiser"],
+      "additionalProperties": true
+    }
+  },
+  "required": ["ipfs_id", "transcripts", "content", "source", "format"],
+  "additionalProperties": true
+}
