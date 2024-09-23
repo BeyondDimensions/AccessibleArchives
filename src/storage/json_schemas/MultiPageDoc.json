@@ -11,7 +11,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "description": "The IPFS CIDs of the pages in this document."
+        "description": "The IPFS CIDs of the pages' metadta files, sorted by page number."
       },
       "description": "A list of IPFS CIDs representing the pages."
     },

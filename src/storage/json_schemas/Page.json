@@ -7,6 +7,10 @@
       "type": "string",
       "description": "The IPFS CID of the page."
     },
+    "format": {
+      "type": "string",
+      "description": "The digital format of this page, represented by its file-name extension."
+    },
     "transcripts": {
       "type": "array",
       "items": {
@@ -55,6 +59,6 @@
       "additionalProperties": true
     }
   },
-  "required": ["ipfs_id", "transcripts", "content", "source"],
+  "required": ["ipfs_id", "transcripts", "content", "source", "format"],
   "additionalProperties": true
 }

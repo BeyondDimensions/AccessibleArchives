@@ -37,7 +37,7 @@ def path_exists(path: str):
 
 def is_file(path):
     if not path_exists(path):
-        raise FileNotFoundError()
+        raise FileNotFoundError(path)
 
     ipfs_id = is_ipfs_path(path)
     if ipfs_id:
@@ -90,7 +90,7 @@ def read_file(path):
 
 def get_ipfs_cid(path):
     if not path_exists(path):
-        raise FileNotFoundError()
+        raise FileNotFoundError(path)
     ipfs_id = is_ipfs_path(path)
     if ipfs_id:
         while "//" in path:
