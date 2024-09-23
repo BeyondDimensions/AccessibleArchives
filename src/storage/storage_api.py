@@ -88,6 +88,24 @@ class Page:
 
 @dataclass_json
 @dataclass
+class CompiledDoc:
+    """A file, based on a MultiPageDoc, in which pages and/or transcripts
+    have been compiled into a more complex format."""
+
+    ipfs_id: str    # the IPFS ID of the file
+    format: str  # the digital file format, expressed by file-name extension
+    compilation_method: str  # how this document was compiled from source
+    compilation_date: datetime = field(
+        default_factory=datetime.now,  # You can set default_factory for datetimes if needed
+        metadata=config(
+            encoder=datetime_encoder,
+            decoder=datetime_decoder
+        )
+    )  # Specify the custom encoder/decoder for datetime
+
+
+@dataclass_json
+@dataclass
 class MultiPageDoc:
     """Represents a folder comprising multiple pages"""
     # IPFS CID of the folder containing the Pages included in this document
@@ -96,6 +114,7 @@ class MultiPageDoc:
     pages: list[str]
     content: dict
     source: dict
+    compilations: list[CompiledDoc]
 
     def get_page_from_ipfs_id(
         self,
@@ -230,6 +249,9 @@ class DocumentCollection:
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
         for filename in list_dir(self.multipagedocs_dir):
+            # only process JSON files
+            if not filename.endswith(".json"):
+                continue
             # read the metadata file
             metadata_filepath = join_paths(
                 self.path, self.multipagedocs_dir, filename

@@ -22,6 +22,33 @@
     "source": {
       "type": "object",
       "description": "Source information for the multi-page document. This can have a dynamic structure."
+    },
+    "compilations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ipfs_id": {
+            "type": "string",
+            "description": "The IPFS CID of the compiled file."
+          },
+          "format": {
+            "type": "string",
+            "description": "The digital file format, represented by its file-name extension."
+          },
+          "compilation_method": {
+            "type": "string",
+            "description": "How the MultiPageDoc was compiled."
+          },
+          "compilation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp of when this file was compiled."
+          }
+        },
+        "required": ["ipfs_id", "format", "compilation_method", "compilation_date"],
+        "additionalProperties": true
+      }
     }
   },
   "required": ["ipfs_id", "pages", "content", "source"],

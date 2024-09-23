@@ -26,12 +26,13 @@ doc = MultiPageDoc.from_json(read_file(os.path.join(
 
 assert page in doc.get_pages()
 assert page_id in doc.get_page_ids()
+assert doc.compilations[0].format == "pdf"
+assert doc.compilations[0].ipfs_id == "Qmb8bSRLULw4nsCjQ959cLAxsbuBib2KZpHhS6fxBgvF4y"
 
 collection = DocumentCollection(TEST_COLLECTION_PATH)
 assert page in collection.get_pages()
 assert page_id in collection.get_page_ids()
 assert doc in collection.get_multipagedocs()
-
 
 # p = Page(
 #     "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2",

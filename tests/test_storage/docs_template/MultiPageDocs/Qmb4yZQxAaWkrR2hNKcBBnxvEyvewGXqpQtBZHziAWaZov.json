@@ -4,5 +4,13 @@
      "QmTTaMwbjA6CiXELZf2Vpv57nzD2zdzqW5QfqpruaAALWT"
   ],
   "content": {},
-  "source": {}
+  "source": {},
+  "compilations":[
+    {
+      "ipfs_id":"Qmb8bSRLULw4nsCjQ959cLAxsbuBib2KZpHhS6fxBgvF4y",
+      "format":"pdf",
+      "compilation_date":"2024-09-22T17:17:13.338542+00:00",
+      "compilation_method": "merged pages and transcripts into searchable PDF"
+    }
+  ]
 }
