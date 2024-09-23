@@ -1,67 +1,89 @@
+import os
 from datetime import datetime, UTC
 from _load_src import SRC_PATH
 from storage.storage_api import MultiPageDoc, DocumentCollection, Page, Transcript, PageSource
 from storage.ipfs_localfs_interop import read_file
-import os
-import ipfs_api
+
 TEST_COLLECTION_PATH = os.path.join(
     SRC_PATH, "..", "tests", "test_storage", "docs_template"
 )
-
-page_id = "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2"
-page = Page.from_json(read_file(os.path.join(
-    TEST_COLLECTION_PATH, "PageMetadata", f"{page_id}.json"
-)))
-
-assert page.ipfs_id == "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2"
-
-transcript_text = read_file(os.path.join(
-    TEST_COLLECTION_PATH, "Transcripts", f"{page_id}.md"
-)).decode()
-assert page.transcripts[0].get_text() == transcript_text
-
-doc = MultiPageDoc.from_json(read_file(os.path.join(
-    TEST_COLLECTION_PATH, "MultiPageDocs", "Qmb4yZQxAaWkrR2hNKcBBnxvEyvewGXqpQtBZHziAWaZov.json")))
+PAGE_ID = "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2"
+DOC_ID = "Qmb4yZQxAaWkrR2hNKcBBnxvEyvewGXqpQtBZHziAWaZov"
+COMPILATION_ID = "Qmb8bSRLULw4nsCjQ959cLAxsbuBib2KZpHhS6fxBgvF4y"
+# Utility function to load a page from a file
 
 
-assert page in doc.get_pages()
-assert page_id in doc.get_page_ids()
-assert doc.compilations[0].format == "pdf"
-assert doc.compilations[0].ipfs_id == "Qmb8bSRLULw4nsCjQ959cLAxsbuBib2KZpHhS6fxBgvF4y"
+def load_page_metadata(PAGE_ID: str) -> Page:
+    """Load a Page from its metadata JSON file."""
+    page_path = os.path.join(TEST_COLLECTION_PATH,
+                             "PageMetadata", f"{PAGE_ID}.json")
+    return Page.from_json(read_file(page_path))
 
-collection = DocumentCollection(TEST_COLLECTION_PATH)
-assert page in collection.get_pages()
-assert page_id in collection.get_page_ids()
-assert doc in collection.get_multipagedocs()
 
-# p = Page(
-#     "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2",
-#     [
-#         Transcript(
-#             "QmbHXuQmaEKaZqRmtBvGXxDSLvGJL1KG7fq1qKFAhwR4v2",
-#             "ChatGPT",
-#             datetime.now(UTC))
-#     ],
-#     {},
-#     PageSource(
-#         "PhotoCopy of BStU archive document", digitisation_date=datetime.now(UTC), digitiser="anonymoys"
-#     )
-# )
-# p.source.digitisation_date
-# with open("/mnt/Uverlin/CLAN/AccessibleArchives/tests/test_storage/docs_template/PageMetadata/QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2.json", "w+")as file:
-#     file.write(p.to_json())
-# pages_dir = os.path.join(TEST_COLLECTION_PATH, "Pages")
-# mpd_ipfs_id = ipfs_api.publish(pages_dir)
-#
-# pages = [
-#     (
-#         page_name.split(".")[0],
-#         ipfs_api.publish(os.path.join(
-#             TEST_COLLECTION_PATH,
-#             "PageMetadata", page_name.replace("png", "json")
-#         ))
-#     )
-#     for page_name in os.listdir(pages_dir)
-# ]
-# doc = MultiPageDoc(mpd_ipfs_id, pages, {}, {})
-# doc.to_json()
+# Utility function to load transcript text
+def read_transcript(PAGE_ID: str) -> str:
+    transcript_path = os.path.join(
+        TEST_COLLECTION_PATH, "Transcripts", f"{PAGE_ID}.md")
+    return read_file(transcript_path).decode()
+
+
+# Utility function to load a MultiPageDoc from a file
+def load_multipagedoc(DOC_ID: str) -> MultiPageDoc:
+    """Load a MultiPageDoc from its metadata JSON file."""
+    doc_path = os.path.join(TEST_COLLECTION_PATH,
+                            "MultiPageDocs", f"{DOC_ID}.json")
+    return MultiPageDoc.from_json(read_file(doc_path))
+
+
+def test_page():
+    """Run tests for the Page class."""
+    page = load_page_metadata(PAGE_ID)
+
+    # Assert that the IPFS ID matches
+    assert page.ipfs_id == PAGE_ID
+
+    # Check if transcript text matches the expected content
+    transcript_text = read_transcript(PAGE_ID)
+    assert page.transcripts[0].get_text() == transcript_text
+
+
+# Test for the MultiPageDoc object
+def test_multipagedoc():
+    """Run tests for the MultiPageDoc class."""
+
+    doc = load_multipagedoc(DOC_ID)
+    page = load_page_metadata(PAGE_ID)
+
+    # Assert that the page is linked to the document
+    assert page in doc.get_pages()
+    assert PAGE_ID in doc.get_page_ids()
+
+    # Assert that the compilation format and IPFS ID match
+    assert doc.compilations[0].format == "pdf"
+    assert doc.compilations[0].ipfs_id == COMPILATION_ID
+
+
+# Test for the DocumentCollection object
+def test_document_collection():
+    """Run tests for the DocumentCollection class."""
+
+    collection = DocumentCollection(TEST_COLLECTION_PATH)
+    page = load_page_metadata(PAGE_ID)
+    doc = load_multipagedoc(DOC_ID)
+
+    # Assert that the page is in the collection
+    assert page in collection.get_pages()
+    assert PAGE_ID in collection.get_page_ids()
+
+    # Assert that the MultiPageDoc is in the collection
+    assert doc in collection.get_multipagedocs()
+
+
+def run_tests():
+    test_page()
+    test_multipagedoc()
+    test_document_collection()
+
+
+if __name__ == "__main__":
+    run_tests()
