@@ -33,7 +33,7 @@ def convert_all_pdfs_in_folder(folder_path, output_folder):
             convert_pdf_to_png(pdf_path, output_folder)
 
 if __name__ == "__main__":
-    folder_path = "/Users/marvinkirsch/DocumentsOB/ScansnapHome/Lighthouse"
-    output_folder = "/Users/marvinkirsch/DocumentsOB/ScansnapHome/Lighthouse/PNGs"
+    folder_path = "/Users/marvinkirsch/DocumentsOB/ScansnapHome/Curation_Folder"
+    output_folder = "/Users/marvinkirsch/DocumentsOB/ScansnapHome/Curation_Folder/PNGs"
 
     convert_all_pdfs_in_folder(folder_path, output_folder)
