@@ -1,8 +1,25 @@
 import os
 import streamlit as st
-from utils.pdf_utils import list_pdfs_in_folder, displayPDF
-from utils.ocr_utils import ensure_directories_exist
-from config.config import PROCESSED_FOLDER
+from utils import encode_file_base64
+from utils import ensure_directories_exist
+from utils import PROCESSED_FOLDER
+
+
+def list_pdfs_in_folder(folder_path):
+    files = os.listdir(folder_path)
+    pdf_files = [file for file in files if file.endswith('.pdf')]
+    return pdf_files
+
+
+def display_pdf(file):
+    base64_pdf = encode_file_base64()
+
+    # Embedding PDF in HTML
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+
+    # Displaying File
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
 
 def pdf_view():
     st.header("Document Viewer")
@@ -24,7 +41,7 @@ def pdf_view():
             with col1:
                 st.write(f"### Previewing PDF: {selected_pdf}")
                 try:
-                    displayPDF(pdf_path)
+                    display_pdf(pdf_path)
                 except Exception as e:
                     st.error(
                         f"An error occurred while displaying the PDF: {e}")
