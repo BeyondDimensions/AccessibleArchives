@@ -1,4 +1,4 @@
-from gui.main_view import main_view
+from gui import main_view
 from utils import logger
 
 

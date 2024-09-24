@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from utils import logger
 from utils import ensure_directories_exist
-from ocr.transcription import transcribe_image
+from ocr import transcribe_image
 from utils import ALLOWED_OPENAI_MODELS, ORIGINAL_FOLDER, DATA_FOLDER
 
 

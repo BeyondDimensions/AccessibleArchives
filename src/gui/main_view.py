@@ -1,7 +1,7 @@
 import streamlit as st
-from gui.chat_view import chat_view
-from gui.pdf_view import pdf_view
-from gui.ocr_view import ocr_view
+from .chat_view import chat_view
+from .pdf_view import pdf_view
+from .ocr_view import ocr_view
 
 
 def main_view():

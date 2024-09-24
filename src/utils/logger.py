@@ -1,5 +1,14 @@
-import loguru
+import sys
+from loguru import logger
 st = None
+
+logger.remove()
+
+logger.add(
+    sys.stdout,
+    format="<cyan>{time:YYYY-MM-DD HH:mm:ss.SSS}</cyan> | <level>{level.icon}  {level: <8}</level>| <level>{message}</level>",
+    colorize=True
+)
 
 
 def streamlit_logger():
@@ -8,30 +17,30 @@ def streamlit_logger():
 
 
 def success(message, log_to_gui=False):
-    loguru.logger.success(message)
+    logger.success(message)
     if st and log_to_gui:
         st.success(message)
 
 
 def info(message, log_to_gui=False):
-    loguru.logger.info(message)
+    logger.info(message)
     if st and log_to_gui:
         st.info(message)
 
 
 def important(message, log_to_gui=False):
-    loguru.logger.important(message)
+    logger.important(message)
     if st and log_to_gui:
         st.warning(message)
 
 
 def warning(message, log_to_gui=False):
-    loguru.logger.warning(message)
+    logger.warning(message)
     if st and log_to_gui:
         st.warning(message)
 
 
 def error(message, log_to_gui=False):
-    loguru.logger.error(message)
+    logger.error(message)
     if st and log_to_gui:
         st.error(message)

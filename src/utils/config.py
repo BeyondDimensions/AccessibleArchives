@@ -1,5 +1,7 @@
 import os
 
+CHROMA_PATH = os.getenv('CHROMA_PATH', 'chroma')
+
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -21,15 +23,15 @@ MODELS = {
 }
 
 LLM_MODELS = {
-    "Ollama Llama3": "llama3.1:8b",
-    "Ollama Mistral": "mistral:7b",
-    "Ollama Qwen": "qwen2:7b",
+    'Ollama Llama3': 'llama3.1:8b',
+    'Ollama Mistral': 'mistral:7b',
+    'Ollama Qwen': 'qwen2:7b',
 }
 
 EMBEDDING_MODELS = {
-    "Ollama Mxbai Embed Large": "mxbai-embed-large",
-    "Ollama Nomic Embed Text": "nomic-embed-text",
-    "Ollama All MiniLM": "all-minilm"
+    'Ollama Mxbai Embed Large': 'mxbai-embed-large',
+    'Ollama Nomic Embed Text': 'nomic-embed-text',
+    'Ollama All MiniLM': 'all-minilm'
 }
 
 # Base data folder

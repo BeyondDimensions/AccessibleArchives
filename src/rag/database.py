@@ -1,58 +1,78 @@
 import os
 import shutil
-from langchain_community.document_loaders import DirectoryLoader
+from utils import logger
+from utils import CHROMA_PATH, DATA_FOLDER
+from .common import get_embedding_function
 from langchain_chroma import Chroma
-from langchain_community.embeddings.ollama import OllamaEmbeddings
 from langchain.schema.document import Document
-
-CHROMA_PATH = "chroma"
-DATA_PATH = "data/transcripts/markdown/dutschke"
+from langchain_community.document_loaders import DirectoryLoader
 
 
 def initialize_database(reset=False):
-    if reset or not os.path.exists(CHROMA_PATH):
-        print("✨ Initializing Database")
-        clear_database()
-        documents = load_documents()
-        chunks = split_documents(documents)
-        save_chunks_to_chroma(chunks)
+    """Initialize the document database. Reset if needed."""
+    try:
+        if reset or not os.path.exists(CHROMA_PATH):
+            logger.info("✨ Initializing Database")
+            reset_database()
+            documents = load_documents()
+            if documents:
+                chunks = split_documents(documents)
+                save_chunks_to_chroma(chunks)
+                logger.success("Successfully initialized database")
+            else:
+                logger.warning("No documents found to process.")
+        else:
+            logger.info("Database already exists. Skipping initialization.")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
 
 
-def clear_database():
-    if os.path.exists(CHROMA_PATH):
-        shutil.rmtree(CHROMA_PATH)
+def reset_database():
+    """Clear the existing database."""
+    try:
+        if os.path.exists(CHROMA_PATH):
+            shutil.rmtree(CHROMA_PATH)
+            logger.success(f"Cleared existing database at {CHROMA_PATH}")
+    except Exception as e:
+        logger.error(f"Error clearing database: {e}")
 
 
 def load_documents():
-    loader = DirectoryLoader(DATA_PATH, glob="*.md")
-    return loader.load()
+    """Load documents from the specified directory."""
+    try:
+        loader = DirectoryLoader(DATA_FOLDER, glob="*.md")
+        documents = loader.load()
+        logger.info(f"Loaded {len(documents)} documents from {DATA_FOLDER}")
+        return documents
+    except Exception as e:
+        logger.error(f"Error loading documents: {e}")
+        return []
 
 
 def save_chunks_to_chroma(chunks: list[Document]):
-    db = Chroma(persist_directory=CHROMA_PATH,
-                embedding_function=get_embedding_function())
-    chunks_with_ids = assign_chunk_ids(chunks)
+    """Save chunked documents to the Chroma database."""
+    try:
+        db = Chroma(persist_directory=CHROMA_PATH,
+                    embedding_function=get_embedding_function())
+        chunks_with_ids = assign_chunk_ids(chunks)
 
-    existing_ids = {item["id"] for item in db.get(include=[])}
-    print(f"Number of existing documents in DB: {len(existing_ids)}")
+        existing_ids = {item["id"] for item in db.get(include=[])}
+        new_chunks = [
+            chunk for chunk in chunks_with_ids if chunk.metadata["id"] not in existing_ids]
 
-    new_chunks = [
-        chunk for chunk in chunks_with_ids if chunk.metadata["id"] not in existing_ids]
-
-    if new_chunks:
-        print(f"👉 Adding new documents: {len(new_chunks)}")
-        new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
-        db.add_documents(new_chunks, ids=new_chunk_ids)
-    else:
-        print("✅ No new documents to add")
-
-
-def get_embedding_function():
-    embeddings = OllamaEmbeddings(model="mxbai-embed-large")
-    return embeddings
+        if new_chunks:
+            logger.info(
+                f"👉 Adding {len(new_chunks)} new documents to the database.")
+            new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
+            db.add_documents(new_chunks, ids=new_chunk_ids)
+        else:
+            logger.success("No new documents to add.")
+    except Exception as e:
+        logger.error(f"Error saving documents to Chroma: {e}")
 
 
 def split_documents(documents: list[Document]):
+    """Split loaded documents into chunks."""
     from langchain_text_splitters import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=300,
@@ -61,11 +81,13 @@ def split_documents(documents: list[Document]):
         add_start_index=True,
     )
     chunks = text_splitter.split_documents(documents)
-    print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
+    logger.info(
+        f"Split {len(documents)} documents into {len(chunks)} chunks.")
     return chunks
 
 
 def assign_chunk_ids(chunks):
+    """Assign unique chunk IDs to each document chunk."""
     last_page_id = None
     current_chunk_index = 0
 
@@ -84,4 +106,5 @@ def assign_chunk_ids(chunks):
 
         chunk.metadata["id"] = chunk_id
 
+    logger.info(f"Assigned IDs to {len(chunks)} chunks.")
     return chunks

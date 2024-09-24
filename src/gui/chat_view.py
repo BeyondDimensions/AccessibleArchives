@@ -1,6 +1,5 @@
 import streamlit as st
-from utils.db_utils import query_database, initialize_database
-from utils import logger
+from rag import generate_response
 
 
 def chat_view():
@@ -8,11 +7,8 @@ def chat_view():
 
     # Model selection
     # model_name = st.selectbox('Select Model', list(LLM_MODELS.keys()))
-    with st.spinner("Initializing database..."):
-        try:
-            initialize_database()
-        except Exception as e:
-            logger.error(f"Error initializing database: {e}", True)
+    # with st.spinner("Initializing database..."):
+    #     initialize_database()
 
     # Initialize session state variables if they don't exist
     if 'messages' not in st.session_state:
@@ -41,7 +37,7 @@ def chat_view():
 
             # Generate the response
             with st.spinner("Generating response..."):
-                response, sources = query_database(prompt)
+                response, sources = generate_response(prompt)
                 response_text = response + \
                     "\n\nSources:\n" + "\n".join(sources)
                 response_placeholder.markdown(response_text)
