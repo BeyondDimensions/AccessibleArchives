@@ -3,10 +3,8 @@ import ipfs_api
 import json
 import shutil
 from datetime import datetime, UTC
-#from gpt4all import GPT4All
 from ocr.transcription import transcribe_image
 from utils.utils import ensure_dir_exists
-#model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.ggf")
 ####################################################################################
 ####################################################################################
 
@@ -20,12 +18,6 @@ def read_markdown_file(md_path):
     with open(md_path, 'r', encoding='utf-8') as file:
         content = file.read()
     return content
-
-#####################################################################################
-
-def categorize_text(content, gpt):
-    response = gpt.generate(f"Without any of your own text, please list the names, the dates and their events and the facilities mentioned in {content}.")      # put promt in, to search for specific data in the text
-    return response
 
 #####################################################################################
 
@@ -43,7 +35,7 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
     #####################################################################################
 
     png_ids = []
-
+    errors_encountered=False
     for filename in os.listdir(input_dir):
         if not filename.endswith(".png"):
             continue
@@ -60,7 +52,11 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
             continue
 
         if not os.path.exists(md_path):
-            transcribe_image(png_path, md_path)
+            try:
+                transcribe_image(png_path, md_path)
+            except:
+                errors_encountered=True
+                continue
         #ipfs_id = generate_id(png_path)
         transcript_id = generate_id(md_path)
         #category = categorize_text(content, gpt)
@@ -86,6 +82,9 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
         with open(json_path, 'w+') as f:
             json.dump(metadata, f, indent=4)
 
+    if errors_encountered:
+        return
+        
     multi_doc_ipfs_id = generate_id(output_dir_multi)
     doc_json_path = os.path.join(output_dir_multi, multi_doc_ipfs_id+".json")
 

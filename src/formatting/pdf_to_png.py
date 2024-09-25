@@ -18,8 +18,11 @@ def convert_pdf_to_png(pdf_path, output_folder):
     pdf_output_folder = os.path.join(output_folder, pdf_name)   # create a folder with the file name
 
 # create the output folder if it doesn't exist
-    if not os.path.exists(pdf_output_folder):
-        os.makedirs(pdf_output_folder)
+    if os.path.exists(pdf_output_folder):
+        return
+
+    os.makedirs(pdf_output_folder)
+    
 
     for page_number in range(len(pdf_document)):    # iterate through all pages
         convert_pdf_page_to_png(pdf_document, page_number, pdf_output_folder)
