@@ -65,7 +65,7 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
             "ipfs_id": ipfs_id,
             "transcripts": [{
                 "ipfs_id" : transcript_id,
-                "transcriber" : "ChatGPT",
+                "transcriber" : "ChatGPT-4o-2024-08-06",
                 "timestamp" : datetime.now(UTC).isoformat()
             }],
             "content": {
