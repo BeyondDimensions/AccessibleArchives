@@ -1,6 +1,5 @@
 import os
 import shutil
-from langdetect import detect
 
 # Define the source and target directories
 source_dir = '/Users/marvinkirsch/Programming/AccessibleArchives/curated_files/Transcripts'
@@ -8,15 +7,6 @@ english_dir = '/Users/marvinkirsch/Programming/AccessibleArchives/curated_files/
 
 # Ensure the target directory exists
 os.makedirs(english_dir, exist_ok=True)
-
-# Function to check if the file is in English
-def is_english(text):
-    try:
-        # Detect the language of the text
-        language = detect(text)
-        return language == 'en'
-    except LangDetectException:  # Handle cases where detection fails
-        return False
 
 # Process the files in the source directory
 for filename in os.listdir(source_dir):
@@ -26,9 +16,14 @@ for filename in os.listdir(source_dir):
         # Read the file content
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
+
+        # Skip the file if it is empty
+        if not content.strip():  # Strip to ignore whitespace-only files
+            print(f"{filename} is empty, skipping.")
+            continue
         
         # Check if the file is in English
-        if is_english(content):
+        if content.strip().startswith("I'm"):
             # Move the file to the English directory
             shutil.move(file_path, os.path.join(english_dir, filename))
             print(f"Moved {filename} to {english_dir}")
