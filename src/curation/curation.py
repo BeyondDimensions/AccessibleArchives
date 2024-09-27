@@ -35,6 +35,7 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
     #####################################################################################
 
     png_ids = []
+    png_metadata_ids = []
     errors_encountered=False
     for filename in os.listdir(input_dir):
         if not filename.endswith(".png"):
@@ -82,6 +83,9 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
         with open(json_path, 'w+') as f:
             json.dump(metadata, f, indent=4)
 
+        metadata_ipfs_id = generate_id(json_path)
+        metadata_ipfs_ids.append(metadata_ipfs_id)
+
     if errors_encountered:
         return
         
@@ -92,9 +96,8 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
     shutil.copy(pdf_path, os.path.join(output_dir_multi, multi_doc_ipfs_id+".pdf"))
 
     doc_metadata = {
-        "pages": png_ids,
         "ipfs_id": multi_doc_ipfs_id,
-        "pages": png_ids,
+        "pages": metadata_ipfs_ids,
         "content": {
 
         },
