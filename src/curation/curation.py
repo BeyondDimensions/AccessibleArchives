@@ -35,7 +35,7 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
     #####################################################################################
 
     png_ids = []
-    png_metadata_ids = []
+    metadata_ipfs_ids = []
     errors_encountered=False
     for filename in os.listdir(input_dir):
         if not filename.endswith(".png"):
