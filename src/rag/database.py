@@ -6,6 +6,7 @@ from .common import get_embedding_function
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def initialize_database(reset=False):
@@ -35,6 +36,7 @@ def reset_database():
             logger.success(f"Cleared existing database at {CHROMA_PATH}")
     except Exception as e:
         logger.error(f"Error clearing database: {e}")
+        raise e
 
 
 def load_documents():
@@ -42,11 +44,12 @@ def load_documents():
     try:
         loader = DirectoryLoader(DATA_FOLDER, glob="*.md")
         documents = loader.load()
-        logger.info(f"Loaded {len(documents)} documents from {DATA_FOLDER}")
+        logger.info(
+            f"Loaded {len(documents)} documents from {DATA_FOLDER}")
         return documents
     except Exception as e:
         logger.error(f"Error loading documents: {e}")
-        return []
+        raise e
 
 
 def save_chunks_to_chroma(chunks: list[Document]):
@@ -54,11 +57,16 @@ def save_chunks_to_chroma(chunks: list[Document]):
     try:
         db = Chroma(persist_directory=CHROMA_PATH,
                     embedding_function=get_embedding_function())
+
         chunks_with_ids = assign_chunk_ids(chunks)
 
-        existing_ids = {item["id"] for item in db.get(include=[])}
+        existing_ids = set(db.get(include=[])["ids"])
+
         new_chunks = [
-            chunk for chunk in chunks_with_ids if chunk.metadata["id"] not in existing_ids]
+            chunk
+            for chunk in chunks_with_ids
+            if chunk.metadata["id"] not in existing_ids
+        ]
 
         if new_chunks:
             logger.info(
@@ -69,11 +77,11 @@ def save_chunks_to_chroma(chunks: list[Document]):
             logger.success("No new documents to add.")
     except Exception as e:
         logger.error(f"Error saving documents to Chroma: {e}")
+        raise e
 
 
 def split_documents(documents: list[Document]):
     """Split loaded documents into chunks."""
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=300,
         chunk_overlap=100,

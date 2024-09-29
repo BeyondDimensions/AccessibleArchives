@@ -6,7 +6,7 @@ logger.remove()
 
 logger.add(
     sys.stdout,
-    format="<cyan>{time:YYYY-MM-DD HH:mm:ss.SSS}</cyan> | <level>{level.icon}  {level: <8}</level>| <level>{message}</level>",
+    format="<cyan>{time:YYYY-MM-DD HH:mm:ss.SSS}</cyan> | <level>{level.icon}  {level: <9}</level>| <level>{message}</level>",
     colorize=True
 )
 
@@ -44,3 +44,7 @@ def error(message, log_to_gui=False):
     logger.error(message)
     if st and log_to_gui:
         st.error(message)
+
+
+def debug(message):
+    logger.debug(message)

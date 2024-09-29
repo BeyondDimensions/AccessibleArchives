@@ -25,7 +25,7 @@ def generate_response(query_text: str):
         return response_text, sources
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
-        return None, None
+        raise e
 
 
 def format_prompt(context_text: str, question: str):
@@ -39,21 +39,22 @@ def query_database(query_text: str):
     try:
         db = Chroma(persist_directory=CHROMA_PATH,
                     embedding_function=get_embedding_function())
+
         results = db.similarity_search_with_score(query_text, k=5)
 
         if not results:
-            logger.warning("No similar documents found.")
-            return None, []
+            logger.warning("No relative documents found.")
+            raise Exception("No relative documents found.")
 
         context_text = "\n\n---\n\n".join(
             doc.page_content for doc, _score in results)
         prompt = format_prompt(context_text, query_text)
 
-        model = Ollama(model="qwen2:7b")
+        model = Ollama(model="llama3.1:8b")
         response_text = model.invoke(prompt)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         return response_text, sources
     except Exception as e:
         logger.error(f"Error querying database: {e}")
-        return None, []
+        raise e

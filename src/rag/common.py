@@ -9,4 +9,4 @@ def get_embedding_function():
         return embeddings
     except Exception as e:
         logger.error(f"Error initializing embedding function: {e}")
-        return None
+        raise e
