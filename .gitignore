@@ -161,10 +161,11 @@ cython_debug/mistral:7b
 
 # Exclude my files
 src/utils/credentials.env
-**/.obsidian/
 chroma/
 .data/
-#*.spec
 *.log
-
+*.DS_Store
+**/.obsidian/
+#*.spec
 curated_files
+TODO.md

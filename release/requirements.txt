@@ -1,4 +1,33 @@
+# Core Libraries
+
+streamlit
+python-dotenv
 ipfs-toolkit
 dataclasses-json
 jsonschema
-python-dotenv
+platformdirs
+pymupdf
+requests
+pytest
+loguru
+
+# LangChain and Chroma
+
+langchain
+langchain-community
+langchain_chroma
+
+# Torch, Hugging Face and Transformers
+
+#torch
+#huggingface_hub
+#transformers
+#sentence-transformers
+
+# Unstructured (with markdown support)
+
+"unstructured[md]"
+
+# PyInstaller for building standalone apps
+
+#pyinstaller

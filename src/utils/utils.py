@@ -1,5 +1,11 @@
 import json
 import os
+import base64
+
+
+def encode_file_base64(file):
+    with open(file, "rb") as f:
+        return base64.b64encode(f.read()).decode('utf-8')
 
 
 def ensure_directories_exist(*dirs):
