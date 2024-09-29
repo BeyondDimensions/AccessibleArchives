@@ -2,10 +2,10 @@ import os
 from datetime import datetime, UTC
 from _load_src import SRC_PATH
 from storage.storage_api import MultiPageDoc, DocumentCollection, Page, Transcript, PageSource
-from storage.ipfs_localfs_interop import read_file
+from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
 
 TEST_COLLECTION_PATH = os.path.join(
-    SRC_PATH, "..", "tests", "test_storage", "docs_template"
+    SRC_PATH, "..", "tests", "test_storage", "demo_docs"
 )
 PAGE_ID = "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2"
 DOC_ID = "Qmb4yZQxAaWkrR2hNKcBBnxvEyvewGXqpQtBZHziAWaZov"
@@ -61,9 +61,15 @@ def test_multipagedoc():
     # Assert that the compilation format and IPFS ID match
     assert doc.compilations[0].format == "pdf"
     assert doc.compilations[0].ipfs_id == COMPILATION_ID
-
+    page_metadata_path = os.path.join(TEST_COLLECTION_PATH,
+                                      "PageMetadata", f"{PAGE_ID}.json")
+    assert page.ipfs_id == doc.get_page_id_from_metadata_id(get_ipfs_cid(page_metadata_path))
+    assert doc.get_page_from_page_number(0) == page
+    assert doc.get_page_number(page.ipfs_id) == 0
 
 # Test for the DocumentCollection object
+
+
 def test_document_collection():
     """Run tests for the DocumentCollection class."""
 
@@ -74,9 +80,15 @@ def test_document_collection():
     # Assert that the page is in the collection
     assert page in collection.get_pages()
     assert PAGE_ID in collection.get_page_ids()
+    assert page == collection.get_page(page.ipfs_id)
 
     # Assert that the MultiPageDoc is in the collection
     assert doc in collection.get_multipagedocs()
+
+    assert doc in collection.get_page_docs(page.ipfs_id)
+    page_metadata_path = os.path.join(TEST_COLLECTION_PATH,
+                                      "PageMetadata", f"{PAGE_ID}.json")
+    assert page.ipfs_id == collection.get_page_id_from_metadata_id(get_ipfs_cid(page_metadata_path))
 
 
 def run_tests():

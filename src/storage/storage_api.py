@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from datetime import datetime, UTC
 import ipfs_api
-from .ipfs_localfs_interop import path_exists, is_dir, is_file, join_paths, read_file, list_dir
-from utils import logging
+from .ipfs_localfs_interop import path_exists, is_dir, is_file, join_paths, read_file, list_dir, get_ipfs_cid
+from utils import logger
 from .exceptions import InvalidDocumentCollectionError
 from utils.utils import load_json_file
 from dataclasses import dataclass
@@ -103,6 +103,9 @@ class CompiledDoc:
         )
     )  # Specify the custom encoder/decoder for datetime
 
+    def get_data(self):
+        return ipfs_api.read(self.ipfs_id)
+
 
 @dataclass_json
 @dataclass
@@ -116,24 +119,39 @@ class MultiPageDoc:
     source: dict
     compilations: list[CompiledDoc]
 
-    def get_page_from_ipfs_id(
+    def get_page(
         self,
-        ipfs_id: str,
+        page_id: str,
     ) -> Page:
         """Get a Page from this document, given its IPFS content ID.
         Args:
-            ipfs_id: the IPFS content ID of the 
+            page_id: the IPFS content ID of the 
         """
-        if ipfs_id not in self.pages:
+        if not hasattr(self, "_pages") or not self._pages:
+            self._load_page_metadata()
+
+        try:
+            return self._pages[page_id][0]
+        except KeyError:
             raise ValueError(
-                "This IPFS ID does not belong to any page in this MultiPageDoc.")
-        return ipfs_api.read()
+                "This IPFS ID does not belong to any page in this MultiPageDoc."
+            )
+
+    def get_page_id_from_metadata_id(self, metadata_id: str) -> str:
+        if not hasattr(self, "_metadata_ids") or not self._metadata_ids:
+            self._load_page_metadata()
+        return self._metadata_ids[metadata_id]
+
+    def get_metadata_id_from_page_id(self, page_id: str) -> str:
+        if not hasattr(self, "_pages") or not self._pages:
+            self._load_page_metadata()
+        return self._pages[page_id][1]
 
     def get_pages(self) -> list[Page]:
         # if we haven't yet loaded our pages and their metadata, do so
         if not hasattr(self, "_pages") or not self._pages:
             self._load_page_metadata()
-        return list(self._pages.values())
+        return [page for page, metadata_id in self._pages.values()]
 
     def get_page_transcripts(self) -> list[Transcript]:
         return [page.transcripts[0] for page in self.get_pages()]
@@ -146,24 +164,33 @@ class MultiPageDoc:
 
     def get_page_from_page_number(self, page_number: int) -> Page:
         """Get a Page, given its page number in this document."""
-        return self.get_page_from_ipfs_id(self.pages[page_number])
+        return self.get_page(self.get_page_id_from_metadata_id(self.pages[page_number]))
+
+    def get_page_number(self, page_id: str) -> int:
+        return self.pages.index(self.get_metadata_id_from_page_id(page_id))
+
+    def _read_metadata_file(self, metadata_id: str) -> str:
+        """May be overridden to provide independence from IPFS daemon."""
+        return ipfs_api.read(metadata_id)
 
     def _load_page_metadata(self,) -> None:
         """Read and validate this MultiPageDoc's Pages' metadata files."""
-        pages: dict[str, Page] = {}
-        for metadata_ipfs_id in self.pages:
+        pages: dict[str, tuple[Page, str]] = {}
+        metadata_ids: dict[str, str] = {}
+        for metadata_id in self.pages:
 
             # load page from metadata
-            page = Page.from_json(bytes.decode(
-                ipfs_api.read(metadata_ipfs_id)))
-            ipfs_id = page.ipfs_id
+            page = Page.from_json(self._read_metadata_file(metadata_id))
+            page_id = page.ipfs_id
             # ensure no duplicate pages
-            if ipfs_id in pages.keys():
+            if page_id in pages.keys():
                 raise InvalidDocumentCollectionError(
                     "This MultiPageDoc refers to the same page multiple times!"
                 )
-            pages.update({ipfs_id: page})
+            pages.update({page_id: (page, metadata_id)})
+            metadata_ids.update({metadata_id: page_id})
         self._pages = pages
+        self._metadata_ids = metadata_ids
 
 
 @dataclass_json
@@ -204,9 +231,19 @@ class DocumentCollection:
     def get_multipagedocs(self) -> Iterator[MultiPageDoc]:
         """Get an iterator over the MultiPageDocs in this DocumentCollection."""
         for doc_id in self.get_multipagedoc_ids():
-            yield MultiPageDoc.from_json(read_file(join_paths(
+            multipagedoc = MultiPageDoc.from_json(read_file(join_paths(
                 self.multipagedocs_dir, f"{doc_id}.json"
             )))
+            self.make_multipagedoc_ipfs_independent(multipagedoc)
+            yield multipagedoc
+
+    def make_multipagedoc_ipfs_independent(self, multipagedoc: MultiPageDoc) -> MultiPageDoc:
+        """Edit the MultiPageDoc method that reads an IPFS file to use
+        the file from this DocumentCollection's path instead, allowing it to
+        function without the IPFS daemon running."""
+        multipagedoc._read_metadata_file = lambda x: read_file(
+            self.get_page_metadata_path(self.get_page_id_from_metadata_id(x)))
+        return multipagedoc
 
     def get_page_ids(self) -> list[str]:
         """Get the IDs of the Pages in this DocumentCollection."""
@@ -215,22 +252,44 @@ class DocumentCollection:
             self._load_pages()
         return self._page_ids
 
+    def get_page(self, page_id: str) -> Page:
+        """Get a Page from this collection, given the IPFS ID of its source."""
+        if page_id not in self.get_page_ids():
+            raise ValueError(
+                "The given IPFS ID does not belong to any of this DocumentCollection's pages."
+            )
+
+        return Page.from_json(read_file(self.get_page_metadata_path(page_id)))
+
     def get_pages(self) -> Iterator[Page]:
         """Get an iterator over the Pages in this DocumentCollection."""
         for page_ipfs_id in self.get_page_ids():
-            yield self.get_page_from_ipfs_id(page_ipfs_id)
+            yield self.get_page(page_ipfs_id)
 
-    def get_page_from_ipfs_id(self, ipfs_id: str) -> Page:
-        """Get a Page from this collection, given the IPFS ID of its source."""
-        if ipfs_id not in self.get_page_ids():
-            raise ValueError(
-                "This IPFS ID does not belong to any page in this MultiPageDoc."
+    def get_page_path(self, page_id: str) -> str:
+        page = self.get_page(page_id)
+        page_path = join_paths(self.pages_dirname, page_id, page.format)
+        if not path_exists(page_path):
+            raise Exception(
+                "Bug: The expected path for this page doesn't exist!"
             )
-        return Page.from_json(
-            bytes.decode(read_file(join_paths(
-                self.pagemetadata_dir, ipfs_id + ".json"
-            )))
-        )
+        return page_path
+
+    def get_page_id_from_metadata_id(self, metadata_id: str) -> str:
+        return self._metadata_ids[metadata_id]
+
+    def get_page_metadata_path(self, page_id: str) -> str:
+        return join_paths(self.pagemetadata_dir, page_id+".json")
+
+    def get_page_docs(self, page_id: str) -> list[MultiPageDoc]:
+        """Given the ID of a Page, get the documents which include it."""
+        page_metadata_path = self.get_page_metadata_path(page_id)
+        page_metadata_ipfs_id = get_ipfs_cid(page_metadata_path)
+        multi_page_docs: list[MultiPageDoc] = []
+        for multi_page_doc in self.get_multipagedocs():
+            if page_metadata_ipfs_id in multi_page_doc.pages:
+                multi_page_docs.append(multi_page_doc)
+        return multi_page_docs
 
     def check_collection_integrity(self, ):
         """Ensure the data in this DocumentCollection is consistent."""
@@ -261,53 +320,55 @@ class DocumentCollection:
 
     def _load_pages(self) -> list[str]:
         page_ids: list[str] = []
-
+        metadata_ids: dict[str, str] = {}
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
         for filename in list_dir(self.pages_dir):
             page_filepath = join_paths(self.pages_dir, filename)
             expected_ipfs_id = filename.split(".")[0]
             try:
-                ipfs_id = ipfs_api.predict_cid(page_filepath)
-                if not ipfs_id == expected_ipfs_id:
+                page_id = get_ipfs_cid(page_filepath)
+                if not page_id == expected_ipfs_id:
                     raise InvalidDocumentCollectionError(
                         "This Page's filename is not its IPFS ID"
                     )
             except ipfs_api.ipfshttpclient.exceptions.ConnectionError:
                 print("Warning: IPFS isn't running, can't verify ID")
-                ipfs_id = expected_ipfs_id
+                page_id = expected_ipfs_id
 
                 # read the metadata file
             metadata_filepath = join_paths(
-                self.path, self.pagemetadata_dir, f"{ipfs_id}.json"
+                self.path, self.pagemetadata_dir, f"{page_id}.json"
             )
 
             page_metadata = load_json_file(metadata_filepath)
             validate(page_metadata, PAGE_SCHEMA)
 
             # extract the Page IPFS ID from the metadata
-            if not page_metadata["ipfs_id"] == ipfs_id:
+            if not page_metadata["ipfs_id"] == page_id:
                 raise InvalidDocumentCollectionError(
                     "This metadata file's filename is not its encoded IPFS ID"
                 )
 
-            if not filename == f"{ipfs_id}.{page_metadata['format']}":
+            if not filename == f"{page_id}.{page_metadata['format']}":
                 raise InvalidDocumentCollectionError(
                     "This page's filename is not its IPFS ID and extension"
                 )
-            page_ids.append(ipfs_id)
+            page_ids.append(page_id)
+            metadata_ids.update({get_ipfs_cid(metadata_filepath): page_id})
         # double check metadata files
         for filename in list_dir(self.pages_dir):
             # ignore non-JSON files
             if not filename.endswith(".json"):
                 continue
-            ipfs_id = filename.strip(".json")
-            if ipfs_id not in page_ids:
+            page_id = filename.strip(".json")
+            if page_id not in page_ids:
                 raise InvalidDocumentCollectionError(
                     "This metadata file refers to a page which is not under pages."
                 )
 
         self._page_ids = page_ids
+        self._metadata_ids = metadata_ids
         return page_ids
 
     def _load_multipagedocs(self) -> list[str]:
@@ -328,13 +389,13 @@ class DocumentCollection:
             validate(doc_metadata, MULTI_PAGE_DOC_SCHEMA)
             # extract the Page IPFS ID from the metadata
 
-            ipfs_id = doc_metadata["ipfs_id"]
-            if filename != f"{ipfs_id}.json":
+            doc_id = doc_metadata["ipfs_id"]
+            if filename != f"{doc_id}.json":
                 raise InvalidDocumentCollectionError(
                     "This MultiPageDoc's filename is not its ID"
                 )
 
-            doc_ids.append(ipfs_id)
+            doc_ids.append(doc_id)
 
         self._multipagedoc_ids = doc_ids
         return doc_ids
