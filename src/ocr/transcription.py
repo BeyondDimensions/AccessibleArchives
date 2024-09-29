@@ -5,7 +5,7 @@ Use ChatGPT to transcribe images to markdown.
 ```py
 from transcription import transcribe_image
 
-transcribe_image("/home/Programming/test.jpg", "/home/Programming/tmp/test-output.md")
+transcribe_image("/home/Programming/test.jpg", "/home/Programming/test-output.md")
 ```
 """
 

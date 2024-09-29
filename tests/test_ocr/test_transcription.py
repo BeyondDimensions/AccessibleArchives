@@ -1,5 +1,5 @@
 import os
-from ocr.transcription import transcribe_image
+from ocr import transcribe_image
 
 
 def test_transcribe_image(data_folder):
