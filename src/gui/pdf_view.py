@@ -1,8 +1,7 @@
 import os
 import streamlit as st
-from utils import encode_file_base64
-from utils import ensure_directories_exist
-from utils import PROCESSED_FOLDER
+from utils import encode_file_base64, ensure_directories_exist
+from config import PROCESSED_FOLDER
 
 
 def list_pdfs_in_folder(folder_path):

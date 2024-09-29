@@ -160,8 +160,7 @@ cython_debug/mistral:7b
 #.idea/
 
 # Exclude my files
-src/utils/credentials.env
-chroma/
+src/config/credentials.env
 .data/
 *.log
 *.DS_Store

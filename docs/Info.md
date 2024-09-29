@@ -1,0 +1,13 @@
+### Usefull information
+- Figure out the cost of chatgpt different models: https://context.ai/compare/gpt-4o-2024-08-06/gpt-4o-mini
+- LLM arena: https://lmarena.ai/
+- gpt-4o-mini is the cheapest ca. 0.004$ per image but gpt-4o-2024-08-06 seems better and to be second the cheapest option ca 0.00525$ per image. Chatgpt-4o-latest is more expensive ca 0.009$ (probably the same models) and slightly slower.
+- Their accuracy: Comparison folder
+- 5 images processed comparision: gpt-4o-2024-08-06 (seems to be the fastest - 31s) vs chatgpt-4o-latest (34s)
+- 1$ for first API call
+- There is no difference in cost regarding conversion
+- Embedding models leaderboard: https://huggingface.co/spaces/mteb/leaderboard
+- Interesting model is: dunzhang/stella_en_1.5B_v5
+- https://github.com/alejandro-ao/ask-multiple-pdfs - some inspiration from?
+- https://platform.openai.com/docs/guides/vision
+- https://openai.com/api/pricing/

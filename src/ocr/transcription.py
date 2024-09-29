@@ -12,9 +12,8 @@ transcribe_image("/home/Programming/test.jpg", "/home/Programming/test-output.md
 import os
 import requests
 from utils import logger
-from utils import openai_api_error
-from utils import encode_file_base64
-from utils import OPENAI_API_KEY, DEFAULT_OPENAI_MODEL
+from utils import openai_api_error, encode_file_base64
+from config import OPENAI_API_KEY, DEFAULT_OPENAI_MODEL
 
 
 def extract_markdown_from_response(response_content):

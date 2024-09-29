@@ -1,12 +1,12 @@
 import os
 import shutil
 from utils import logger
-from utils import CHROMA_PATH, DATA_FOLDER
+from config import CHROMA_PATH, MARKDOWN_FOLDER
 from .common import get_embedding_function
+from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def initialize_database(reset=False):
@@ -42,10 +42,10 @@ def reset_database():
 def load_documents():
     """Load documents from the specified directory."""
     try:
-        loader = DirectoryLoader(DATA_FOLDER, glob="*.md")
+        loader = DirectoryLoader(MARKDOWN_FOLDER, glob="*.md")
         documents = loader.load()
         logger.info(
-            f"Loaded {len(documents)} documents from {DATA_FOLDER}")
+            f"Loaded {len(documents)} documents from {MARKDOWN_FOLDER}")
         return documents
     except Exception as e:
         logger.error(f"Error loading documents: {e}")
@@ -78,41 +78,3 @@ def save_chunks_to_chroma(chunks: list[Document]):
     except Exception as e:
         logger.error(f"Error saving documents to Chroma: {e}")
         raise e
-
-
-def split_documents(documents: list[Document]):
-    """Split loaded documents into chunks."""
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
-        chunk_overlap=100,
-        length_function=len,
-        add_start_index=True,
-    )
-    chunks = text_splitter.split_documents(documents)
-    logger.info(
-        f"Split {len(documents)} documents into {len(chunks)} chunks.")
-    return chunks
-
-
-def assign_chunk_ids(chunks):
-    """Assign unique chunk IDs to each document chunk."""
-    last_page_id = None
-    current_chunk_index = 0
-
-    for chunk in chunks:
-        source = chunk.metadata.get("source")
-        page = chunk.metadata.get("page")
-        current_page_id = f"{source}:{page}"
-
-        if current_page_id == last_page_id:
-            current_chunk_index += 1
-        else:
-            current_chunk_index = 0
-
-        chunk_id = f"{current_page_id}:{current_chunk_index}"
-        last_page_id = current_page_id
-
-        chunk.metadata["id"] = chunk_id
-
-    logger.info(f"Assigned IDs to {len(chunks)} chunks.")
-    return chunks
