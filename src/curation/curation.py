@@ -54,8 +54,11 @@ def curate_pngs(input_dir, output_dir,original_medium, pdf_path):
 
         if not os.path.exists(md_path):
             try:
+                print("Transcribing...")
                 transcribe_image(png_path, md_path)
+                print("Transcribed!")
             except:
+                print("Transcption failed.")
                 errors_encountered=True
                 continue
         #ipfs_id = generate_id(png_path)
