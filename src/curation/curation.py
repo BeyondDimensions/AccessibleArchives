@@ -54,6 +54,8 @@ def curate_pngs(input_dir, output_dir, original_medium, pdf_path):
 
         json_path = os.path.join(output_dir_json, ipfs_id+".json")
         if os.path.exists(json_path):
+            metadata_ipfs_id = generate_id(json_path)
+            metadata_ipfs_ids.append(metadata_ipfs_id)
             continue
 
         if not os.path.exists(md_path):
