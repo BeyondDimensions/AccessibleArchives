@@ -1,12 +1,4 @@
 import os
-from platformdirs import user_data_dir
-
-# Defining app name and author
-APP_NAME = "AccessibleArchives"
-APP_AUTHOR = "BeyondDimensions"
-
-CHROMA_PATH = os.getenv('CHROMA_PATH', os.path.join(
-    user_data_dir(APP_NAME, APP_AUTHOR), 'chroma'))
 
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
