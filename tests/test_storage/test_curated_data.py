@@ -17,30 +17,30 @@ PAGES_DIR = os.path.join(TEST_COLLECTION_PATH, "Pages")
 PAGES_METADATA_DIR = os.path.join(TEST_COLLECTION_PATH, "PageMetadata")
 UNTRANSCRIBED_DIR = ensure_dir_exists(os.path.join(TEST_COLLECTION_PATH, "Untrasncribed"))
 
-print("Checking files...")
-# check that page metadata files exist and contain valid JSON
-for filename in os.listdir(PAGES_DIR):
-    metadata_path = os.path.join(PAGES_METADATA_DIR, filename.split(".")[0]+".json")
-    # check that page metadata files exist
-    if not os.path.exists(metadata_path):
-
-        try:
-            shutil.move(os.path.join(PAGES_DIR, filename), UNTRANSCRIBED_DIR)
-        except shutil.Error as e:
-            if "already exists" in str(e):
-                os.remove(os.path.join(PAGES_DIR, filename))
-            else:
-                raise e
-    else:
-        # check the PAGES_METADATA_DIR contains valid JSON files
-        try:
-            with open(metadata_path) as file:
-                data = file.read()
-            metadata = json.loads(data)
-            validate(metadata, PAGE_SCHEMA)
-        except json.JSONDecodeError as e:
-            print(f"Failed to load page metadata for {filename}")
-            raise e
+# print("Checking files...")
+# # check that page metadata files exist and contain valid JSON
+# for filename in os.listdir(PAGES_DIR):
+#     metadata_path = os.path.join(PAGES_METADATA_DIR, filename.split(".")[0]+".json")
+#     # check that page metadata files exist
+#     if not os.path.exists(metadata_path):
+#
+#         try:
+#             shutil.move(os.path.join(PAGES_DIR, filename), UNTRANSCRIBED_DIR)
+#         except shutil.Error as e:
+#             if "already exists" in str(e):
+#                 os.remove(os.path.join(PAGES_DIR, filename))
+#             else:
+#                 raise e
+#     else:
+#         # check the PAGES_METADATA_DIR contains valid JSON files
+#         try:
+#             with open(metadata_path) as file:
+#                 data = file.read()
+#             metadata = json.loads(data)
+#             validate(metadata, PAGE_SCHEMA)
+#         except json.JSONDecodeError as e:
+#             print(f"Failed to load page metadata for {filename}")
+#             raise e
 
 print("Initialising DocumentCollection")
 collection = DocumentCollection(TEST_COLLECTION_PATH)

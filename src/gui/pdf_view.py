@@ -5,6 +5,7 @@ import streamlit as st
 from utils import encode_data_base64
 from utils import ensure_directories_exist
 from utils import PROCESSED_FOLDER
+from storage import known_doc_collections
 
 
 def list_pdfs_in_folder(folder_path):
@@ -25,15 +26,12 @@ def display_pdf(pdf_data: bytes, page_number: int):
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 
-# TODO: ask user to select a document collection
-CURRENT_DOCUMENT_COLLECTION = DocumentCollection(
-    "/ipfs/QmZ75y9EkkVEpRKhWZn4Ba2E9yNAxbkqGjEFkKdmCUkL5h")
-
-
 def pdf_view():
     st.header("Document Viewer")
 
-    pdf_files = DocumentCollection.get_multipagedoc_ids()
+    # TODO: ask user to select a document collection
+    selected_doc_collection = known_doc_collections[0]
+    pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
     if not pdf_files:
         st.write("No PDF files found in the folder.")
@@ -41,7 +39,7 @@ def pdf_view():
         selected_pdf = st.selectbox('Select a PDF file', pdf_files)
 
         if selected_pdf:
-            document = CURRENT_DOCUMENT_COLLECTION.get_multipagedoc(selected_pdf)
+            document = selected_doc_collection.get_multipagedoc(selected_pdf)
             pdf_data = document.compilations[0].get_data()
             # Create two columns for layout
             col1, col2 = st.columns([4, 1])  # Adjust the ratio as needed
@@ -49,7 +47,7 @@ def pdf_view():
             with col1:
                 st.write(f"### Previewing PDF: {selected_pdf}")
                 try:
-                    display_pdf(pdf_data)
+                    display_pdf(pdf_data, 0)
                 except Exception as e:
                     st.error(
                         f"An error occurred while displaying the PDF: {e}")
@@ -62,6 +60,6 @@ def pdf_view():
                 st.download_button(
                     label="Download PDF",
                     data=virtual_pdf_file,
-                    file_name=selected_pdf,
+                    file_name=selected_pdf+".pdf",
                     mime="application/pdf"
                 )

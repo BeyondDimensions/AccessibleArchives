@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from typing import Iterator, List
 from jsonschema import validate
 import jsonschema
@@ -20,6 +21,7 @@ from dataclasses_json import dataclass_json, config
 from datetime import datetime
 from typing import List
 import dateutil.parser
+from utils import logger
 # Custom encoder and decoder for datetime to use strings (ISO 8601 format)
 
 
@@ -214,6 +216,8 @@ class DocumentCollection:
     multipagedocs_dirname = "MultiPageDocs"
 
     def __init__(self, collection_path: str):
+        logger.info("Loading DocumentCollection...")
+        logger.info(collection_path)
         self.path = collection_path
         self.pages_dir = join_paths(self.path, self.pages_dirname)
         self.pagemetadata_dir = join_paths(
@@ -229,6 +233,7 @@ class DocumentCollection:
         _page_ids: list[str] | None = None
         _multipagedoc_ids: list[str] | None = None
         self.check_collection_integrity()
+        logger.info("Loaded DocumentCollection!")
 
     def get_multipagedoc_ids(self) -> list[str]:
         """Get the IDs of the MultiPageDocs in this DocumentCollection."""
@@ -308,6 +313,7 @@ class DocumentCollection:
         """Ensure the data in this DocumentCollection is consistent."""
         if not path_exists(self.path):
             error_message = f"Can't find the path {self.path}"
+            logger.error(error_message)
             raise InvalidDocumentCollectionError(error_message)
         for subfolder_path in {
             self.pages_dir,
@@ -319,11 +325,13 @@ class DocumentCollection:
                 error_message = (
                     f"Collection doesn't have the subfolder {subfolder_path}"
                 )
+                logger.error(error_message)
                 raise InvalidDocumentCollectionError(error_message)
             if is_file(subfolder_path):
                 error_message = (
                     f"This path should be a folder, not a file: {subfolder_path}"
                 )
+                logger.error(error_message)
                 raise InvalidDocumentCollectionError(error_message)
 
         # verify the integrity of pages and their metadata files
@@ -335,7 +343,9 @@ class DocumentCollection:
         metadata_ids: dict[str, str] = {}
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
-        for filename in list_dir(self.pages_dir):
+
+        logger.info("Loading DocumentCollection pages...")
+        for filename in tqdm(list_dir(self.pages_dir)):
             page_filepath = join_paths(self.pages_dir, filename)
             expected_ipfs_id = filename.split(".")[0]
             try:
@@ -345,7 +355,7 @@ class DocumentCollection:
                         "This Page's filename is not its IPFS ID"
                     )
             except ipfs_api.ipfshttpclient.exceptions.ConnectionError:
-                print("Warning: IPFS isn't running, can't verify ID")
+                logger.warning("Warning: IPFS isn't running, can't verify ID")
                 page_id = expected_ipfs_id
 
                 # read the metadata file
@@ -388,7 +398,8 @@ class DocumentCollection:
 
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
-        for filename in list_dir(self.multipagedocs_dir):
+        logger.info("Loading DocumentCollection pages...")
+        for filename in tqdm(list_dir(self.multipagedocs_dir)):
             # only process JSON files
             if not filename.endswith(".json"):
                 continue
