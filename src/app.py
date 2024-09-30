@@ -3,7 +3,6 @@ from utils import logger
 
 from storage import load_known_docs
 
-logger.info("Starting...")
 load_known_docs()
 
 

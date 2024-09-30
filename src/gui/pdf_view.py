@@ -4,7 +4,7 @@ import os
 import streamlit as st
 from utils import encode_data_base64
 from utils import ensure_directories_exist
-from storage import known_doc_collections
+from storage import get_known_docs
 
 
 def list_pdfs_in_folder(folder_path):
@@ -29,7 +29,7 @@ def pdf_view():
     st.header("Document Viewer")
 
     # TODO: ask user to select a document collection
-    selected_doc_collection = known_doc_collections[0]
+    selected_doc_collection = get_known_docs()[0]
     pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
     if not pdf_files:
