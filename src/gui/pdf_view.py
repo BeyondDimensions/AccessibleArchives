@@ -4,7 +4,6 @@ import os
 import streamlit as st
 from utils import encode_data_base64
 from utils import ensure_directories_exist
-from utils import PROCESSED_FOLDER
 from storage import known_doc_collections
 
 

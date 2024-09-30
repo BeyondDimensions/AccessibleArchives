@@ -1,6 +1,11 @@
 from gui import main_view
 from utils import logger
 
+from storage import load_known_docs
+
+logger.info("Starting...")
+load_known_docs()
+
 
 def main():
     logger.streamlit_logger()
