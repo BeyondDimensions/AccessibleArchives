@@ -26,7 +26,7 @@ langchain_chroma
 
 # Unstructured (with markdown support)
 
-"unstructured[md]"
+unstructured[md]
 
 # PyInstaller for building standalone apps
 
