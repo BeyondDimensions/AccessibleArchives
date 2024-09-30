@@ -1,20 +1,28 @@
 # Accessible Archives
 
+_Explore thousands of documents with a friendly AI chat-assistant._
+
 <p align="center">
-  <img src="logo.png" alt="Accessible archives logo" />
+  <img src="splash.png" alt="Accessible archives logo" />
 </p>
 
 ## Overview
 
-This project involves scanning documents related to the Red Army Faction (RAF), performing Optical Character Recognition (OCR) to extract text, and fine-tuning a Large Language Model (LLM) with the extracted data. The resulting model can engage in a chat about the RAF documents. The application leverages Hugging Face for model training and selection, and Streamlit for creating a graphical user interface (GUI) that allows document preview in PDF format.
+AccessibleArchives is a program that uses an AI chat-assistant to aid users in exploring the content of a large set of documents so you they don't have to read them all themselves.
 
-## Features
+To achieve the above goal, this project is includes the following components:
+- OCR: transcribes text from images to support scanned physical documents, leveraging state-of-the-art **optical character recognition (OCR)** technology (ChatGPT!)
+- Data Curation: organises source material, transcriptions, multi-page documents and categorising them
+- decentralised storage: supports **IPFS** data storage for easy sharing
+- LLM chat-assistant: uses **large language models (LLM)** to allow the user to ask about the documents' contents
+- RAG: uses **retrieval augmented generation (RAG)** to allow 
 
-- **Document Scanning and OCR**: Converts scanned RAF documents into searchable text.
-- **LLM Fine-tuning**: Utilizes the extracted text to fine-tune various LLM models.
-- **Model Selection**: Allows users to choose from multiple LLM models available on Hugging Face.
-- **Interactive Chatbot**: Engage in conversations with the fine-tuned LLM about RAF documents.
-- **Streamlit GUI**: User-friendly interface to upload, preview documents, and chat with the LLM.
+These components are bundled into a web-application (OCR & data-curation are still missing in the GUI), and we are working on bundling it into a stand-alone executable.
+
+## User-Interface
+
+The AccessibleArchives GUI allows the user to browse through documents and ask a chatbot questions about them.
+
 
 ## Installation
 
@@ -23,62 +31,38 @@ This project involves scanning documents related to the Red Army Faction (RAF), 
 - Python 3.10+
 - Pip (Python package installer)
 
-### Clone the Repository
+### Setup
 
 ```bash
-git clone https://github.com/BeyondDimensions/Lighthouse.git
-cd Lighthouse
-```
+git clone https://github.com/BeyondDimensions/AccessibleArchives.git
+cd AccessibleArchives
 
-## Install Dependencies
-```bash
+# Install Dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
-
 ### Running the Application
+
 ```bash
 streamlit run app.py
 ```
 
-### Fine-tuning the Model
-1. Choose an LLM model from the available options on Hugging Face.
-2. Start the fine-tuning process with the extracted OCR data.
-3. Once fine-tuned, you can interact with the chatbot.
-
-## Project Structure
-```bash
-AccessibleArchives/
-│
-├── data/
-│   ├── documents
-│   ├── images
-│       └── logo.png
-│   └── fine_tuned/
-├── ocr/
-│   └── ocr.py
-├── utils/
-│   ├── fine_tuning.py
-│   ├── model_utils.py
-│   └── pdf_utils.py
-├── app.py
-├── config.py
-├── requirements.txt
-├── LICENSE
-└── README.md
-```
-
 ## Technologies Used
-- Hugging Face: For accessing and fine-tuning various LLM models.
-- Streamlit: For creating an interactive web-based GUI.
-- Python: Primary programming language.
+
+- Python: primary programming language
+- Streamlit: GUI framework
+- 
+- ChatGPT: for OCR (transcribing images)
+- IPFS: for de
 
 ## Contribution
+
 Contributions are welcome! Please fork the repository and create a pull request with your changes.
 
 ## License
+
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
 ## Contact
+
 For any questions or suggestions, please open an issue in the repository or contact us.
