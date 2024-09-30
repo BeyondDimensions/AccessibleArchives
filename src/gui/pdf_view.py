@@ -1,8 +1,11 @@
+from io import BytesIO
+from storage import DocumentCollection
 import os
 import streamlit as st
-from utils import encode_file_base64
+from utils import encode_data_base64
 from utils import ensure_directories_exist
 from utils import PROCESSED_FOLDER
+from storage import known_doc_collections
 
 
 def list_pdfs_in_folder(folder_path):
@@ -11,11 +14,13 @@ def list_pdfs_in_folder(folder_path):
     return pdf_files
 
 
-def display_pdf(file):
-    base64_pdf = encode_file_base64()
+def display_pdf(pdf_data: bytes, page_number: int):
+    base64_pdf = encode_data_base64(pdf_data)
 
+    # TODO: scroll to page number
     # Embedding PDF in HTML
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+    pdf_display = f'<iframe src="data:application/pdf;base64,{
+        base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
 
     # Displaying File
     st.markdown(pdf_display, unsafe_allow_html=True)
@@ -24,8 +29,9 @@ def display_pdf(file):
 def pdf_view():
     st.header("Document Viewer")
 
-    ensure_directories_exist(PROCESSED_FOLDER)
-    pdf_files = list_pdfs_in_folder(PROCESSED_FOLDER)
+    # TODO: ask user to select a document collection
+    selected_doc_collection = known_doc_collections[0]
+    pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
     if not pdf_files:
         st.write("No PDF files found in the folder.")
@@ -33,25 +39,27 @@ def pdf_view():
         selected_pdf = st.selectbox('Select a PDF file', pdf_files)
 
         if selected_pdf:
-            pdf_path = os.path.join(PROCESSED_FOLDER, selected_pdf)
-
+            document = selected_doc_collection.get_multipagedoc(selected_pdf)
+            pdf_data = document.compilations[0].get_data()
             # Create two columns for layout
             col1, col2 = st.columns([4, 1])  # Adjust the ratio as needed
 
             with col1:
                 st.write(f"### Previewing PDF: {selected_pdf}")
                 try:
-                    display_pdf(pdf_path)
+                    display_pdf(pdf_data, 0)
                 except Exception as e:
                     st.error(
                         f"An error occurred while displaying the PDF: {e}")
 
             with col2:
                 # Add a button to download the PDF
-                with open(pdf_path, "rb") as pdf_file:
-                    st.download_button(
-                        label="Download PDF",
-                        data=pdf_file,
-                        file_name=selected_pdf,
-                        mime="application/pdf"
-                    )
+                # with open(pdf_path, "rb") as pdf_file:
+                virtual_pdf_file = BytesIO(pdf_data)
+
+                st.download_button(
+                    label="Download PDF",
+                    data=virtual_pdf_file,
+                    file_name=selected_pdf+".pdf",
+                    mime="application/pdf"
+                )

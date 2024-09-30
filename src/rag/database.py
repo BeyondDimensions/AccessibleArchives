@@ -7,6 +7,7 @@ from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from storage import known_doc_collections
 
 
 def initialize_database(reset=False):
@@ -39,10 +40,13 @@ def reset_database():
         raise e
 
 
+# TODO: ask user to select a document collection
+
+
 def load_documents():
     """Load documents from the specified directory."""
     try:
-        loader = DirectoryLoader(DATA_FOLDER, glob="*.md")
+        loader = DirectoryLoader(known_doc_collections.transcripts_dir, glob="*.md")
         documents = loader.load()
         logger.info(
             f"Loaded {len(documents)} documents from {DATA_FOLDER}")
