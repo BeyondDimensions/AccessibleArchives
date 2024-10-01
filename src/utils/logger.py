@@ -28,12 +28,6 @@ def info(message, log_to_gui=False):
         st.info(message)
 
 
-def important(message, log_to_gui=False):
-    logger.important(message)
-    if st and log_to_gui:
-        st.warning(message)
-
-
 def warning(message, log_to_gui=False):
     logger.warning(message)
     if st and log_to_gui:

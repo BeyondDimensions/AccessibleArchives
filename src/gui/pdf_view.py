@@ -1,65 +1,118 @@
+import base64
+import PyPDF2
 from io import BytesIO
 from storage import DocumentCollection
 import os
 import streamlit as st
 from utils import encode_data_base64
 from utils import ensure_directories_exist
-from utils import PROCESSED_FOLDER
-from storage import known_doc_collections
+from storage import get_known_docs
+from formatting.pdf_pagination import extract_pages
 
-
-def list_pdfs_in_folder(folder_path):
-    files = os.listdir(folder_path)
-    pdf_files = [file for file in files if file.endswith('.pdf')]
-    return pdf_files
+# how many PDF pages to display at once
+PAGES_PER_CHUNK = 1
 
 
 def display_pdf(pdf_data: bytes, page_number: int):
-    base64_pdf = encode_data_base64(pdf_data)
+    """Display the given PDF file at the specified page."""
+    # extract the next few pages
+    page_numbers = list(range(page_number, page_number+PAGES_PER_CHUNK))
+    pdf_data_chunk, num_pages, start_page, end_page = extract_pages(pdf_data, page_numbers)
+    base64_pdf = encode_data_base64(pdf_data_chunk)
 
-    # TODO: scroll to page number
     # Embedding PDF in HTML
-    pdf_display = f'<iframe src="data:application/pdf;base64,{
-        base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+    pdf_display = f'''
+    <style>
+        body {{
+            overflow: hidden;  /* Hide scrollbar */
+        }}
+        #pdf-iframe {{
+            width: 100%;  /* Full width */
+            height: calc(100vh - 250px);  /* Adjust based on your layout */
+            border: none;  /* Remove border */
+        }}
+    </style>
+    <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}" type="application/pdf"></iframe>
+    <script>
+        // Function to resize the iframe on window resize
+        function resizeIframe() {{
+            const iframe = document.getElementById('pdf-iframe');
+            iframe.style.height = window.innerHeight + 'px';
+        }}
 
-    # Displaying File
+        window.addEventListener('resize', resizeIframe);
+        // Initial call to set the height
+        resizeIframe();
+    </script>
+'''
+
+    display_page_navigation(num_pages, start_page+1, end_page+1)
+
+    # Display the PDF file
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 
+def display_page_navigation(num_pages, start_page, end_page=None):
+    """Display a label showing which page number(s) is/are currently loaded."""
+    # Create two columns for layout
+    last_col, _, col2, _, next_col = st.columns([1, 4, 1, 4, 1])  # Layout for buttons and spacing
+
+    # Display navigation buttons
+
+    with last_col:
+        if st.button("last"):
+            # Ensure we don't go below the first page
+            if st.session_state['current_page'] >= PAGES_PER_CHUNK:
+                st.session_state['current_page'] -= PAGES_PER_CHUNK
+
+    # "Next" button
+    with next_col:
+        if st.button("next"):
+            # Ensure we don't exceed the total pages
+            if st.session_state['current_page'] + PAGES_PER_CHUNK < num_pages:
+                st.session_state['current_page'] += PAGES_PER_CHUNK
+            # Add a button to download the PDF
+            # with open(pdf_path, "rb") as pdf_file:
+    with col2:
+        if end_page is None or start_page == end_page:
+            text = f"Page  {start_page}"
+        else:
+            text = f"Pages {start_page} - {end_page}"
+
+        st.markdown(text)
+
+
 def pdf_view():
-    st.header("Document Viewer")
+    """Display a PDF viewer with a document selector, download button etc."""
+    # st.header("Document Viewer")
 
     # TODO: ask user to select a document collection
-    selected_doc_collection = known_doc_collections[0]
+    selected_doc_collection = get_known_docs()[0]
     pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
     if not pdf_files:
         st.write("No PDF files found in the folder.")
     else:
-        selected_pdf = st.selectbox('Select a PDF file', pdf_files)
+        selector_col, download_col = st.columns([5, 1])  # Layout for buttons and spacing
+
+        with selector_col:
+            selected_pdf = st.selectbox('Select a Document', pdf_files)
 
         if selected_pdf:
+            if not 'current_page' in st.session_state:
+                st.session_state['current_page'] = 0
             document = selected_doc_collection.get_multipagedoc(selected_pdf)
-            pdf_data = document.compilations[0].get_data()
-            # Create two columns for layout
-            col1, col2 = st.columns([4, 1])  # Adjust the ratio as needed
 
-            with col1:
-                st.write(f"### Previewing PDF: {selected_pdf}")
-                try:
-                    display_pdf(pdf_data, 0)
-                except Exception as e:
-                    st.error(
-                        f"An error occurred while displaying the PDF: {e}")
+            st.session_state["pdf_data"] = document.compilations[0].get_data()
+            virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 
-            with col2:
-                # Add a button to download the PDF
-                # with open(pdf_path, "rb") as pdf_file:
-                virtual_pdf_file = BytesIO(pdf_data)
-
+            with download_col:
                 st.download_button(
                     label="Download PDF",
                     data=virtual_pdf_file,
                     file_name=selected_pdf+".pdf",
                     mime="application/pdf"
                 )
+
+            # Display the current chunk of the PDF based on the current page
+            display_pdf(st.session_state["pdf_data"], st.session_state['current_page'])
