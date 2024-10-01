@@ -15,8 +15,8 @@ def load_known_docs():
     # TODO: replace with appdata memory of known collections
     known_doc_collections.append(DocumentCollection(
         # "/ipfs/QmZ75y9EkkVEpRKhWZn4Ba2E9yNAxbkqGjEFkKdmCUkL5h"
-        "/mnt/Storage/curated_files"
-        # TEST_COLLECTION_PATH
+        # "/mnt/Storage/curated_files"
+        TEST_COLLECTION_PATH
     ))
     return known_doc_collections
 
