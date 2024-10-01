@@ -7,7 +7,7 @@ import base64
 
 
 def extract_pages(pdf_data: bytes, pages: list):
-    print(pages)
+    # print(pages)
     pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
     pdf_writer = PyPDF2.PdfWriter()
 
@@ -40,7 +40,7 @@ def display_pdf(pdf_data: bytes, page_number: int):
     # Extract the next 3 pages (or adjust to your needs)
     page_numbers = list(range(page_number, page_number+pages_per_chunk))
     pdf_data_chunk, start_page, end_page = extract_pages(pdf_data, page_numbers)
-    print(len(pdf_data_chunk))
+    # print(len(pdf_data_chunk))
     base64_pdf = encode_data_base64(pdf_data_chunk)
 
     # Embedding PDF in HTML

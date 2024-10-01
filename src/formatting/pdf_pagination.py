@@ -3,7 +3,6 @@ from io import BytesIO
 
 
 def extract_pages(pdf_data: bytes, pages: list):
-    print(pages)
     pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
     pdf_writer = PyPDF2.PdfWriter()
 
