@@ -1,11 +1,6 @@
-import base64
-import PyPDF2
 from io import BytesIO
-from storage import DocumentCollection
-import os
 import streamlit as st
 from utils import encode_data_base64
-from utils import ensure_directories_exist
 from storage import get_known_docs
 from formatting.pdf_pagination import extract_pages
 
@@ -102,7 +97,7 @@ def pdf_view():
             selected_pdf = st.selectbox('Select a Document', pdf_files)
 
         if selected_pdf:
-            if not 'current_page' in st.session_state:
+            if 'current_page' not in st.session_state:
                 st.session_state['current_page'] = 0
             document = selected_doc_collection.get_multipagedoc(selected_pdf)
 

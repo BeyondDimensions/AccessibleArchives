@@ -7,7 +7,6 @@ from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from storage import get_known_docs
 
 

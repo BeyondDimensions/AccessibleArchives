@@ -59,15 +59,37 @@ show_progress "Installing" "Curl"
 sudo apt-get install curl -y
 check_status "Curl installed" "install Curl"
 
+# Install Pandoc
+show_progress "Installing" "Pandoc and texlive"
+sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra -y
+check_status "Pandoc and texlive installed" "install Pandoc and texlive"
+
+# Install IPFS
+# TODO manage to download latest version
+show_progress "Installing" "IPFS"
+wget https://github.com/ipfs/ipfs-desktop/releases/download/v0.38.0/ipfs-desktop-0.38.0-linux-amd64.deb
+sudo dpkg -i ./ipfs-desktop-0.38.0-linux-amd64.deb
+check_status "IPFS installed" "install IPFS"
+
+show_progress "Starting" "IPFS"
+ipfs-desktop
+# ipfs init
+# ipfs daemon
+# sudo systemctl start ipfs
+# sudo systemctl enable ipfs
+check_status "IPFS started" "start IPFS"
+
 # Install Python 3 and pip
 show_progress "Installing" "Python3"
 sudo apt-get install python3 python3-pip python3-venv -y
 check_status "Python3 installed" "install Python3"
 
-# Install Pandoc
-show_progress "Installing" "Pandoc and texlive"
-sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra -y
-check_status "Pandoc and texlive installed" "install Pandoc and texlive"
+# Install Python dependencies
+show_progress "Installing" "Python Dependencies"
+python3 -m venv ../../.venv
+source ../../.venv/bin/activate
+pip3 install -r ../requirements.txt
+check_status "Python Dependencies installed" "install Python Dependencies"
 
 # Install Ollama
 show_progress "Installing" "Ollama"
@@ -97,13 +119,6 @@ check_status "Ollama Model: mxbai-embed-large pulled" "pull Ollama Model: mxbai-
 show_progress "Starting" "Ollama Service"
 nohup ollama serve &> /dev/null &
 check_status "Ollama Service started" "start Ollama Service"
-
-# Install Python dependencies
-show_progress "Installing" "Python Dependencies"
-python3 -m venv ../../.venv
-source ../../.venv/bin/activate
-pip3 install -r ../requirements.txt
-check_status "Python Dependencies installed" "install Python Dependencies"
 
 # Update hosts file
 update_hosts_file
@@ -154,6 +169,8 @@ update_hosts_file
 
 # Cleanup files
 cleanup_file "install_ollama.sh"
+# TODO clean project folder from downloads and cd to ~/.local/share/AccessibleArchives
+# TODO clean after ipfs installation
 
 # Copy the entire project folder to ~/.local/share/
 show_progress "Copying" "files"
@@ -163,7 +180,8 @@ check_status "Files copied" "copy files"
 
 # Create symlink to run the app
 show_progress "Creating" "symlink to run the app"
-sudo ln -sf "$(pwd)/run_webui.sh" /usr/local/bin/accessible-archives
+SYMLINK_TARGET="$(cd ../.. && pwd)/release/web/run_webui.sh"
+sudo ln -sf "$SYMLINK_TARGET" /usr/local/bin/accessible-archives
 check_status "Symlink created" "create symlink"
 
 # Create desktop entry
@@ -174,7 +192,7 @@ DESKTOP_ENTRY="$HOME/.local/share/applications/AccessibleArchives.desktop"
 cat <<EOF > "$DESKTOP_ENTRY"
 [Desktop Entry]
 Name=Accessible Archives
-Exec=/home/$USERNAME/.local/share/AccessibleArchives/release/web/run_webui.sh
+Exec=/usr/local/bin/accessible-archives
 Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
 Terminal=true
 Type=Application

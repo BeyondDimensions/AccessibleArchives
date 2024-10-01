@@ -6,8 +6,8 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No color
 
-# Change to the project directory
-cd ../../src/ || { echo -e "${RED}✘ Failed to change directory to src.${NC}\n"; exit 1; }
+# Set the base directory for your application
+BASE_DIR="$HOME/.local/share/AccessibleArchives"  || { printf "${RED}✘ Failed to set main project directory.${NC}\n"; exit 1; }
 
 # Function to check if Ollama is running
 is_ollama_running() {
@@ -29,17 +29,19 @@ else
   fi
 fi
 
+# TODO add check as well if IPFS is running and run it if not
+
 # Activate the Python virtual environment
-if [ -d "../.venv" ]; then
-  source ../.venv/bin/activate
+if [ -d "$BASE_DIR/.venv" ]; then
+  source "$BASE_DIR/.venv/bin/activate"
 else
-  printf "${RED}✘ Virtual environment not found. Please run the installation script first.${NC}\n"
+  printf "${RED}✘ Virtual environment not found.${NC}\n"
   exit 1
 fi
 
 # Run your Streamlit app
 printf "${GREEN}✔ Starting the application...${NC}\n"
-streamlit run your_app.py --server.address accessible-archives.local --server.port 8501
+streamlit run "$BASE_DIR/src/app.py" --server.address accessible-archives.local --server.port 8501
 if [ $? -eq 0 ]; then
   printf "${GREEN}✔ Application started successfully!${NC}\n"
 else
