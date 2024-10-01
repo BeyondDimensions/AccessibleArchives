@@ -8,9 +8,10 @@ from utils.utils import ensure_dir_exists
 ####################################################################################
 ####################################################################################
 
-
+from tqdm import tqdm
 def generate_id(file_path):
-    return ipfs_api.publish(file_path)
+    #print (file_path)
+    return ipfs_api.predict_cid(file_path)
 
 ####################################################################################
 
@@ -22,6 +23,24 @@ def read_markdown_file(md_path):
 
 #####################################################################################
 
+def create_virtual_folder(files:list[str]):
+    folder_name="tmp"
+    
+    #create virtual folder
+    try:
+        ipfs_api.http_client.files.mkdir(f"/{folder_name}")
+    except:
+        os.system(f"ipfs files rm -r /{folder_name}")
+        ipfs_api.http_client.files.mkdir(f"/{folder_name}")
+    
+    # fill virtual folder with files
+    for ipfs_id in files:
+        ipfs_api.http_client.files.cp(f"/ipfs/{ipfs_id}", f"/{folder_name}/")
+    
+    # get virtual folder's IPFS ID
+    folder_id = dict(ipfs_api.http_client.files.stat(f"/{folder_name}"))["Hash"]
+    os.system(f"ipfs files rm -r /{folder_name}")
+    return folder_id
 
 def curate_pngs(input_dir, output_dir, original_medium, pdf_path):
     # erstellen der output Ordner
@@ -37,11 +56,11 @@ def curate_pngs(input_dir, output_dir, original_medium, pdf_path):
         os.path.join(output_dir, "MultiPageDocs"))
 
     #####################################################################################
-
+    #print(ipfs_api.my_id())
     png_ids = []
     metadata_ipfs_ids = []
     errors_encountered=False
-    for filename in os.listdir(input_dir):
+    for filename in (os.listdir(input_dir)):
         if not filename.endswith(".png"):
             continue
         original_png = os.path.join(input_dir, filename)
@@ -54,6 +73,8 @@ def curate_pngs(input_dir, output_dir, original_medium, pdf_path):
 
         json_path = os.path.join(output_dir_json, ipfs_id+".json")
         if os.path.exists(json_path):
+            metadata_ipfs_id = generate_id(json_path)
+            metadata_ipfs_ids.append(metadata_ipfs_id)
             continue
 
         if not os.path.exists(md_path):
@@ -96,7 +117,7 @@ def curate_pngs(input_dir, output_dir, original_medium, pdf_path):
     if errors_encountered:
         return
         
-    multi_doc_ipfs_id = generate_id(output_dir_multi)
+    multi_doc_ipfs_id = create_virtual_folder(png_ids)
     doc_json_path = os.path.join(output_dir_multi, multi_doc_ipfs_id+".json")
 
     pdf_ipfs_id = generate_id(pdf_path)

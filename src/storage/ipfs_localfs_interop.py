@@ -20,12 +20,12 @@ def path_exists(path: str):
         try:
             ipfs_api.http_client.ls(path)
         except ipfs_api.ipfshttpclient.exceptions.TimeoutError:
-            print(f"Couldn't find the IPFS object {ipfs_id}.")
+            # print(f"Couldn't find the IPFS object {ipfs_id}.")
             return False
         except ipfs_api.ipfshttpclient.exceptions.ErrorResponse as e:
             # if the error message is about a path not existing
             if "no link named" in str(e):
-                print(f"The IPFS object {ipfs_id} doesn't have the path {path}.")
+                # print(f"The IPFS object {ipfs_id} doesn't have the path {path}.")
                 return False
             else:
                 # the error message is about something else
@@ -47,7 +47,7 @@ def is_file(path):
         except ipfs_api.ipfshttpclient.exceptions.ErrorResponse as e:
             # if the error message is about the path being a directory
             if "is a directory" in str(e):
-                print(f"The IPFS object {ipfs_id} doesn't have the path {path}.")
+                # print(f"The IPFS object {ipfs_id} doesn't have the path {path}.")
                 return False
             else:
                 # the error message is about something else

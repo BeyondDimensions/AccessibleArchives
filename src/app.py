@@ -7,6 +7,10 @@ st.set_page_config(
     page_icon="../release/icon.png",  # Use a path to your favicon file
 )
 
+from storage import load_known_docs
+
+load_known_docs()
+
 
 def main():
     logger.streamlit_logger()

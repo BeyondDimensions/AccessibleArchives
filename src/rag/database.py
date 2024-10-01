@@ -7,6 +7,8 @@ from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from storage import get_known_docs
 
 
 def initialize_database(reset=False):
@@ -42,7 +44,9 @@ def reset_database():
 def load_documents():
     """Load documents from the specified directory."""
     try:
-        loader = DirectoryLoader(MARKDOWN_FOLDER, glob="*.md")
+        # TODO: ask user to select a document collection
+        loader = DirectoryLoader(
+            get_known_docs()[0].transcripts_dir, glob="*.md")
         documents = loader.load()
         logger.info(
             f"Loaded {len(documents)} documents from {MARKDOWN_FOLDER}")

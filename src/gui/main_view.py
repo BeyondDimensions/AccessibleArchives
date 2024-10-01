@@ -3,18 +3,19 @@ from .chat_view import chat_view
 from .pdf_view import pdf_view
 from .ocr_view import ocr_view
 
+st.set_page_config(layout="wide")
+
+
+def set_page_style():
+    st.html("<style> .main {overflow: hidden} </style>")
+
 
 def main_view():
-    st.title('Accessible Archives')
+    # st.title('Accessible Archives')
+    set_page_style()
 
-    # Tabs setup
-    st.sidebar.title("Navigation")
-    tabs = ['Chatbot', 'Document Viewer', 'OCR Processing']
-    choice = st.sidebar.selectbox('Select Tab', tabs)
-
-    if choice == 'Chatbot':
-        chat_view()
-    elif choice == 'Document Viewer':
+    pdf_col, chat_col = st.columns([1, 1])  # Layout for buttons and spacing
+    with pdf_col:
         pdf_view()
-    elif choice == 'OCR Processing':
-        ocr_view()
+    with chat_col:
+        chat_view()

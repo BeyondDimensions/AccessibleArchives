@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from typing import Iterator, List
 from jsonschema import validate
 import jsonschema
@@ -7,10 +8,9 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from datetime import datetime, UTC
 import ipfs_api
-from .ipfs_localfs_interop import path_exists, is_dir, is_file, join_paths, read_file, list_dir, get_ipfs_cid
+from .ipfs_localfs_interop import is_ipfs_path, path_exists, is_dir, is_file, join_paths, read_file, list_dir, get_ipfs_cid
 from utils import logger
 from .exceptions import InvalidDocumentCollectionError
-from utils.utils import load_json_file
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json, config
 from datetime import datetime
@@ -21,15 +21,25 @@ from dataclasses_json import dataclass_json, config
 from datetime import datetime
 from typing import List
 import dateutil.parser
+from utils import logger
 # Custom encoder and decoder for datetime to use strings (ISO 8601 format)
 
 
-def datetime_encoder(dt: datetime) -> str:
+def encode_datetime_to_str(dt: datetime) -> str:
     return dt.isoformat()
 
 
-def datetime_decoder(dt_str: str) -> datetime:
+def decode_datetime_from_str(dt_str: str) -> datetime:
     return dateutil.parser.isoparse(dt_str)
+
+
+def load_json_file(filepath):
+    """Load a json file, return its contents as a dictionary."""
+    if is_ipfs_path(filepath):
+        return json.loads(ipfs_api.read(filepath).decode())
+    else:
+        with open(filepath, 'r') as file:
+            return json.load(file)
 
 
 PAGE_SCHEMA = load_json_file(os.path.join(
@@ -50,8 +60,8 @@ class Transcript:
     timestamp: datetime = field(
         default_factory=datetime.now,  # You can set default_factory for datetimes if needed
         metadata=config(
-            encoder=datetime_encoder,
-            decoder=datetime_decoder
+            encoder=encode_datetime_to_str,
+            decoder=decode_datetime_from_str
         )
     )  # Specify the custom encoder/decoder for datetime
 
@@ -68,8 +78,8 @@ class PageSource:
     digitisation_date: datetime = field(
         default_factory=datetime.now,  # You can set default_factory for datetimes if needed
         metadata=config(
-            encoder=datetime_encoder,
-            decoder=datetime_decoder
+            encoder=encode_datetime_to_str,
+            decoder=decode_datetime_from_str
         )
     )  # Specify the custom encoder/decoder for datetime
 
@@ -98,8 +108,8 @@ class CompiledDoc:
     compilation_date: datetime = field(
         default_factory=datetime.now,  # You can set default_factory for datetimes if needed
         metadata=config(
-            encoder=datetime_encoder,
-            decoder=datetime_decoder
+            encoder=encode_datetime_to_str,
+            decoder=decode_datetime_from_str
         )
     )  # Specify the custom encoder/decoder for datetime
 
@@ -206,21 +216,24 @@ class DocumentCollection:
     multipagedocs_dirname = "MultiPageDocs"
 
     def __init__(self, collection_path: str):
+        logger.info("Loading DocumentCollection...")
+        logger.info(collection_path)
         self.path = collection_path
-        self.pages_dir = os.path.join(self.path, self.pages_dirname)
-        self.pagemetadata_dir = os.path.join(
+        self.pages_dir = join_paths(self.path, self.pages_dirname)
+        self.pagemetadata_dir = join_paths(
             self.path, self.pagemetadata_dirname
         )
-        self.transcripts_dir = os.path.join(
+        self.transcripts_dir = join_paths(
             self.path, self.transcripts_dirname
         )
-        self.multipagedocs_dir = os.path.join(
+        self.multipagedocs_dir = join_paths(
             self.path, self.multipagedocs_dirname
         )
 
         _page_ids: list[str] | None = None
         _multipagedoc_ids: list[str] | None = None
         self.check_collection_integrity()
+        logger.info("Loaded DocumentCollection!")
 
     def get_multipagedoc_ids(self) -> list[str]:
         """Get the IDs of the MultiPageDocs in this DocumentCollection."""
@@ -228,14 +241,19 @@ class DocumentCollection:
             self._load_multipagedocs()
         return self._multipagedoc_ids
 
+    def get_multipagedoc(self, multipagedoc_id: str) -> MultiPageDoc:
+        multipagedoc = MultiPageDoc.from_json(read_file(join_paths(
+            self.multipagedocs_dir, f"{multipagedoc_id}.json"
+        )))
+        multipagedoc._load_page_metadata()
+        self.make_multipagedoc_ipfs_independent(multipagedoc)
+        return multipagedoc
+
     def get_multipagedocs(self) -> Iterator[MultiPageDoc]:
         """Get an iterator over the MultiPageDocs in this DocumentCollection."""
         for doc_id in self.get_multipagedoc_ids():
-            multipagedoc = MultiPageDoc.from_json(read_file(join_paths(
-                self.multipagedocs_dir, f"{doc_id}.json"
-            )))
-            self.make_multipagedoc_ipfs_independent(multipagedoc)
-            yield multipagedoc
+
+            yield self.get_multipagedoc(doc_id)
 
     def make_multipagedoc_ipfs_independent(self, multipagedoc: MultiPageDoc) -> MultiPageDoc:
         """Edit the MultiPageDoc method that reads an IPFS file to use
@@ -295,23 +313,25 @@ class DocumentCollection:
         """Ensure the data in this DocumentCollection is consistent."""
         if not path_exists(self.path):
             error_message = f"Can't find the path {self.path}"
+            logger.error(error_message)
             raise InvalidDocumentCollectionError(error_message)
-        for subfolder in {
+        for subfolder_path in {
             self.pages_dir,
             self.transcripts_dir,
             self.multipagedocs_dir,
             self.pagemetadata_dir
         }:
-            full_path = join_paths(self.path, subfolder)
-            if not path_exists(full_path):
+            if not path_exists(subfolder_path):
                 error_message = (
-                    f"Collection doesn't have the subfolder {full_path}"
+                    f"Collection doesn't have the subfolder {subfolder_path}"
                 )
+                logger.error(error_message)
                 raise InvalidDocumentCollectionError(error_message)
-            if is_file(full_path):
+            if is_file(subfolder_path):
                 error_message = (
-                    f"This path should be a folder, not a file: {full_path}"
+                    f"This path should be a folder, not a file: {subfolder_path}"
                 )
+                logger.error(error_message)
                 raise InvalidDocumentCollectionError(error_message)
 
         # verify the integrity of pages and their metadata files
@@ -323,7 +343,9 @@ class DocumentCollection:
         metadata_ids: dict[str, str] = {}
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
-        for filename in list_dir(self.pages_dir):
+
+        logger.info("Loading DocumentCollection pages...")
+        for filename in tqdm(list_dir(self.pages_dir)):
             page_filepath = join_paths(self.pages_dir, filename)
             expected_ipfs_id = filename.split(".")[0]
             try:
@@ -333,12 +355,12 @@ class DocumentCollection:
                         "This Page's filename is not its IPFS ID"
                     )
             except ipfs_api.ipfshttpclient.exceptions.ConnectionError:
-                print("Warning: IPFS isn't running, can't verify ID")
+                logger.warning("Warning: IPFS isn't running, can't verify ID")
                 page_id = expected_ipfs_id
 
                 # read the metadata file
             metadata_filepath = join_paths(
-                self.path, self.pagemetadata_dir, f"{page_id}.json"
+                self.pagemetadata_dir, f"{page_id}.json"
             )
 
             page_metadata = load_json_file(metadata_filepath)
@@ -376,7 +398,8 @@ class DocumentCollection:
 
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
-        for filename in list_dir(self.multipagedocs_dir):
+        logger.info("Loading DocumentCollection pages...")
+        for filename in tqdm(list_dir(self.multipagedocs_dir)):
             # only process JSON files
             if not filename.endswith(".json"):
                 continue
@@ -394,7 +417,8 @@ class DocumentCollection:
                 raise InvalidDocumentCollectionError(
                     "This MultiPageDoc's filename is not its ID"
                 )
-
+            if not doc_metadata["pages"]:
+                continue
             doc_ids.append(doc_id)
 
         self._multipagedoc_ids = doc_ids
