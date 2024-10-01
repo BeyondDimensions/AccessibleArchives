@@ -25,6 +25,7 @@ def chat_view():
     for message in st.session_state.messages:
         st.chat_message(message['role']).markdown(message['content'])
 
+    response_placeholder = st.empty()
     # Input for the prompt
     prompt = st.chat_input('Pass your prompt here')
 
@@ -33,7 +34,6 @@ def chat_view():
         st.session_state.messages.append({'role': 'user', 'content': prompt})
 
         with st.chat_message("assistant"):
-            response_placeholder = st.empty()
 
             # Generate the response
             with st.spinner("Generating response..."):

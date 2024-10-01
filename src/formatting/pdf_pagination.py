@@ -21,4 +21,4 @@ def extract_pages(pdf_data: bytes, pages: list):
     pdf_output = BytesIO()
     pdf_writer.write(pdf_output)
     pdf_output.seek(0)
-    return (pdf_output.read(), start_page, end_page)
+    return (pdf_output.read(), num_pages, start_page, end_page)
