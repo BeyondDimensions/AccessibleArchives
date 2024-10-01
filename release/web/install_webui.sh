@@ -9,15 +9,15 @@ NC="\033[0m" # No color
 
 # Function to show progress bar
 show_progress() {
-  printf "\n${YELLOW}Installing %s...${NC}\n" "$1"
+  printf "${YELLOW}%s %s...${NC}\n" "$1" "$2"
 }
 
 # Function to check if a command succeeded or failed
 check_status() {
   if [ $? -eq 0 ]; then
-    printf "${GREEN}✔ %s installed successfully!${NC}\n" "$1"
+    printf "${GREEN}✔ %s successfully!${NC}\n" "$1"
   else
-    printf "${RED}✘ Failed to install %s. Please check logs.${NC}\n" "$1"
+    printf "${RED}✘ Failed to %s. Please check logs.${NC}\n" "$2"
     exit 1
   fi
 }
@@ -25,125 +25,152 @@ check_status() {
 # Function to clean up files
 cleanup_file() {
   if [ -f "$1" ]; then
-    rm "$1"
+    sudo rm "$1"
     printf "${GREEN}✔ Cleanup complete: $1 removed.${NC}\n"
   else
     printf "${YELLOW}✔ No $1 file found for cleanup.${NC}\n"
   fi
 }
 
+# Function to update /etc/hosts
+update_hosts_file() {
+  show_progress "Updating" "/etc/hosts file"
+  HOSTS_FILE="/etc/hosts"
+  HOST_ENTRY="127.0.0.1 accessible-archives.local"
+
+  # Check if the entry already exists
+  if grep -q "$HOST_ENTRY" "$HOSTS_FILE"; then
+    printf "${GREEN}✔ Entry for accessible-archives.local already exists in $HOSTS_FILE.${NC}\n"
+  else
+    # Add the entry
+    echo "$HOST_ENTRY" | sudo tee -a "$HOSTS_FILE" > /dev/null
+    check_status "/etc/hosts file updated" "update /etc/hosts file"
+  fi
+}
+
 # Update and upgrade packages
-show_progress "System Update"
+show_progress "Installing" "System Update"
 sudo apt-get update -y
 sudo apt-get upgrade -y
-check_status "System Update"
+check_status "System Update installed" "install System Update"
 
 # Install curl
-show_progress "Curl"
+show_progress "Installing" "Curl"
 sudo apt-get install curl -y
-check_status "Curl"
+check_status "Curl installed" "install Curl"
 
 # Install Python 3 and pip
-show_progress "Python3"
+show_progress "Installing" "Python3"
 sudo apt-get install python3 python3-pip python3-venv -y
-check_status "Python3"
+check_status "Python3 installed" "install Python3"
 
 # Install Pandoc
-show_progress "Pandoc and texlive"
+show_progress "Installing" "Pandoc and texlive"
 sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra -y
-check_status "Pandoc and texlive"
+check_status "Pandoc and texlive installed" "install Pandoc and texlive"
 
 # Install Ollama
-show_progress "Ollama"
+show_progress "Installing" "Ollama"
 curl -fsSL https://ollama.com/install.sh -o install_ollama.sh
 chmod +x install_ollama.sh
 bash install_ollama.sh
-check_status "Ollama"
+check_status "Ollama installed" "install Ollama"
 
-# ollama_init
+# Initialize Ollama
+show_progress "Initializing" "Ollama"
 sudo systemctl daemon-reload
 sudo systemctl restart ollama
-sleep 5 #wait to start the service
+sleep 5
+check_status "Ollama initialized" "initialize Ollama"
 
 # Download Ollama model
-show_progress "Ollama Model: llama3.1:8b"
+show_progress "Pulling" "Ollama Model: llama3.1:8b"
 ollama pull llama3.1:8b
-check_status "Ollama Model: llama3.1:8b"
+check_status "Ollama Model: llama3.1:8b pulled" "pull Ollama Model: llama3.1:8b"
 
 # Download Ollama embedding model
-show_progress "Ollama Model: mxbai-embed-large"
+show_progress "Pulling" "Ollama Model: mxbai-embed-large"
 ollama pull mxbai-embed-large
-check_status "Ollama Model: mxbai-embed-large"
+check_status "Ollama Model: mxbai-embed-large pulled" "pull Ollama Model: mxbai-embed-large"
 
 # Start Ollama as a background service
-show_progress "Ollama Service"
+show_progress "Starting" "Ollama Service"
 nohup ollama serve &> /dev/null &
-check_status "Ollama Service"
+check_status "Ollama Service started" "start Ollama Service"
 
 # Install Python dependencies
-show_progress "Python Dependencies"
+show_progress "Installing" "Python Dependencies"
 python3 -m venv ../../.venv
 source ../../.venv/bin/activate
 pip3 install -r ../requirements.txt
-check_status "Python Dependencies"
+check_status "Python Dependencies installed" "install Python Dependencies"
 
-# Install Nginx
-show_progress "Nginx"
-sudo apt-get install nginx -y
-check_status "Nginx"
+# Update hosts file
+update_hosts_file
 
-# Configure Nginx for the Streamlit app
-NGINX_CONF="/etc/nginx/sites-available/accessible-archives"
-cat <<EOF | sudo tee $NGINX_CONF
-server {
-    listen 80;
-    server_name accessible-archives.local;
+# # Install Nginx
+# show_progress "Installing" "Nginx"
+# sudo apt-get install nginx -y
+# check_status "Nginx installed" "install Nginx"
+#
+# # Configure Nginx for the Streamlit app
+# show_progress "Configuring" "Nginx"
+# NGINX_CONF="/etc/nginx/sites-available/accessible-archives"
+# cat <<EOF | sudo tee $NGINX_CONF
+# server {
+#     listen 80;
+#     server_name accessible-archives.local;
+#
+#     location / {
+#         proxy_pass http://localhost:8501;  # Default Streamlit port
+#         proxy_set_header Host \$host;
+#         proxy_set_header X-Real-IP \$remote_addr;
+#         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto \$scheme;
+#     }
+# }
+# EOF
+# check_status "Nginx configured" "configure Nginx"
+#
+# # Enable the Nginx configuration
+# show_progress "Enabling" "Nginx"
+# sudo ln -s $NGINX_CONF /etc/nginx/sites-enabled/
+# check_status "Nginx enabled" "enable Nginx"
+#
+# # Test Nginx configuration and reload
+# show_progress "Testing" "Nginx"
+# sudo nginx -t
+# check_status "Nginx tested" "test Nginx"
+#
+# # Reload Nginx
+# show_progress "Reloading" "Nginx"
+# sudo systemctl reload nginx
+# check_status "Nginx reloaded" "reload Nginx"
+#
+# # Enable Nginx in firewall
+# show_progress "Enabling" "Nginx in firewall"
+# sudo ufw allow 'Nginx Full'
+# check_status "Nginx in firewall enabled" "enable Nginx in firewall"
 
-    location / {
-        proxy_pass http://127.0.0.1:8501;  # Default Streamlit port
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
-check_status "Nginx Configuration"
-
-# Enable the Nginx configuration
-sudo ln -s $NGINX_CONF /etc/nginx/sites-enabled/
-check_status "Enable Nginx Site"
-
-# Test Nginx configuration and reload
-sudo nginx -t
-check_status "Nginx Test"
-sudo systemctl reload nginx
-check_status "Nginx Reload"
-
-# Create symlink to run the app
-echo "Creating symlink to run the app..."
-sudo ln -sf "$(pwd)/run_webui.sh" /usr/local/bin/accessible-archives
-printf "${GREEN}✔ Symlink created successfully!${NC}"
-
+# Cleanup files
 cleanup_file "install_ollama.sh"
 
-printf "\n${YELLOW}Copying files...${NC}\n"
-# Create necessary directories
-mkdir -p ~/.local/share/
-
 # Copy the entire project folder to ~/.local/share/
+show_progress "Copying" "files"
+mkdir -p ~/.local/share/
 cp -r "$(cd ../.. && pwd)" ~/.local/share/
-printf "${GREEN}✔ Project directory copied to ~/.local/share/.${NC}"
+check_status "Files copied" "copy files"
 
-printf "\n${YELLOW}Creating desktop entry...${NC}\n"
-
-# Define the username
-USERNAME=$(whoami)
-
-# Define the desktop entry file
-DESKTOP_ENTRY="$HOME/.local/share/applications/AccessibleArchives.desktop"
+# Create symlink to run the app
+show_progress "Creating" "symlink to run the app"
+sudo ln -sf "$(pwd)/run_webui.sh" /usr/local/bin/accessible-archives
+check_status "Symlink created" "create symlink"
 
 # Create desktop entry
+show_progress "Creating" "desktop entry"
+USERNAME=$(whoami)
+DESKTOP_ENTRY="$HOME/.local/share/applications/AccessibleArchives.desktop"
+
 cat <<EOF > "$DESKTOP_ENTRY"
 [Desktop Entry]
 Name=Accessible Archives
@@ -157,9 +184,8 @@ EOF
 
 # Make the desktop entry executable
 chmod +x "$DESKTOP_ENTRY"
-
-printf "${GREEN}✔ Desktop entry created.${NC}\n"
+check_status "Desktop entry created" "create desktop entry"
 
 printf "${GREEN}✔ Installation complete! You can now run 'accessible-archives' to start the app.${NC}\n"
 
-printf "${YELLOW}✔ Access your app at http://accessible-archives.local${NC}\n"  # Inform the user about the access URL
+printf "${YELLOW}✔ Access your app at http://accessible-archives.local:8501/${NC}\n"  # Inform the user about the access URL

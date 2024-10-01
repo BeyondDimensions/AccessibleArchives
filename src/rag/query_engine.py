@@ -52,7 +52,7 @@ def query_database(query_text: str):
             doc.page_content for doc, _score in results)
         prompt = format_prompt(context_text, query_text)
 
-        model = Ollama(model="qwen2:7b")
+        model = Ollama(model="llama3.1:8b")
         response_text = model.invoke(prompt)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
