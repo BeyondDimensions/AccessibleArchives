@@ -176,7 +176,7 @@ cat <<EOF > "$DESKTOP_ENTRY"
 Name=Accessible Archives
 Exec=/home/$USERNAME/.local/share/AccessibleArchives/release/web/run_webui.sh
 Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
-Terminal=false
+Terminal=true
 Type=Application
 Comment=RAG based Chat assistant
 Categories=Utility;
