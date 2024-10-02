@@ -1,6 +1,6 @@
 DEFAULT_OPENAI_MODEL = 'gpt-4o-2024-08-06'
 
-DEFAULT_LLM_MODEL = 'llama3.1:8b'
+DEFAULT_LLM_MODEL = 'qwen2:7b'
 
 DEFAULT_EMBEDDING_MODEL = 'mxbai-embed-large'
 

@@ -17,7 +17,7 @@ PY_REQUIREMENTS=$PROJ_DIR/release/requirements.txt
 OLLAMA_DIR=/opt/ollama
 INSTALL_DIR=/opt/AccessibleArchives
 PY_VENV_DIR=$INSTALL_DIR/.venv
-
+CHROMADB_PATH=$INSTALL_DIR/ChromaDB
 # Function to create a directory if it doesn't yet exist and check permissions
 ensure_dir() {
 if ! [ -e $1 ];then
@@ -28,6 +28,7 @@ sudo chown $USER:$USER $1
 
 ensure_dir $OLLAMA_DIR
 ensure_dir $INSTALL_DIR
+ensure_dir $CHROMADB_PATH
 
 # Function to show progress bar
 show_progress() {
@@ -135,6 +136,9 @@ show_progress "Pulling" "Ollama Model: llama3.1:8b"
 ollama pull llama3.1:8b
 check_status "Ollama Model: llama3.1:8b pulled" "pull Ollama Model: llama3.1:8b"
 
+show_progress "Pulling" "Ollama Model: qwen2:7b"
+ollama pull qwen2:7b
+check_status "Ollama Model: qwen2:7b pulled" "pull Ollama Model: qwen2:7b"
 # Download Ollama embedding model
 show_progress "Pulling" "Ollama Model: mxbai-embed-large"
 ollama pull mxbai-embed-large

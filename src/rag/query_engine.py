@@ -2,40 +2,47 @@ from utils import logger
 from config import CHROMA_PATH
 from config import RAG_CONFIG
 from langchain_chroma import Chroma
-from langchain.prompts import ChatPromptTemplate
-from langchain_community.llms.ollama import Ollama
-from .database import initialize_database
+from .database import initialize_database, reset_database
 from .common import get_embedding_function
-
-PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
-
-{context}
-
----
-
-Answer the question based on the above context: {question}
-"""
+from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
 
 
 def generate_response(query_text: str):
     """Generate a response using retrieved documents."""
     try:
-        initialize_database()  # Ensure the database is initialized
-        response_text, sources = query_database(query_text)
-        return response_text, sources
+        # Ensure the database is initialized
+        if query_text == "/reset_db":
+            reset_database()
+            return
+        # initialize_database(get_known_docs()[0].transcripts_dir)
+
+        # Create the conversation chain
+        conversation_chain = get_conversation_chain()
+
+        query_chain = get_query_chain(conversation_chain.memory.copy())
+
+        database_query = query_chain.run(
+            input=f"{query_text}")
+        logger.info(f"Database query: {database_query}")
+        logger.info("Querying database...")
+        # Retrieve relevant documents
+        context_text, sources = query_database(database_query)
+        logger.success("Queried database.")
+
+        if sources:  # if we found relevant documents:
+            # Use conversation chain to generate a final response, adding the new user query and context
+            response = get_conversation_sources_chain(
+                conversation_chain.memory, context_text).run(query_text)
+        else:   # we found no relevant documents
+            response = conversation_chain.run(input=f"{query_text}")
+        logger.success(f"Got final response: {response}")
+        return response, sources
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
         raise e
 
 
-def format_prompt(context_text: str, question: str):
-    """Format the prompt with the given context and question."""
-    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    return prompt_template.format(context=context_text, question=question)
-
-
-def query_database(query_text: str):
+def query_database(query_text: str) -> tuple[str | None, list[str] | None]:
     """Query the database for similar documents and generate a response."""
     try:
         db = Chroma(persist_directory=CHROMA_PATH,
@@ -46,17 +53,14 @@ def query_database(query_text: str):
 
         if not results:
             logger.warning("No relative documents found.")
+            return None, None
             raise Exception("No relative documents found.")
 
         context_text = "\n\n---\n\n".join(
             doc.page_content for doc, _score in results)
-        prompt = format_prompt(context_text, query_text)
-
-        model = Ollama(model="llama3.1:8b")
-        response_text = model.invoke(prompt)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
-        return response_text, sources
+        return context_text, sources  # You can keep this if needed elsewhere
     except Exception as e:
         logger.error(f"Error querying database: {e}")
         raise e
