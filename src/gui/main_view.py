@@ -3,8 +3,6 @@ from .chat_view import chat_view
 from .pdf_view import pdf_view
 from .ocr_view import ocr_view
 
-st.set_page_config(layout="wide")
-
 
 def set_page_style():
     st.html("<style> .main {overflow: hidden} </style>")

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 def pytest_configure():
     # Load the .env file for all tests
     env_path = os.path.join(os.path.dirname(__file__),
-                            '..', 'src', 'utils', 'credentials.env')
+                            '..', 'src', 'config', 'credentials.env')
     load_dotenv(env_path)
 
 

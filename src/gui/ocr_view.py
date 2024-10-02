@@ -3,7 +3,7 @@ import streamlit as st
 from utils import logger
 from utils import ensure_directories_exist
 from ocr import transcribe_image
-from utils import ALLOWED_OPENAI_MODELS, ORIGINAL_FOLDER, DATA_FOLDER
+from config import OPENAI_MODELS, ORIGINAL_FOLDER, DATA_FOLDER
 
 
 def get_pdf_input_from_user(input_option):
@@ -44,7 +44,7 @@ def ocr_view():
     if not folder_path or not pdf_files:
         return
 
-    gpt_version = st.selectbox('Select GPT Version', ALLOWED_OPENAI_MODELS)
+    gpt_version = st.selectbox('Select GPT Version', OPENAI_MODELS)
 
     # Button to trigger the processing of selected PDFs
     if st.button('Start Processing PDFs'):

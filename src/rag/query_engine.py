@@ -1,5 +1,6 @@
 from utils import logger
-from utils import CHROMA_PATH
+from config import CHROMA_PATH
+from config import RAG_CONFIG
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.llms.ollama import Ollama
@@ -40,7 +41,8 @@ def query_database(query_text: str):
         db = Chroma(persist_directory=CHROMA_PATH,
                     embedding_function=get_embedding_function())
 
-        results = db.similarity_search_with_score(query_text, k=5)
+        results = db.similarity_search_with_score(
+            query_text, k=RAG_CONFIG['number_of_contexts'])
 
         if not results:
             logger.warning("No relative documents found.")

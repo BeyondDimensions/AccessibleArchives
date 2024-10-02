@@ -1,11 +1,6 @@
-import base64
-import PyPDF2
 from io import BytesIO
-from storage import DocumentCollection
-import os
 import streamlit as st
 from utils import encode_data_base64
-from utils import ensure_directories_exist
 from storage import get_known_docs
 from formatting.pdf_pagination import extract_pages
 
@@ -119,14 +114,14 @@ def pdf_view():
                 st.session_state["pdf_data"] = document.compilations[0].get_data()
                 virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 
-                with download_col:
-                    st.download_button(
-                        label="Download PDF",
-                        data=virtual_pdf_file,
-                        file_name=selected_pdf + ".pdf",
-                        mime="application/pdf"
-                    )
+            with download_col:
+                st.download_button(
+                    label="Download PDF",
+                    data=virtual_pdf_file,
+                    file_name=selected_pdf+".pdf",
+                    mime="application/pdf"
+                )
 
-                # Display the current chunk of the PDF based on the current page
-                display_pdf(st.session_state["pdf_data"],
-                            st.session_state['current_page'])
+            # Display the current chunk of the PDF based on the current page
+            display_pdf(st.session_state["pdf_data"],
+                        st.session_state['current_page'])
