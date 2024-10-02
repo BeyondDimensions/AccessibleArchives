@@ -7,6 +7,7 @@ from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
+from storage import get_known_docs
 
 MARKDOWN_FOLDER = "../../.data"
 
@@ -47,14 +48,16 @@ def reset_database():
 def load_documents():
     """Load documents from the specified directory."""
     try:
-        if not os.path.exists(MARKDOWN_FOLDER):
-            logger.warning(f"Directory {MARKDOWN_FOLDER} does not exist.")
-            return []
-
-        loader = DirectoryLoader(MARKDOWN_FOLDER, glob="*.md")
-        documents = loader.load()
+        # TODO: ask user to select a document collection
         logger.info(
-            f"Loaded {len(documents)} documents from {MARKDOWN_FOLDER}")
+            f"Loading documents from {get_known_docs()[0].transcripts_dir}")
+        loader = DirectoryLoader(
+            get_known_docs()[0].transcripts_dir, glob="*.md",
+            show_progress=True,
+        )
+        documents = loader.load()
+        logger.success(
+            f"Loaded {len(documents)} documents from {get_known_docs()[0].transcripts_dir}")
         return documents
     except Exception as e:
         logger.error(f"Error loading documents: {e}")

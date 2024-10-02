@@ -6,6 +6,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 def split_documents(documents: list[Document]):
     """Split loaded documents into chunks."""
+    logger.info(
+        f"Splitting {len(documents)} documents into chunks...")
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=RAG_CONFIG['chunk_size'],
         chunk_overlap=RAG_CONFIG['chunk_overlap'],
@@ -13,7 +15,7 @@ def split_documents(documents: list[Document]):
         add_start_index=True,
     )
     chunks = text_splitter.split_documents(documents)
-    logger.info(
+    logger.success(
         f"Split {len(documents)} documents into {len(chunks)} chunks.")
     return chunks
 
@@ -23,6 +25,7 @@ def assign_chunk_ids(chunks):
     last_page_id = None
     current_chunk_index = 0
 
+    logger.info(f"Assigning IDs to {len(chunks)} chunks...")
     for chunk in chunks:
         source = chunk.metadata.get("source")
         page = chunk.metadata.get("page")
@@ -38,5 +41,5 @@ def assign_chunk_ids(chunks):
 
         chunk.metadata["id"] = chunk_id
 
-    logger.info(f"Assigned IDs to {len(chunks)} chunks.")
+    logger.success(f"Assigned IDs to {len(chunks)} chunks.")
     return chunks
