@@ -1,7 +1,7 @@
 import os
 import shutil
 from utils import logger
-from config import CHROMA_PATH, MARKDOWN_FOLDER
+from config import CHROMA_PATH
 from .common import get_embedding_function
 from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
@@ -44,11 +44,15 @@ def load_documents():
     """Load documents from the specified directory."""
     try:
         # TODO: ask user to select a document collection
-        loader = DirectoryLoader(
-            get_known_docs()[0].transcripts_dir, glob="*.md")
-        documents = loader.load()
         logger.info(
-            f"Loaded {len(documents)} documents from {MARKDOWN_FOLDER}")
+            f"Loading documents from {get_known_docs()[0].transcripts_dir}")
+        loader = DirectoryLoader(
+            get_known_docs()[0].transcripts_dir, glob="*.md",
+            show_progress=True,
+        )
+        documents = loader.load()
+        logger.success(
+            f"Loaded {len(documents)} documents from {get_known_docs()[0].transcripts_dir}")
         return documents
     except Exception as e:
         logger.error(f"Error loading documents: {e}")
