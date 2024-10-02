@@ -38,8 +38,11 @@ def chat_view():
             # Generate the response
             with st.spinner("Generating response..."):
                 response, sources = generate_response(prompt)
-                response_text = response + \
-                    "\n\nSources:\n" + "\n".join(sources)
+                if sources:
+                    response_text = response + \
+                        "\n\nSources:\n" + "\n".join(sources)
+                else:
+                    response_text = response
                 response_placeholder.markdown(response_text)
                 st.session_state.messages.append(
                     {'role': 'assistant', 'content': response_text})

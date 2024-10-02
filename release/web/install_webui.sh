@@ -107,6 +107,9 @@ show_progress "Pulling" "Ollama Model: llama3.1:8b"
 ollama pull llama3.1:8b
 check_status "Ollama Model: llama3.1:8b pulled" "pull Ollama Model: llama3.1:8b"
 
+show_progress "Pulling" "Ollama Model: qwen2:7b"
+ollama pull qwen2:7b
+check_status "Ollama Model: qwen2:7b pulled" "pull Ollama Model: qwen2:7b"
 # Download Ollama embedding model
 show_progress "Pulling" "Ollama Model: mxbai-embed-large"
 ollama pull mxbai-embed-large
