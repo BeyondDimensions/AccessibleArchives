@@ -11,7 +11,7 @@ PAGES_PER_CHUNK = 1
 def display_pdf(pdf_data: bytes, page_number: int):
     """Display the given PDF file at the specified page."""
     # extract the next few pages
-    page_numbers = list(range(page_number, page_number+PAGES_PER_CHUNK))
+    page_numbers = list(range(page_number, page_number + PAGES_PER_CHUNK))
     pdf_data_chunk, num_pages, start_page, end_page = extract_pages(
         pdf_data, page_numbers)
     base64_pdf = encode_data_base64(pdf_data_chunk)
@@ -22,13 +22,21 @@ def display_pdf(pdf_data: bytes, page_number: int):
         body {{
             overflow: hidden;  /* Hide scrollbar */
         }}
-        #pdf-iframe {{
-            width: 100%;  /* Full width */
+        #pdf-container {{
+            display: flex;
+            justify-content: center;  /* Center horizontally */
+            align-items: center;  /* Center vertically if needed */
             height: calc(100vh - 250px);  /* Adjust based on your layout */
+        }}
+        #pdf-iframe {{
+            width: 75%;  /* Adjust width as needed */
+            height: 100%;
             border: none;  /* Remove border */
         }}
     </style>
-    <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}" type="application/pdf"></iframe>
+    <div id="pdf-container">
+        <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}#zoom=58" type="application/pdf"></iframe>
+    </div>
     <script>
         // Function to resize the iframe on window resize
         function resizeIframe() {{
@@ -42,7 +50,7 @@ def display_pdf(pdf_data: bytes, page_number: int):
     </script>
 '''
 
-    display_page_navigation(num_pages, start_page+1, end_page+1)
+    display_page_navigation(num_pages, start_page + 1, end_page + 1)
 
     # Display the PDF file
     st.markdown(pdf_display, unsafe_allow_html=True)
@@ -57,14 +65,14 @@ def display_page_navigation(num_pages, start_page, end_page=None):
     # Display navigation buttons
 
     with last_col:
-        if st.button("last"):
+        if st.button("Last"):
             # Ensure we don't go below the first page
             if st.session_state['current_page'] >= PAGES_PER_CHUNK:
                 st.session_state['current_page'] -= PAGES_PER_CHUNK
 
     # "Next" button
     with next_col:
-        if st.button("next"):
+        if st.button("Next"):
             # Ensure we don't exceed the total pages
             if st.session_state['current_page'] + PAGES_PER_CHUNK < num_pages:
                 st.session_state['current_page'] += PAGES_PER_CHUNK
@@ -82,27 +90,31 @@ def display_page_navigation(num_pages, start_page, end_page=None):
 def pdf_view():
     """Display a PDF viewer with a document selector, download button etc."""
     # st.header("Document Viewer")
+    with st.container(height=900, border=False):
+        # TODO: ask user to select a document collection
+        st.markdown(
+            "<h4 style='text-align: center;'>Select a Document</h4>", unsafe_allow_html=True)
+        selected_doc_collection = get_known_docs()[0]
+        pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
-    # TODO: ask user to select a document collection
-    selected_doc_collection = get_known_docs()[0]
-    pdf_files = selected_doc_collection.get_multipagedoc_ids()
+        if not pdf_files:
+            st.write("No PDF files found in the folder.")
+        else:
+            selector_col, download_col = st.columns(
+                [5, 1])  # Layout for buttons and spacing
 
-    if not pdf_files:
-        st.write("No PDF files found in the folder.")
-    else:
-        selector_col, download_col = st.columns(
-            [5, 1])  # Layout for buttons and spacing
+            with selector_col:
+                selected_pdf = st.selectbox(
+                    'Select Document', pdf_files, label_visibility="collapsed")
 
-        with selector_col:
-            selected_pdf = st.selectbox('Select a Document', pdf_files)
+            if selected_pdf:
+                if 'current_page' not in st.session_state:
+                    st.session_state['current_page'] = 0
+                document = selected_doc_collection.get_multipagedoc(
+                    selected_pdf)
 
-        if selected_pdf:
-            if 'current_page' not in st.session_state:
-                st.session_state['current_page'] = 0
-            document = selected_doc_collection.get_multipagedoc(selected_pdf)
-
-            st.session_state["pdf_data"] = document.compilations[0].get_data()
-            virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
+                st.session_state["pdf_data"] = document.compilations[0].get_data()
+                virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 
             with download_col:
                 st.download_button(
