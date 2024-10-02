@@ -1,5 +1,5 @@
 from utils import logger
-from config import CHROMA_PATH
+from config import CHROMA_WORKING_PATH
 from config import RAG_CONFIG
 from langchain_chroma import Chroma
 from .database import initialize_database, reset_database
@@ -45,7 +45,7 @@ def generate_response(query_text: str):
 def query_database(query_text: str) -> tuple[str | None, list[str] | None]:
     """Query the database for similar documents and generate a response."""
     try:
-        db = Chroma(persist_directory=CHROMA_PATH,
+        db = Chroma(persist_directory=CHROMA_WORKING_PATH,
                     embedding_function=get_embedding_function())
 
         results = db.similarity_search_with_score(

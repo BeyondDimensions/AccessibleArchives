@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 load_known_docs()
-initialize_database(get_known_docs()[0].transcripts_dir)
+initialize_database(get_known_docs()[0].transcripts_dir, load_files=True)
 
 
 def main():

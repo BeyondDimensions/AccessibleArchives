@@ -1,7 +1,7 @@
 import os
 import shutil
 from utils import logger
-from config import CHROMA_PATH
+from config import CHROMA_WORKING_PATH, CHROMA_BACKUP_PATH
 from .common import get_embedding_function
 from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
@@ -15,9 +15,11 @@ MARKDOWN_FOLDER = "../../.data"
 # This could be useful for downstream logic that depends on database initialization.
 
 
-def initialize_database(data_path, reset=False):
+def initialize_database(data_path, reset=False, load_files=True):
     """Initialize the document database. Reset if needed."""
     try:
+        if os.path.exists(CHROMA_BACKUP_PATH) and not load_files:
+            return
         if reset:
             reset_database()
         logger.info("✨ Initializing Database")
@@ -35,9 +37,9 @@ def initialize_database(data_path, reset=False):
 def reset_database():
     """Clear the existing database."""
     try:
-        if os.path.exists(CHROMA_PATH):
-            shutil.rmtree(CHROMA_PATH)
-            logger.success(f"Cleared existing database at {CHROMA_PATH}")
+        if os.path.exists(CHROMA_WORKING_PATH):
+            shutil.rmtree(CHROMA_WORKING_PATH)
+            logger.success(f"Cleared existing database at {CHROMA_WORKING_PATH}")
     except Exception as e:
         logger.error(f"Error clearing database: {e}")
         raise e
@@ -67,11 +69,31 @@ def split_array(arr, chunk_size=10):
     return [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]
 
 
+def load_db() -> Chroma:
+    return Chroma(
+        persist_directory=CHROMA_BACKUP_PATH,
+        embedding_function=get_embedding_function()
+    )
+
+
+def backup_chroma_db():
+    # Make sure the backup path exists
+    os.makedirs(CHROMA_BACKUP_PATH, exist_ok=True)
+    # Copy the entire directory tree to the backup location
+    shutil.copytree(CHROMA_WORKING_PATH, CHROMA_BACKUP_PATH, dirs_exist_ok=True)
+
+
+def restore_chroma_db():
+    # Make sure the original chroma path exists
+    os.makedirs(CHROMA_WORKING_PATH, exist_ok=True)
+    # Copy the backup directory back to the original chroma path
+    shutil.copytree(CHROMA_BACKUP_PATH, CHROMA_WORKING_PATH, dirs_exist_ok=True)
+
+
 def save_chunks_to_chroma(chunks: list[Document]):
     """Save chunked documents to the Chroma database."""
     try:
-        db = Chroma(persist_directory=CHROMA_PATH,
-                    embedding_function=get_embedding_function())
+        db = load_db()
 
         chunks_with_ids = assign_chunk_ids(chunks)
 
@@ -83,14 +105,16 @@ def save_chunks_to_chroma(chunks: list[Document]):
             for chunk in chunks_with_ids
             if chunk.metadata["id"] not in existing_ids
         ]
-
         if new_chunks:
             logger.info(
-                f"👉 Adding {len(new_chunks)} new documents to the database.")
-            new_chunk_batches = split_array(new_chunks, chunk_size=100)
+                f"👉 Adding {len(new_chunks)} new documents to the database."
+            )
+            new_chunk_batches = split_array(new_chunks, chunk_size=10)
             for batch in tqdm(new_chunk_batches):
                 batch_chunk_ids = [chunk.metadata["id"] for chunk in batch]
                 db.add_documents(batch, ids=batch_chunk_ids)
+                backup_chroma_db()
+                db = load_db()
             logger.success(
                 f"👉 Added {len(new_chunks)} new documents to the database.")
         else:
