@@ -11,7 +11,6 @@ def set_page_style():
 def main_view():
     # st.title('Accessible Archives')
     set_page_style()
-
     pdf_col, chat_col = st.columns([1, 1])  # Layout for buttons and spacing
     with pdf_col:
         pdf_view()

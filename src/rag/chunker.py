@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from utils import logger
 from config import RAG_CONFIG
 from langchain.schema.document import Document
@@ -26,7 +27,7 @@ def assign_chunk_ids(chunks):
     current_chunk_index = 0
 
     logger.info(f"Assigning IDs to {len(chunks)} chunks...")
-    for chunk in chunks:
+    for chunk in tqdm(chunks):
         source = chunk.metadata.get("source")
         page = chunk.metadata.get("page")
         current_page_id = f"{source}:{page}"

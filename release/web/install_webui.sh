@@ -17,7 +17,7 @@ PY_REQUIREMENTS=$PROJ_DIR/release/requirements.txt
 OLLAMA_DIR=/opt/ollama
 INSTALL_DIR=/opt/AccessibleArchives
 PY_VENV_DIR=$INSTALL_DIR/.venv
-
+CHROMADB_PATH=$INSTALL_DIR/ChromaDB
 # Function to create a directory if it doesn't yet exist and check permissions
 ensure_dir() {
 if ! [ -e $1 ];then
@@ -28,6 +28,7 @@ sudo chown $USER:$USER $1
 
 ensure_dir $OLLAMA_DIR
 ensure_dir $INSTALL_DIR
+ensure_dir $CHROMADB_PATH
 
 # Function to show progress bar
 show_progress() {

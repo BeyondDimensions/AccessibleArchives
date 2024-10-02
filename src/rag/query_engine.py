@@ -14,7 +14,7 @@ def generate_response(query_text: str):
         if query_text == "/reset_db":
             reset_database()
             return
-        initialize_database()
+        # initialize_database(get_known_docs()[0].transcripts_dir)
 
         # Create the conversation chain
         conversation_chain = get_conversation_chain()
