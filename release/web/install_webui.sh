@@ -7,6 +7,28 @@ RED="\033[0;31m"
 YELLOW="\033[1;33m"
 NC="\033[0m" # No color
 
+# the absolute path of this script's directory
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+PROJ_DIR=$SCRIPT_DIR/../..
+SRC_DIR=$PROJ_DIR/src
+
+PY_REQUIREMENTS=$PROJ_DIR/release/requirements.txt
+
+OLLAMA_DIR=/opt/ollama
+INSTALL_DIR=/opt/AccessibleArchives
+PY_VENV_DIR=$INSTALL_DIR/.venv
+
+# Function to create a directory if it doesn't yet exist and check permissions
+ensure_dir() {
+if ! [ -e $1 ];then
+  sudo mkdir $1
+fi
+sudo chown $USER:$USER $1
+}
+
+ensure_dir $OLLAMA_DIR
+ensure_dir $INSTALL_DIR
+
 # Function to show progress bar
 show_progress() {
   printf "${YELLOW}%s %s...${NC}\n" "$1" "$2"
@@ -65,42 +87,48 @@ sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texl
 check_status "Pandoc and texlive installed" "install Pandoc and texlive"
 
 # Install IPFS
-# TODO manage to download latest version
-show_progress "Installing" "IPFS"
-wget https://dist.ipfs.tech/kubo/v0.30.0/kubo_v0.30.0_linux-amd64.tar.gz
-tar -xvzf kubo_v0.30.0_linux-amd64.tar.gz
-sudo bash kubo/install.sh
-check_status "IPFS installed" "install IPFS"
-
-show_progress "Starting" "IPFS"
-ipfs init
-check_status "IPFS started" "start IPFS"
+if systemctl is-active --quiet ipfs; then
+  echo "IPFS is already installed!"
+else
+  show_progress "Installing" "IPFS"
+  $SCRIPT_DIR/ipfs/install_ipfs.sh
+  $SCRIPT_DIR/ipfs/setup_ipfs_systemd.sh
+  check_status "IPFS started" "start IPFS"
+fi
 
 # Install Python 3 and pip
 show_progress "Installing" "Python3"
-sudo apt-get install python3 python3-pip python3-venv -y
+sudo apt-get install python3 python3-pip python3-virtualenv -y
 check_status "Python3 installed" "install Python3"
 
 # Install Python dependencies
 show_progress "Installing" "Python Dependencies"
-python3 -m venv ../../.venv
-source ../../.venv/bin/activate
-pip3 install -r ../requirements.txt
+python3 -m virtualenv $PY_VENV_DIR
+source $PY_VENV_DIR/bin/activate
+check_status "Python Environment installed" "install Python Environment"
+pip3 install -r $PY_REQUIREMENTS
 check_status "Python Dependencies installed" "install Python Dependencies"
 
-# Install Ollama
-show_progress "Installing" "Ollama"
-curl -fsSL https://ollama.com/install.sh -o install_ollama.sh
-chmod +x install_ollama.sh
-bash install_ollama.sh
-check_status "Ollama installed" "install Ollama"
+cd $OLLAMA_DIR
 
-# Initialize Ollama
-show_progress "Initializing" "Ollama"
-sudo systemctl daemon-reload
-sudo systemctl restart ollama
-sleep 5
-check_status "Ollama initialized" "initialize Ollama"
+if sudo systemctl is-active --quiet ollama; then
+  echo "Ollama is already installed and running."
+else
+  # Install Ollama
+  show_progress "Installing" "Ollama"
+  curl -fsSL https://ollama.com/install.sh -o install_ollama.sh
+  chmod +x install_ollama.sh
+  bash install_ollama.sh
+  check_status "Ollama installed" "install Ollama"
+
+  # Initialize Ollama
+  show_progress "Initializing" "Ollama"
+  sudo systemctl daemon-reload
+  sudo systemctl restart ollama
+  sleep 5
+  sudo systemctl is-active --quiet ollama
+  check_status "Ollama initialized" "initialize Ollama"
+fi
 
 # Download Ollama model
 show_progress "Pulling" "Ollama Model: llama3.1:8b"
@@ -174,19 +202,19 @@ cleanup_file "install_ollama.sh"
 
 # Copy the entire project folder to ~/.local/share/
 show_progress "Copying" "files"
-mkdir -p ~/.local/share/
-cp -r "$(cd ../.. && pwd)" ~/.local/share/
+rsync -XAvs $PROJ_DIR $INSTALL_DIR/
 check_status "Files copied" "copy files"
 
 # Create symlink to run the app
 show_progress "Creating" "symlink to run the app"
-SYMLINK_TARGET="$(cd ../.. && pwd)/release/web/run_webui.sh"
+SYMLINK_TARGET="$INSTALL_DIR/release/web/run_webui.sh"
 sudo ln -sf "$SYMLINK_TARGET" /usr/local/bin/accessible-archives
 check_status "Symlink created" "create symlink"
 
 # Create desktop entry
 show_progress "Creating" "desktop entry"
 USERNAME=$(whoami)
+ensure_dir $HOME/.local/share/applications
 DESKTOP_ENTRY="$HOME/.local/share/applications/AccessibleArchives.desktop"
 
 cat <<EOF > "$DESKTOP_ENTRY"
@@ -206,4 +234,3 @@ check_status "Desktop entry created" "create desktop entry"
 
 printf "${GREEN}✔ Installation complete! You can now run 'accessible-archives' to start the app.${NC}\n"
 
-printf "${YELLOW}✔ Access your app at http://accessible-archives.local:8501/${NC}\n"  # Inform the user about the access URL
