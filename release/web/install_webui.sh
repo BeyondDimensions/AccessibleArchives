@@ -67,16 +67,13 @@ check_status "Pandoc and texlive installed" "install Pandoc and texlive"
 # Install IPFS
 # TODO manage to download latest version
 show_progress "Installing" "IPFS"
-wget https://github.com/ipfs/ipfs-desktop/releases/download/v0.38.0/ipfs-desktop-0.38.0-linux-amd64.deb
-sudo dpkg -i ./ipfs-desktop-0.38.0-linux-amd64.deb
+wget https://dist.ipfs.tech/kubo/v0.30.0/kubo_v0.30.0_linux-amd64.tar.gz
+tar -xvzf kubo_v0.30.0_linux-amd64.tar.gz
+sudo bash kubo/install.sh
 check_status "IPFS installed" "install IPFS"
 
 show_progress "Starting" "IPFS"
-ipfs-desktop
-# ipfs init
-# ipfs daemon
-# sudo systemctl start ipfs
-# sudo systemctl enable ipfs
+ipfs init
 check_status "IPFS started" "start IPFS"
 
 # Install Python 3 and pip
