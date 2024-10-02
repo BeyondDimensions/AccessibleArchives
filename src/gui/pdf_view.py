@@ -35,7 +35,7 @@ def display_pdf(pdf_data: bytes, page_number: int):
         }}
     </style>
     <div id="pdf-container">
-        <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}" type="application/pdf"></iframe>
+        <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}#zoom=58" type="application/pdf"></iframe>
     </div>
     <script>
         // Function to resize the iframe on window resize
@@ -90,8 +90,10 @@ def display_page_navigation(num_pages, start_page, end_page=None):
 def pdf_view():
     """Display a PDF viewer with a document selector, download button etc."""
     # st.header("Document Viewer")
-    with st.container(height=850, border=False):
+    with st.container(height=900, border=False):
         # TODO: ask user to select a document collection
+        st.markdown(
+            "<h4 style='text-align: center;'>Select a Document</h4>", unsafe_allow_html=True)
         selected_doc_collection = get_known_docs()[0]
         pdf_files = selected_doc_collection.get_multipagedoc_ids()
 

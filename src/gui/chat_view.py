@@ -3,9 +3,9 @@ from rag import generate_response
 
 
 def chat_view():
-    with st.container(height=850, border=False):
+    with st.container(height=900, border=False):
         st.markdown(
-            "<h3 style='text-align: center;'>Ask me a question!</h3>", unsafe_allow_html=True)
+            "<h4 style='text-align: center;'>Ask me a question!</h4>", unsafe_allow_html=True)
         # st.header("Ask me a question!")
 
         # Model selection
@@ -22,7 +22,7 @@ def chat_view():
         #     st.session_state.previous_model = model_name
 
         # Input for the prompt
-        output_container = st.container(height=725, border=False)
+        output_container = st.container(height=775, border=False)
         input_container = st.container(height=50, border=False)
 
         with input_container:
