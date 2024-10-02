@@ -1,5 +1,5 @@
 # Core Libraries
-
+setuptools
 streamlit
 python-dotenv
 ipfs-toolkit
