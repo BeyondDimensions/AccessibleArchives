@@ -2,37 +2,31 @@ from utils import logger
 from config import CHROMA_PATH
 from config import RAG_CONFIG
 from langchain_chroma import Chroma
-from langchain.prompts import ChatPromptTemplate
-from langchain_community.llms.ollama import Ollama
 from .database import initialize_database
 from .common import get_embedding_function
-
-PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
-
-{context}
-
----
-
-Answer the question based on the above context: {question}
-"""
+from .conversation_chain import create_conversation_chain
 
 
 def generate_response(query_text: str):
     """Generate a response using retrieved documents."""
     try:
-        initialize_database()  # Ensure the database is initialized
-        response_text, sources = query_database(query_text)
-        return response_text, sources
+        # Ensure the database is initialized
+        initialize_database()
+
+        # Create the conversation chain
+        conversation_chain = create_conversation_chain()
+
+        # Retrieve relevant documents
+        context_text, sources = query_database(query_text)
+
+        # Use conversation chain to generate a final response, adding the new user query and context
+        response = conversation_chain.run(
+            input=f"{context_text}\n\n{query_text}")
+
+        return response, sources
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
         raise e
-
-
-def format_prompt(context_text: str, question: str):
-    """Format the prompt with the given context and question."""
-    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    return prompt_template.format(context=context_text, question=question)
 
 
 def query_database(query_text: str):
@@ -50,13 +44,9 @@ def query_database(query_text: str):
 
         context_text = "\n\n---\n\n".join(
             doc.page_content for doc, _score in results)
-        prompt = format_prompt(context_text, query_text)
-
-        model = Ollama(model="llama3.1:8b")
-        response_text = model.invoke(prompt)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
-        return response_text, sources
+        return context_text, sources  # You can keep this if needed elsewhere
     except Exception as e:
         logger.error(f"Error querying database: {e}")
         raise e

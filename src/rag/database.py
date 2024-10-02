@@ -1,13 +1,17 @@
 import os
 import shutil
 from utils import logger
-from config import CHROMA_PATH, MARKDOWN_FOLDER
+from config import CHROMA_PATH
 from .common import get_embedding_function
 from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
-from storage import get_known_docs
+
+MARKDOWN_FOLDER = "../../.data"
+
+# it might be beneficial to return a boolean value indicating whether the database was newly initialized or skipped.
+# This could be useful for downstream logic that depends on database initialization.
 
 
 def initialize_database(reset=False):
@@ -43,9 +47,11 @@ def reset_database():
 def load_documents():
     """Load documents from the specified directory."""
     try:
-        # TODO: ask user to select a document collection
-        loader = DirectoryLoader(
-            get_known_docs()[0].transcripts_dir, glob="*.md")
+        if not os.path.exists(MARKDOWN_FOLDER):
+            logger.warning(f"Directory {MARKDOWN_FOLDER} does not exist.")
+            return []
+
+        loader = DirectoryLoader(MARKDOWN_FOLDER, glob="*.md")
         documents = loader.load()
         logger.info(
             f"Loaded {len(documents)} documents from {MARKDOWN_FOLDER}")
