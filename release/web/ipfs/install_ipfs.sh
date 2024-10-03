@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # In this script, it matters with which user this script is being run, as that
-# user is used to initialise the IPFS node
+# user is used to initialize the IPFS node
 
 IPFS_VERSION="0.26.0"
 # the threshold of RAM in gigabytes under which the lowpower profile is applied
@@ -45,10 +45,10 @@ cd $CWD
 
 if [ "$(ipfs --version)" = "ipfs version ${IPFS_VERSION}" ]; then
   ipfs init
-  
+
   ## Configure IPFS
   ipfs config --json Experimental.Libp2pStreamMounting true
-  
+
   # Get total memory in kibibytes, then convert to gibibytes
   total_memory_kb=$(free -k | awk '/^Mem:/ {print $2}')
   total_memory_gb=$((total_memory_kb / 1024 / 1024))
@@ -57,8 +57,8 @@ if [ "$(ipfs --version)" = "ipfs version ${IPFS_VERSION}" ]; then
     echo "Applying low-power profile..."
     ipfs config profile apply lowpower
   fi
-  
-  
+
+
 else
   RED='\033[0;31m'
   NC='\033[0m'  # No Color

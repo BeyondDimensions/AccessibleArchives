@@ -11,6 +11,7 @@ requests
 pytest
 loguru
 PyPDF2 # delete that later and merge with fitz
+openai
 
 # LangChain and Chroma
 

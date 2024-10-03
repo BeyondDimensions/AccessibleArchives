@@ -50,10 +50,10 @@ def display_pdf(pdf_data: bytes, page_number: int):
     </script>
 '''
 
-    display_page_navigation(num_pages, start_page + 1, end_page + 1)
-
     # Display the PDF file
     st.markdown(pdf_display, unsafe_allow_html=True)
+
+    display_page_navigation(num_pages, start_page + 1, end_page + 1)
 
 
 def display_page_navigation(num_pages, start_page, end_page=None):

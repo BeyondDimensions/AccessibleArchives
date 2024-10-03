@@ -12,6 +12,11 @@ LLM_MODELS = {
     'Ollama Qwen': 'qwen2:7b',
 }
 
+TEMP_MODELS = {
+    'Llama3': 'llama3.1:8b',
+    'ChatGPT': 'gpt-4o-2024-08-06'
+}
+
 EMBEDDING_MODELS = {
     'Ollama Mxbai Embed Large': 'mxbai-embed-large',
     'Ollama Nomic Embed Text': 'nomic-embed-text',

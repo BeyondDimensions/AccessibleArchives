@@ -10,7 +10,7 @@ import streamlit as st
 from config.rag_config import DB_QUERY_GEN_PROMPT, PROMPT_WRAPPER, PROMPT_SOURCES_WRAPPER
 
 
-def initialise_conversation_chain(llm_model=DEFAULT_LLM_MODEL,):
+def initialize_conversation_chain(llm_model=DEFAULT_LLM_MODEL):
     """Create a conversation chain with memory."""
     logger.info("Creating conversation chain...")
     memory = ConversationBufferMemory(
@@ -30,7 +30,7 @@ def initialise_conversation_chain(llm_model=DEFAULT_LLM_MODEL,):
 
 def get_conversation_chain():
     if "conversation_chain" not in st.session_state:
-        initialise_conversation_chain()
+        initialize_conversation_chain()
     return st.session_state["conversation_chain"]
 
 

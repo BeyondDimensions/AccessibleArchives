@@ -1,29 +1,34 @@
 import streamlit as st
 from rag import generate_response
 from rag.database import initialize_database, reset_database
+from config import TEMP_MODELS
+
+
+def update_model(model_name):
+    """Update the model and clear messages if changed."""
+    if 'previous_model' not in st.session_state:
+        st.session_state.previous_model = model_name
+    if st.session_state.previous_model != model_name:
+        st.session_state.messages = []  # Clear messages
+        st.session_state.previous_model = model_name  # Update the model
+
+    # TODO it should initialize the conversation chain
 
 
 def chat_view():
     with st.container(height=900, border=False):
         st.markdown(
-            "<h4 style='text-align: center;'>Ask me a question!</h4>", unsafe_allow_html=True)
+            "<h4 style='text-align: center;'>Select a model</h4>", unsafe_allow_html=True)
         # st.header("Ask me a question!")
 
         # Model selection
-        # model_name = st.selectbox('Select Model', list(LLM_MODELS.keys()))
-        # # Initialize session state variables if they don't exist
-        # if 'messages' not in st.session_state:
-        #     st.session_state.messages = []
-        # if 'previous_model' not in st.session_state:
-        #     st.session_state.previous_model = model_name
-        #
-        # # Clear messages if the selected model has changed
-        # if st.session_state.previous_model != model_name:
-        #     st.session_state.messages = []
-        #     st.session_state.previous_model = model_name
+        model_name = st.selectbox('Select Model', list(
+            TEMP_MODELS.keys()), label_visibility="collapsed")
+
+        update_model(model_name)
 
         # Input for the prompt
-        output_container = st.container(height=775, border=False)
+        output_container = st.container(height=705, border=False)
         input_container = st.container(height=50, border=False)
 
         with input_container:
