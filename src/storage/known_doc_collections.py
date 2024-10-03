@@ -4,9 +4,9 @@ import os
 import ipfs_api
 from utils import logger
 SRC_PATH = os.path.abspath(os.path.join(__file__, "..", ".."))
-# TEST_COLLECTION_PATH = os.path.abspath(os.path.join(
-#     SRC_PATH, "..", "tests", "test_storage", "demo_docs"
-# ))
+TEST_COLLECTION_PATH = os.path.abspath(os.path.join(
+    SRC_PATH, "..", "tests", "test_storage", "demo_docs"
+))
 DOCUMENTS_PATH = os.path.abspath(os.path.join(
     SRC_PATH, "..", ".data"
 ))

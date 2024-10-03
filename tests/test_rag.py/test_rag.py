@@ -9,4 +9,4 @@ from rag.query_engine import generate_response
 initialize_database(os.path.join(TEST_COLLECTION_PATH, "Transcripts"), load_files=False)
 # initialize_database(os.path.join(TEST_COLLECTION_PATH, "Transcripts"), load_files=True)
 
-generate_response("Hello there!")
+generate_response("Was weist du über den RAF extremisten, Peter-Jürgen Boock?")

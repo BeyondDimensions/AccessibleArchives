@@ -28,18 +28,43 @@ Gespräch: {history}
 Aktuelle Frage: {input}
 """
 PROMPT_SOURCES_WRAPPER = """
+
+Wir sind im Jahr 3000.
+Du hast einige sehr alte  geschichtliche Dokumente, die für unseren 
+geschichtlichen Recherchen relavant sind. 
+Hier sind diese uralte Dokumente:
+
+---
+
+{relevant_documents}
+
+---
+
+Wir haben schon ein bisschen miteinander geredet, erinnerst du dich?
+
 Gespräch: {history}
 
 Aktuelle Frage: {input}
 
-Hier sind evtl. hilfreiche informationen:
 
-{relevant_documents}
+Für die aktuelle Frage, die sich auf uralte Vorfällen von vor mehr wie tausend 
+Jahren bezieht, formuliere eine hilfreiche Antwort. 
 """
 DB_QUERY_GEN_PROMPT = """
 Gesprächshistorie: {history}
 
 Aktuelle Frage: {input}
 
-Für die aktuelle Frage, formuliere, genau was wir suchen.
+Wir sind im Jahr 3000.
+Du hast einige sehr alte  geschichtliche Dokumente, die für unseren 
+geschichtlichen Recherchen relavant sind. Für die aktuelle Frage, die sich auf 
+uralte Vorfällen von vor mehr wie tausend Jahren bezieht, formuliere genau 
+wonach wir für dieser geschichtlichen Recherche suchen.
+"""
+
+SOURCE_DOC_FORMATTING = """
+{id}
+```markdown
+{text}
+```
 """
