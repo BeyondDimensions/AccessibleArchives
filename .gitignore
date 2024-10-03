@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-**/__pycache__/
+**/__pycache__
 *.py[cod]
 *$py.class
 # C extensions
@@ -7,20 +7,20 @@
 
 # Distribution / packaging
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
+build
+develop-eggs
+dist
+downloads
+eggs
+.eggs
+lib
+lib64
+parts
+sdist
+var
+wheels
+share/python-wheels
+*.egg-info
 .installed.cfg
 *.egg
 MANIFEST
@@ -35,9 +35,9 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
+htmlcov
+.tox
+.nox
 .coverage
 .coverage.*
 .cache
@@ -45,9 +45,9 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+.hypothesis
+.pytest_cache
+cover
 
 # Translations
 *.mo
@@ -60,24 +60,24 @@ db.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
-instance/
+instance
 .webassets-cache
 
 # Scrapy stuff:
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/_build
 
 # PyBuilder
-.pybuilder/
-target/
+.pybuilder
+target
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
 # IPython
-profile_default/
+profile_default
 ipython_config.py
 
 # pyenv
@@ -107,10 +107,10 @@ ipython_config.py
 #   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
 .pdm.toml
 .pdm-python
-.pdm-build/
+.pdm-build
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+__pypackages__
 
 # Celery stuff
 celerybeat-schedule
@@ -122,11 +122,11 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+env
+venv
+ENV
+env.bak
+venv.bak
 
 # Spyder project settings
 .spyderproject
@@ -139,15 +139,15 @@ venv.bak/
 /site
 
 # mypy
-.mypy_cache/
+.mypy_cache
 .dmypy.json
 dmypy.json
 
 # Pyre type checker
-.pyre/
+.pyre
 
 # pytype static type analyzer
-.pytype/
+.pytype
 
 # Cython debug symbols
 cython_debug/mistral:7b
@@ -161,9 +161,9 @@ cython_debug/mistral:7b
 
 # Exclude my files
 src/config/credentials.env
-.data/
+.data
 *.log
 *.DS_Store
-**/.obsidian/
+**/.obsidian
 #*.spec
 curated_files
