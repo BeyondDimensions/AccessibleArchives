@@ -18,16 +18,17 @@ def update_model(model_name):
 def chat_view():
     with st.container(height=900, border=False):
         st.markdown(
-            "<h4 style='text-align: center;'>Ask me a question!</h4>", unsafe_allow_html=True)
+            "<h4 style='text-align: center;'>Select a model</h4>", unsafe_allow_html=True)
         # st.header("Ask me a question!")
 
         # Model selection
-        model_name = st.selectbox('Select Model', list(TEMP_MODELS.keys()))
+        model_name = st.selectbox('Select Model', list(
+            TEMP_MODELS.keys()), label_visibility="collapsed")
 
         update_model(model_name)
 
         # Input for the prompt
-        output_container = st.container(height=775, border=False)
+        output_container = st.container(height=705, border=False)
         input_container = st.container(height=50, border=False)
 
         with input_container:
