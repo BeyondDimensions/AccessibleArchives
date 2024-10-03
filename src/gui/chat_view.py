@@ -52,7 +52,8 @@ def chat_view():
                         return
                     # Generate the response
                     with st.spinner("Generating response..."):
-                        response, sources = generate_response(prompt)
+                        response, sources = generate_response(
+                            prompt, st.session_state["current_doc_collection"])
                         response_text = response + \
                             "\n\nSources:\n" + "\n".join(sources)
                         response_placeholder.markdown(response_text)

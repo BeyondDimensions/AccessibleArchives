@@ -47,16 +47,18 @@ def generate_response(query_text: str, docs_clxn: DocumentCollection):
                     ipfs_id = _ipfs_id[0]
                 try:
                     page = docs_clxn.get_page(ipfs_id)
+                    full_text = page.transcripts[0].get_text()
+                    if not most_relevant_source:
+                        most_relevant_source = page
                 except ValueError:  # page isn't in our document collection
                     logger.error(
                         "Retrieved a page from ChromaDB which isn't in our "
                         f"document collection: {ipfs_id}")
+                    full_text = text
                     continue
-                if not most_relevant_source:
-                    most_relevant_source = page
                 if ipfs_id not in source_files:
                     source_files.update({
-                        ipfs_id: page.transcripts[0].get_text()
+                        ipfs_id: full_text
                     })
 
             formatted_sources = "\n".join([

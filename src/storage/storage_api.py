@@ -235,6 +235,7 @@ class DocumentCollection:
 
         _page_ids: list[str] | None = None
         _multipagedoc_ids: list[str] | None = None
+        _page_docs: dict[str, str] | None = None
         self.check_collection_integrity()
         logger.info("Loaded DocumentCollection!")
 
@@ -396,9 +397,12 @@ class DocumentCollection:
         self._metadata_ids = metadata_ids
         return page_ids
 
+    def get_doc_id_from_page_id(self, page_id) -> str | None:
+        return self._page_docs.get(get_ipfs_cid(self.get_page_metadata_path(page_id)), None)
+
     def _load_multipagedocs(self) -> list[str]:
         doc_ids: list[str] = []
-
+        _page_docs: dict[str:str] = {}
         # check the Pages subfolder, ensuring correct file-naming
         # and existence of metadata files
         logger.info("Loading DocumentCollection pages...")
@@ -422,7 +426,10 @@ class DocumentCollection:
                 )
             if not doc_metadata["pages"]:
                 continue
+            for page_metadata_id in doc_metadata["pages"]:
+                _page_docs.update({page_metadata_id: doc_id})
             doc_ids.append(doc_id)
 
         self._multipagedoc_ids = doc_ids
+        self._page_docs = _page_docs
         return doc_ids

@@ -7,9 +7,12 @@ from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
 TEST_COLLECTION_PATH = os.path.join(
     SRC_PATH, "..", "tests", "test_storage", "demo_docs"
 )
-PAGE_ID = "QmYZWkFRHWWDV1L98bj7aoWdi6ucz3j1SFZqgFgCtUHuJ2"
-DOC_ID = "Qmb4yZQxAaWkrR2hNKcBBnxvEyvewGXqpQtBZHziAWaZov"
-COMPILATION_ID = "Qmb8bSRLULw4nsCjQ959cLAxsbuBib2KZpHhS6fxBgvF4y"
+TEST_COLLECTION_PATH = os.path.abspath(os.path.join(
+    SRC_PATH, "..", ".data5"
+))
+PAGE_ID = "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou"
+DOC_ID = "QmPjudoU1LuKkA65Xw1aC6qJHhqon5iicUdr5AcA63QpjE"
+COMPILATION_ID = "QmUYF3CWuUKs2VAtXqrYyvbZ7bHRciYZRXGhUK2uy2a4yh"
 # Utility function to load a page from a file
 
 
@@ -63,9 +66,11 @@ def test_multipagedoc():
     assert doc.compilations[0].ipfs_id == COMPILATION_ID
     page_metadata_path = os.path.join(TEST_COLLECTION_PATH,
                                       "PageMetadata", f"{PAGE_ID}.json")
+    assert get_ipfs_cid(page_metadata_path) in doc.pages
     assert page.ipfs_id == doc.get_page_id_from_metadata_id(get_ipfs_cid(page_metadata_path))
-    assert doc.get_page_from_page_number(0) == page
-    assert doc.get_page_number(page.ipfs_id) == 0
+    assert doc.get_page_from_page_number(1) == page
+    assert doc.get_page_number(page.ipfs_id) == 1
+
 
 # Test for the DocumentCollection object
 
@@ -86,6 +91,7 @@ def test_document_collection():
     assert doc in collection.get_multipagedocs()
 
     assert doc in collection.get_page_docs(page.ipfs_id)
+    collection.get_doc_id_from_page_id(page.ipfs_id)
     page_metadata_path = os.path.join(TEST_COLLECTION_PATH,
                                       "PageMetadata", f"{PAGE_ID}.json")
     assert page.ipfs_id == collection.get_page_id_from_metadata_id(get_ipfs_cid(page_metadata_path))

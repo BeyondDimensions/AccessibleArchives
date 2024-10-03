@@ -13,9 +13,8 @@ from storage.storage_api import (
 )
 from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
 DOCUMENTS_PATH = os.path.abspath(os.path.join(
-    SRC_PATH, "..", ".data2"
+    SRC_PATH, "..", ".data5"
 ))
-DOCUMENTS_PATH = "/mnt/Uverlin/CLAN/AccessibleArchives/tests/test_curation/.output"
 PAGES_DIR = os.path.join(DOCUMENTS_PATH, "Pages")
 PAGES_METADATA_DIR = os.path.join(DOCUMENTS_PATH, "PageMetadata")
 UNTRANSCRIBED_DIR = ensure_dir_exists(os.path.join(DOCUMENTS_PATH, "Untrasncribed"))
