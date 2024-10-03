@@ -96,13 +96,15 @@ def save_chunks_to_chroma(chunks: list[Document]):
 
         existing_ids = set(db.get(include=[])["ids"])
         logger.info(f"Existing IDs: {len(existing_ids)}")
-
+        # print(list(existing_ids)[0:10])
+        # print([chunk.metadata["id"] for chunk in chunks_with_ids])
         new_chunks = [
             chunk
             for chunk in chunks_with_ids
             if chunk.metadata["id"] not in existing_ids
         ]
         if new_chunks:
+            logger.info(f"Skipping existing chunks: {len(chunks_with_ids) - len(new_chunks)}")
             logger.info(
                 f"👉 Adding {len(new_chunks)} new documents to the database."
             )
