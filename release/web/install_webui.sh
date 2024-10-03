@@ -157,7 +157,6 @@ check_status "Ollama Model: llama3.1:8b pulled" "pull Ollama Model: llama3.1:8b"
 # ollama pull qwen2:7b
 # check_status "Ollama Model: qwen2:7b pulled" "pull Ollama Model: qwen2:7b"
 # # Download Ollama embedding model
-
 show_progress "Pulling" "Ollama Model: mxbai-embed-large"
 ollama pull mxbai-embed-large
 check_status "Ollama Model: mxbai-embed-large pulled" "pull Ollama Model: mxbai-embed-large"
@@ -168,7 +167,7 @@ nohup ollama serve &> /dev/null &
 check_status "Ollama Service started" "start Ollama Service"
 
 # Update hosts file
-update_hosts_file
+# update_hosts_file
 
 # # Install Nginx
 # show_progress "Installing" "Nginx"

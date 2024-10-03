@@ -1,9 +1,8 @@
 from utils import logger
-from config import CHROMA_PATH
+from config import CHROMA_WORKING_PATH
 from config import RAG_CONFIG
 from config import SOURCE_DOC_FORMATTING
 from langchain_chroma import Chroma
-from .database import initialize_database, reset_database
 from .common import get_embedding_function
 from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
 
@@ -11,11 +10,6 @@ from .conversation_chain import get_conversation_chain, get_query_chain, get_con
 def generate_response(query_text: str):
     """Generate a response using retrieved documents."""
     try:
-        # Ensure the database is initialized
-        if query_text == "/reset_db":
-            reset_database()
-            return
-        # initialize_database(get_known_docs()[0].transcripts_dir)
 
         # Create the conversation chain
         conversation_chain = get_conversation_chain()
@@ -27,7 +21,7 @@ def generate_response(query_text: str):
         logger.info(f"Database query: {database_query}")
         logger.info("Querying database...")
         # Retrieve relevant documents
-        context_text, sources = query_database(database_query)
+        sources = query_database(database_query)
         logger.success("Queried database.")
 
         # TODO
@@ -42,7 +36,7 @@ def generate_response(query_text: str):
 
             # Use conversation chain to generate a final response, adding the new user query and context
             response = get_conversation_sources_chain(
-                conversation_chain.memory, context_text).run(query_text)
+                conversation_chain.memory, formatted_sources).run(query_text)
         else:   # we found no relevant documents
             response = conversation_chain.run(input=f"{query_text}")
         logger.success(f"Got final response: {response}")
@@ -52,19 +46,27 @@ def generate_response(query_text: str):
         raise e
 
 
-def query_database(query_text: str) -> tuple[str | None, list[str] | None]:
+def query_database(query_text: str) -> dict[str, str] | None:
     """Query the database for similar documents and generate a response."""
     try:
-        db = Chroma(persist_directory=CHROMA_PATH,
+        db = Chroma(persist_directory=CHROMA_WORKING_PATH,
                     embedding_function=get_embedding_function())
 
         results = db.similarity_search_with_score(
             query_text, k=RAG_CONFIG['number_of_contexts'])
 
         if not results:
-            logger.warning("No relative documents found.")
-            return None, None
-            raise Exception("No relative documents found.")
+            logger.warning("No relevant documents found.")
+            return None
+            raise Exception("No relevant documents found.")
+
+        # sort results by score
+        results.sort(key=lambda result: result[1], reverse=True)
+
+        return dict([
+            (doc.metadata["id"], doc.page_content)
+            for doc, score in results if doc.metadata.get("id", None)
+        ])
 
         context_text = "\n\n---\n\n".join(
             doc.page_content for doc, _score in results)
