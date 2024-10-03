@@ -96,6 +96,9 @@ class Page:
     source: PageSource  # information of this page's source
     format: str     # the digital file format of this page, expressed by file-name extension
 
+    def get_data(self) -> bytes:
+        return ipfs_api.read(self.ipfs_id)
+
 
 @dataclass_json
 @dataclass

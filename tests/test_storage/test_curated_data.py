@@ -12,10 +12,13 @@ from storage.storage_api import (
     MULTI_PAGE_DOC_SCHEMA,
 )
 from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
-TEST_COLLECTION_PATH = "/tmp/MyTemp/curated_files"
-PAGES_DIR = os.path.join(TEST_COLLECTION_PATH, "Pages")
-PAGES_METADATA_DIR = os.path.join(TEST_COLLECTION_PATH, "PageMetadata")
-UNTRANSCRIBED_DIR = ensure_dir_exists(os.path.join(TEST_COLLECTION_PATH, "Untrasncribed"))
+DOCUMENTS_PATH = os.path.abspath(os.path.join(
+    SRC_PATH, "..", ".data2"
+))
+DOCUMENTS_PATH = "/mnt/Uverlin/CLAN/AccessibleArchives/tests/test_curation/.output"
+PAGES_DIR = os.path.join(DOCUMENTS_PATH, "Pages")
+PAGES_METADATA_DIR = os.path.join(DOCUMENTS_PATH, "PageMetadata")
+UNTRANSCRIBED_DIR = ensure_dir_exists(os.path.join(DOCUMENTS_PATH, "Untrasncribed"))
 
 print("Checking files...")
 # check that page metadata files exist and contain valid JSON
@@ -43,7 +46,7 @@ for filename in os.listdir(PAGES_DIR):
             raise e
 
 print("Initialising DocumentCollection")
-collection = DocumentCollection(TEST_COLLECTION_PATH)
+collection = DocumentCollection(DOCUMENTS_PATH)
 print("Inistialised DocumentCollection")
 
 print(len(collection.get_page_ids()))

@@ -5,9 +5,14 @@ from config.rag_config import SOURCE_DOC_FORMATTING
 from langchain_chroma import Chroma
 from .common import get_embedding_function
 from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
+from storage import DocumentCollection, Page
 
 
-def generate_response(query_text: str):
+def flatten(xss):
+    return [x for xs in xss for x in xs]
+
+
+def generate_response(query_text: str, docs_clxn: DocumentCollection):
     """Generate a response using retrieved documents."""
     try:
 
@@ -25,9 +30,39 @@ def generate_response(query_text: str):
         logger.success("Queried database.")
 
         if sources:  # if we found relevant documents:
+            source_files: dict[str, str] = {}
+            most_relevant_source: Page | None = None
+            for id, text in list(sources.items()):
+                _ipfs_id = [
+                    s for s in flatten([
+                        seg.split(".") for seg in flatten([
+                            segment.split("/") for segment in id.split(":")
+                        ])
+                    ]) if s.startswith("Qm")
+                ]
+                if not _ipfs_id:
+                    logger.error(f"Couldn't extract IPFS ID from {id}")
+                    continue
+                else:
+                    ipfs_id = _ipfs_id[0]
+                try:
+                    page = docs_clxn.get_page(ipfs_id)
+                except ValueError:  # page isn't in our document collection
+                    logger.error(
+                        "Retrieved a page from ChromaDB which isn't in our "
+                        f"document collection: {ipfs_id}")
+                    continue
+                if not most_relevant_source:
+                    most_relevant_source = page
+                if ipfs_id not in source_files:
+                    source_files.update({
+                        ipfs_id: page.transcripts[0].get_text()
+                    })
+
             formatted_sources = "\n".join([
-                SOURCE_DOC_FORMATTING.replace("{id}", id).replace("{text}", text)
-                for id, text in list(sources.items())
+                SOURCE_DOC_FORMATTING.replace(
+                    "{id}", id).replace("{text}", text)
+                for id, text in list(source_files.items())
             ])
 
             # Use conversation chain to generate a final response, adding the new user query and context

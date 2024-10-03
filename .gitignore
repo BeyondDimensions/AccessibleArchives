@@ -161,9 +161,10 @@ cython_debug/mistral:7b
 
 # Exclude my files
 src/config/credentials.env
-.data
+.data*
 *.log
 *.DS_Store
 **/.obsidian
 #*.spec
 curated_files
+chroma-backup
