@@ -19,7 +19,7 @@ known_doc_collections: list[DocumentCollection] = []
 def load_known_docs():
     logger.info("Loading known docs...")
     # TODO: replace with appdata memory of known collections
-    ipfs_api.publish(DOCUMENTS_PATH)
+    # ipfs_api.publish(DOCUMENTS_PATH)
     known_doc_collections.append(DocumentCollection(
         # "/ipfs/QmZ75y9EkkVEpRKhWZn4Ba2E9yNAxbkqGjEFkKdmCUkL5h"
         # "/mnt/Storage/curated_files"
