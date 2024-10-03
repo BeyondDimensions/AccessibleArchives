@@ -1,6 +1,7 @@
 from utils import logger
 from config import CHROMA_PATH
 from config import RAG_CONFIG
+from config import SOURCE_DOC_FORMATTING
 from langchain_chroma import Chroma
 from .database import initialize_database, reset_database
 from .common import get_embedding_function
@@ -29,7 +30,16 @@ def generate_response(query_text: str):
         context_text, sources = query_database(database_query)
         logger.success("Queried database.")
 
+        # TODO
+        # st.session_state["history"]
+
         if sources:  # if we found relevant documents:
+            formatted_sources = "\n".join([
+                SOURCE_DOC_FORMATTING.replace(
+                    "{id}", id).replace("{text}", text)
+                for id, text in list(sources.items())
+            ])
+
             # Use conversation chain to generate a final response, adding the new user query and context
             response = get_conversation_sources_chain(
                 conversation_chain.memory, context_text).run(query_text)
