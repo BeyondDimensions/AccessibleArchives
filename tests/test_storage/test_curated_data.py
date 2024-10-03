@@ -12,7 +12,7 @@ from storage.storage_api import (
     MULTI_PAGE_DOC_SCHEMA,
 )
 from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
-TEST_COLLECTION_PATH = "/tmp/MyTemp/curated_files"
+TEST_COLLECTION_PATH = "/Users/marvinkirsch/Programming/AccessibleArchives/curated_files"
 PAGES_DIR = os.path.join(TEST_COLLECTION_PATH, "Pages")
 PAGES_METADATA_DIR = os.path.join(TEST_COLLECTION_PATH, "PageMetadata")
 UNTRANSCRIBED_DIR = ensure_dir_exists(os.path.join(TEST_COLLECTION_PATH, "Untrasncribed"))
