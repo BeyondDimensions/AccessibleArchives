@@ -1,5 +1,6 @@
 import streamlit as st
 from rag import generate_response
+from rag.database import initialize_database, reset_database
 
 
 def chat_view():
@@ -42,7 +43,13 @@ def chat_view():
 
                 with st.chat_message("assistant"):
                     response_placeholder = st.empty()
-
+                    if prompt == "/reset_db":
+                        reset_database()
+                        return
+                    if prompt == "/load_files":
+                        initialize_database(
+                            st.session_state["current_doc_collection"].transcripts_dir, load_files=True)
+                        return
                     # Generate the response
                     with st.spinner("Generating response..."):
                         response, sources = generate_response(prompt)

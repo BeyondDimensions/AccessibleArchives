@@ -2,7 +2,6 @@ from utils import logger
 from config import CHROMA_WORKING_PATH
 from config import RAG_CONFIG
 from langchain_chroma import Chroma
-from .database import initialize_database, reset_database
 from .common import get_embedding_function
 from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
 
@@ -10,11 +9,6 @@ from .conversation_chain import get_conversation_chain, get_query_chain, get_con
 def generate_response(query_text: str):
     """Generate a response using retrieved documents."""
     try:
-        # Ensure the database is initialized
-        if query_text == "/reset_db":
-            reset_database()
-            return
-        # initialize_database(get_known_docs()[0].transcripts_dir)
 
         # Create the conversation chain
         conversation_chain = get_conversation_chain()

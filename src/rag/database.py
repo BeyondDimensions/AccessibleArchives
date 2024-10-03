@@ -7,21 +7,18 @@ from .chunker import split_documents, assign_chunk_ids
 from langchain_chroma import Chroma
 from langchain.schema.document import Document
 from langchain_community.document_loaders import DirectoryLoader
-from storage import get_known_docs
 from tqdm import tqdm
-MARKDOWN_FOLDER = "../../.data"
 
 # it might be beneficial to return a boolean value indicating whether the database was newly initialized or skipped.
 # This could be useful for downstream logic that depends on database initialization.
 
 
-def initialize_database(data_path, reset=False, load_files=True):
+def initialize_database(data_path, load_files=True):
     """Initialize the document database. Reset if needed."""
     try:
         if os.path.exists(CHROMA_BACKUP_PATH) and not load_files:
             return
-        if reset:
-            reset_database()
+
         logger.info("✨ Initializing Database")
         documents = load_documents(data_path)
         if documents:
@@ -71,7 +68,7 @@ def split_array(arr, chunk_size=10):
 
 def load_db() -> Chroma:
     return Chroma(
-        persist_directory=CHROMA_BACKUP_PATH,
+        persist_directory=CHROMA_WORKING_PATH,
         embedding_function=get_embedding_function()
     )
 
