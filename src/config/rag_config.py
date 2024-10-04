@@ -77,11 +77,7 @@ Gesprächshistorie:
 
 Aktuelle Frage: {input}
 
-Wir sind im Jahr 3000.
-Wir haben vor uns einige sehr alte geschichtliche Dokumente aus dem 20. Jahrhundert, die für unseren
-geschichtlichen Recherchen relavant sind. Für die aktuelle Frage, die sich auf
-uralte Vorfällen von vor mehr wie tausend Jahren bezieht, formuliere genau
-wonach wir für dieser geschichtlichen Recherche in diesen Dokumenten suchen.
+Formuliere genau, wonach man suchen muss, um diese Frage zu beantworten.
 """
 
 SOURCE_DOC_FORMATTING = """

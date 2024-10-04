@@ -169,3 +169,4 @@ src/config/credentials.env
 curated_files
 chroma-backup
 chroma-backup*
+chroma-full

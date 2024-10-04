@@ -13,7 +13,7 @@ from storage.storage_api import (
 )
 from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
 DOCUMENTS_PATH = os.path.abspath(os.path.join(
-    SRC_PATH, "..", ".data5"
+    SRC_PATH, "..", ".data-full"
 ))
 PAGES_DIR = os.path.join(DOCUMENTS_PATH, "Pages")
 PAGES_METADATA_DIR = os.path.join(DOCUMENTS_PATH, "PageMetadata")
@@ -54,6 +54,7 @@ doc = collection.get_multipagedocs().send(None)
 # for doc in collection.get_multipagedocs():
 #     print(len(doc.pages))
 
+"Qma9saVg1JGp5Vf1fCuw9T3cpVeeWyS3zpaz3SwPDt19fA"
 
 # doc._load_page_metadata()
 "QmfMo8eELXbwvDgczDQA9BMpDYFarLuYrycYBHqxuj2DYb" in set(doc.get_page_ids())

@@ -54,7 +54,6 @@ def dummy_generate_response(llm_name: str, prompt: str, history: list[dict[str, 
         "QmcocB9fk47J3pqWy8vaoUnRrF7ZYAr1K8nZhoT69Hfubk",
         "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
         "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
-
     ]
     return response, sources
 
@@ -144,7 +143,7 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
 
         response = prompt_llm(llm_prompt, llm_name)
         logger.success(f"Got final response: {response}")
-        return response, source_files.keys()
+        return response, list(source_files.keys())
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
         raise e
