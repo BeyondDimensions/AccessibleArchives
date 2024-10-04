@@ -28,13 +28,12 @@ SYMLINK_PATH=/usr/local/bin/accessible-archives
 APP_DATA=$HOME/.local/share/
 DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
 # CHROMADB_DIR=/var/lib/AccessibleArchives/ChromaDB
-CHROMADB_DIR=$APP_DATA/AccessibleArchives/ChromaDB
-CHROMADB_BACKUP_DIR=$APP_DATA/AccessibleArchives/ChromaDB-backup
+CHROMADB_DIR=$INSTALL_DIR/ChromaDB
 
 # Function to create a directory if it doesn't yet exist and check permissions
 ensure_dir() {
 if ! [ -e $1 ];then
-  sudo mkdir $1
+  sudo mkdir -p $1
 fi
 sudo chown $USER:$USER $1
 }
@@ -42,7 +41,6 @@ sudo chown $USER:$USER $1
 ensure_dir $OLLAMA_DIR
 ensure_dir $INSTALL_DIR
 ensure_dir $CHROMADB_DIR
-ensure_dir $CHROMADB_BACKUP_DIR
 ensure_dir $DATA_DIR
 ensure_dir $APP_DATA
 
@@ -95,7 +93,7 @@ check_status "System Update installed" "install System Update"
 
 # Install curl
 show_progress "Installing" "Curl"
-sudo apt-get install curl -y
+sudo apt-get install -y curl rsync git 
 check_status "Curl installed" "install Curl"
 
 # Install Pandoc
@@ -104,13 +102,13 @@ sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texl
 check_status "Pandoc and texlive installed" "install Pandoc and texlive"
 
 # Install IPFS
-if sudo systemctl is-active --quiet ipfs; then
+if sudo systemctl is-active --quiet ipfs || [ -e $SCRIPT_DIR/we_are_in_docker ]; then
   printf "${GREEN}✔ IPFS already installed!.${NC}\n"
 else
   show_progress "Installing" "IPFS"
   $SCRIPT_DIR/ipfs/install_ipfs.sh
   $SCRIPT_DIR/ipfs/setup_ipfs_systemd.sh
-  check_status "IPFS started" "start IPFS"
+  # check_status "IPFS started" "start IPFS"
 fi
 
 # Install Python 3 and pip
@@ -138,14 +136,16 @@ else
 
   # Cleanup files
   cleanup_file $OLLAMA_INSTALL_SCRIPT
+  if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
 
-  # Initialize Ollama
-  show_progress "Initializing" "Ollama"
-  sudo systemctl daemon-reload
-  sudo systemctl restart ollama
-  sleep 5
-  sudo systemctl is-active --quiet ollama
-  check_status "Ollama initialized" "initialize Ollama"
+    # Initialize Ollama
+    show_progress "Initializing" "Ollama"
+    sudo systemctl daemon-reload
+    sudo systemctl restart ollama
+    sleep 5
+    sudo systemctl is-active --quiet ollama
+    check_status "Ollama initialized" "initialize Ollama"
+  fi
 fi
 
 # Download Ollama model
@@ -215,7 +215,7 @@ check_status "Ollama Service started" "start Ollama Service"
 
 # Copy the entire project folder to ~/.local/share/
 show_progress "Copying" "files"
-rsync -XAvs $PROJ_DIR $INSTALL_DIR/
+rsync -XAva $PROJ_DIR $INSTALL_DIR/
 check_status "Files copied" "copy files"
 
 # Create symlink to run the app
@@ -223,22 +223,23 @@ show_progress "Creating" "symlink to run the app"
 sudo ln -sf $SYMLINK_TARGET $SYMLINK_PATH
 check_status "Symlink created" "create symlink"
 
-# Create desktop entry
-show_progress "Creating" "desktop entry"
+if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
+  # Create desktop entry
+  show_progress "Creating" "desktop entry"
 
-cat <<EOF > $DESKTOP_ENTRY
-[Desktop Entry]
-Name=Accessible Archives
-Exec=$SYMLINK_PATH
-Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
-Terminal=true
-Type=Application
-Comment=RAG based Chat assistant
-Categories=Utility;
-EOF
+  cat <<EOF > $DESKTOP_ENTRY
+  [Desktop Entry]
+  Name=Accessible Archives
+  Exec=$SYMLINK_PATH
+  Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
+  Terminal=true
+  Type=Application
+  Comment=RAG based Chat assistant
+  Categories=Utility;
+  EOF
 
-# Make the desktop entry executable
-chmod +x $DESKTOP_ENTRY
-check_status "Desktop entry created" "create desktop entry"
-
+  # Make the desktop entry executable
+  chmod +x $DESKTOP_ENTRY
+  check_status "Desktop entry created" "create desktop entry"
+fi
 printf "${GREEN}✔ Installation complete! You can now run 'accessible-archives' to start the app.${NC}\n"

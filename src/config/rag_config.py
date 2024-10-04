@@ -1,3 +1,4 @@
+import platform
 import os
 from platformdirs import user_data_dir
 from utils import ensure_dir_exists
@@ -7,16 +8,28 @@ APP_AUTHOR = "BeyondDimensions"
 FAVICON = os.path.abspath(os.path.join(
     os.path.dirname(__file__), "..", "..", "release", "icon.png"))
 
-CHROMA_WORKING_PATH = os.getenv(
-    'CHROMA_WORKING_PATH',
-    ensure_dir_exists(os.path.join(
-        user_data_dir(APP_NAME, APP_AUTHOR), 'ChromaDB'))
-)
-CHROMA_BACKUP_PATH = os.getenv(
-    'CHROMA_WORKING_PATH',
-    ensure_dir_exists(os.path.join(user_data_dir(
-        APP_NAME, APP_AUTHOR), 'ChromaDB-backup'))
-)
+platform.system()
+if platform.system().lower() == "linux":
+    CHROMA_WORKING_PATH = os.getenv(
+        'CHROMA_WORKING_PATH',
+        ensure_dir_exists(os.path.join("opt", "AccessibleArchives",  'ChromaDB', "current"))
+    )
+    CHROMA_BACKUP_PATH = os.getenv(
+        'CHROMA_WORKING_PATH',
+        ensure_dir_exists(os.path.join("opt", "AccessibleArchives",  'ChromaDB', "backup"))
+    )
+
+else:
+    CHROMA_WORKING_PATH = os.getenv(
+        'CHROMA_WORKING_PATH',
+        ensure_dir_exists(os.path.join(
+            user_data_dir(APP_NAME, APP_AUTHOR), 'ChromaDB', 'current'))
+    )
+    CHROMA_BACKUP_PATH = os.getenv(
+        'CHROMA_WORKING_PATH',
+        ensure_dir_exists(os.path.join(user_data_dir(
+            APP_NAME, APP_AUTHOR), 'ChromaDB', 'backup'))
+    )
 
 RAG_CONFIG = {
     'number_of_contexts': 5,
