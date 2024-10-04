@@ -133,17 +133,19 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
             ).replace(
                 "{input}", prompt
             )
+            source_ids = list(source_files.keys())
         else:   # we found no relevant documents
             llm_prompt = PROMPT_WRAPPER.replace(
                 "{history}", formatted_history
             ).replace(
                 "{input}", prompt
             )
+            source_ids = []
         logger.info(f"Generating final response: {llm_prompt}")
 
         response = prompt_llm(llm_prompt, llm_name)
         logger.success(f"Got final response: {response}")
-        return response, list(source_files.keys())
+        return response, source_ids
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
         raise e

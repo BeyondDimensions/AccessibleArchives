@@ -170,3 +170,6 @@ curated_files
 chroma-backup
 chroma-backup*
 chroma-full
+
+
+*.sqlite3

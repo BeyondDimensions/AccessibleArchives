@@ -1,0 +1,9 @@
+[Unit]
+Description=AccessibleArchives - Explore thousands of documents with a friendly AI chat-assistant
+
+[Service]
+User=root
+ExecStart=/opt/AccessibleArchives/release/web/run_webui.sh
+
+[Install]
+WantedBy=multi-user.target
