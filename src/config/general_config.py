@@ -1,8 +1,14 @@
 import os
+from utils import logger
 
+# Load API keys from environment variables
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
-
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+# Handle missing API keys with a warning
+if not HUGGINGFACEHUB_API_TOKEN:
+    logger.warning(
+        "HUGGINGFACEHUB_API_TOKEN is not set. Some features may not work.")
 
 # Base data folder
 DATA_FOLDER = '.data'
