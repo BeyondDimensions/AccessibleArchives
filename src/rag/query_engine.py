@@ -1,7 +1,7 @@
 from utils import logger
 from config import CHROMA_WORKING_PATH
 from config import RAG_CONFIG
-from config.rag_config import SOURCE_DOC_FORMATTING
+from config import SOURCE_DOC_FORMATTING
 from langchain_chroma import Chroma
 from .common import get_embedding_function
 from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
@@ -28,6 +28,9 @@ def generate_response(query_text: str, docs_clxn: DocumentCollection):
         # Retrieve relevant documents
         sources = query_database(database_query)
         logger.success("Queried database.")
+
+        # TODO
+        # st.session_state["history"]
 
         if sources:  # if we found relevant documents:
             source_files: dict[str, str] = {}

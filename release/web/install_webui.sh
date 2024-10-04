@@ -7,17 +7,30 @@ RED="\033[0;31m"
 YELLOW="\033[1;33m"
 NC="\033[0m" # No color
 
+USERNAME=$(whoami)
+
 # the absolute path of this script's directory
 SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJ_DIR=$SCRIPT_DIR/../..
 SRC_DIR=$PROJ_DIR/src
-
 PY_REQUIREMENTS=$PROJ_DIR/release/requirements.txt
+PY_VENV_DIR=$PROJ_DIR/.venv
 
-OLLAMA_DIR=/opt/ollama
+# TODO add data from the project to DATA_DIR!!!
+# TODO clean after ipfs installation or is it done?
+
+OLLAMA_DIR=/tmp/Ollama
+OLLAMA_INSTALL_SCRIPT=$OLLAMA_DIR/install_ollama.sh
 INSTALL_DIR=/opt/AccessibleArchives
-PY_VENV_DIR=$INSTALL_DIR/.venv
-CHROMADB_PATH=$INSTALL_DIR/ChromaDB
+DATA_DIR=/opt/AccessibleArchives/data
+SYMLINK_TARGET=$INSTALL_DIR/release/web/run_webui.sh
+SYMLINK_PATH=/usr/local/bin/accessible-archives
+APP_DATA=$HOME/.local/share/
+DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
+# CHROMADB_DIR=/var/lib/AccessibleArchives/ChromaDB
+CHROMADB_DIR=$APP_DATA/AccessibleArchives/ChromaDB
+CHROMADB_BACKUP_DIR=$APP_DATA/AccessibleArchives/ChromaDB-backup
+
 # Function to create a directory if it doesn't yet exist and check permissions
 ensure_dir() {
 if ! [ -e $1 ];then
@@ -28,7 +41,10 @@ sudo chown $USER:$USER $1
 
 ensure_dir $OLLAMA_DIR
 ensure_dir $INSTALL_DIR
-ensure_dir $CHROMADB_PATH
+ensure_dir $CHROMADB_DIR
+ensure_dir $CHROMADB_BACKUP_DIR
+ensure_dir $DATA_DIR
+ensure_dir $APP_DATA
 
 # Function to show progress bar
 show_progress() {
@@ -48,7 +64,7 @@ check_status() {
 # Function to clean up files
 cleanup_file() {
   if [ -f "$1" ]; then
-    sudo rm "$1"
+    sudo rm -f "$1"
     printf "${GREEN}✔ Cleanup complete: $1 removed.${NC}\n"
   else
     printf "${YELLOW}✔ No $1 file found for cleanup.${NC}\n"
@@ -88,8 +104,8 @@ sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texl
 check_status "Pandoc and texlive installed" "install Pandoc and texlive"
 
 # Install IPFS
-if systemctl is-active --quiet ipfs; then
-  echo "IPFS is already installed!"
+if sudo systemctl is-active --quiet ipfs; then
+  printf "${GREEN}✔ IPFS already installed!.${NC}\n"
 else
   show_progress "Installing" "IPFS"
   $SCRIPT_DIR/ipfs/install_ipfs.sh
@@ -110,17 +126,18 @@ check_status "Python Environment installed" "install Python Environment"
 pip3 install -r $PY_REQUIREMENTS
 check_status "Python Dependencies installed" "install Python Dependencies"
 
-cd $OLLAMA_DIR
-
 if sudo systemctl is-active --quiet ollama; then
   echo "Ollama is already installed and running."
 else
   # Install Ollama
   show_progress "Installing" "Ollama"
-  curl -fsSL https://ollama.com/install.sh -o install_ollama.sh
-  chmod +x install_ollama.sh
-  bash install_ollama.sh
+  curl -fsSL https://ollama.com/install.sh -o $OLLAMA_INSTALL_SCRIPT
+  chmod +x $OLLAMA_INSTALL_SCRIPT
+  bash $OLLAMA_INSTALL_SCRIPT
   check_status "Ollama installed" "install Ollama"
+
+  # Cleanup files
+  cleanup_file $OLLAMA_INSTALL_SCRIPT
 
   # Initialize Ollama
   show_progress "Initializing" "Ollama"
@@ -196,11 +213,6 @@ check_status "Ollama Service started" "start Ollama Service"
 # sudo ufw allow 'Nginx Full'
 # check_status "Nginx in firewall enabled" "enable Nginx in firewall"
 
-# Cleanup files
-cleanup_file "install_ollama.sh"
-# TODO clean project folder from downloads and cd to ~/.local/share/AccessibleArchives
-# TODO clean after ipfs installation
-
 # Copy the entire project folder to ~/.local/share/
 show_progress "Copying" "files"
 rsync -XAvs $PROJ_DIR $INSTALL_DIR/
@@ -208,20 +220,16 @@ check_status "Files copied" "copy files"
 
 # Create symlink to run the app
 show_progress "Creating" "symlink to run the app"
-SYMLINK_TARGET="$INSTALL_DIR/release/web/run_webui.sh"
-sudo ln -sf "$SYMLINK_TARGET" /usr/local/bin/accessible-archives
+sudo ln -sf $SYMLINK_TARGET $SYMLINK_PATH
 check_status "Symlink created" "create symlink"
 
 # Create desktop entry
 show_progress "Creating" "desktop entry"
-USERNAME=$(whoami)
-ensure_dir $HOME/.local/share/applications
-DESKTOP_ENTRY="$HOME/.local/share/applications/AccessibleArchives.desktop"
 
-cat <<EOF > "$DESKTOP_ENTRY"
+cat <<EOF > $DESKTOP_ENTRY
 [Desktop Entry]
 Name=Accessible Archives
-Exec=/usr/local/bin/accessible-archives
+Exec=$SYMLINK_PATH
 Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
 Terminal=true
 Type=Application
@@ -230,8 +238,7 @@ Categories=Utility;
 EOF
 
 # Make the desktop entry executable
-chmod +x "$DESKTOP_ENTRY"
+chmod +x $DESKTOP_ENTRY
 check_status "Desktop entry created" "create desktop entry"
 
 printf "${GREEN}✔ Installation complete! You can now run 'accessible-archives' to start the app.${NC}\n"
-

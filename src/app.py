@@ -4,14 +4,10 @@ from gui import main_view
 from utils import logger
 import streamlit as st
 
-st.set_page_config(
-    page_title="Accessible Archives",
-    page_icon="../release/icon.png",  # Use a path to your favicon file
-    layout="wide"
-)
 load_known_docs()
 st.session_state["current_doc_collection"] = get_known_docs()[0]
-initialize_database(st.session_state["current_doc_collection"].transcripts_dir, load_files=False)
+initialize_database(
+    st.session_state["current_doc_collection"].transcripts_dir, load_files=False)
 
 
 def main():

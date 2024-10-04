@@ -30,7 +30,7 @@ def initialise_conversation_chain(llm_model=DEFAULT_LLM_MODEL,) -> ConversationC
 
 def get_conversation_chain():
     if "conversation_chain" not in st.session_state:
-        initialise_conversation_chain()
+        initialize_conversation_chain()
     return st.session_state["conversation_chain"]
 
 

@@ -3,6 +3,22 @@ from utils import logger
 from config import RAG_CONFIG
 from langchain.schema.document import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+# from langchain.text_splitter import CharacterTextSplitter
+
+# def split_documents(documents: list[Document]):
+#     """Split loaded documents into chunks."""
+#     logger.info(
+#         f"Splitting {len(documents)} documents into chunks...")
+#     text_splitter = CharacterTextSplitter(
+#         separator="\n",
+#         chunk_size=RAG_CONFIG['chunk_size'],
+#         chunk_overlap=RAG_CONFIG['chunk_overlap'],
+#         length_function=len
+#     )
+#     chunks = text_splitter.split_documents(documents)
+#     logger.success(
+#     f"Split {len(documents)} documents into {len(chunks)} chunks.")
+#     return chunks
 
 
 def split_documents(documents: list[Document]):

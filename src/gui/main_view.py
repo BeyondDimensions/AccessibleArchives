@@ -2,10 +2,18 @@ import streamlit as st
 from .chat_view import chat_view
 from .pdf_view import pdf_view
 from .ocr_view import ocr_view
+from config import APP_NAME, FAVICON
 
 
 def set_page_style():
     st.html("<style> .main {overflow: hidden} </style>")
+
+
+st.set_page_config(
+    page_title=APP_NAME,
+    page_icon=FAVICON,
+    layout="wide"
+)
 
 
 def main_view():
