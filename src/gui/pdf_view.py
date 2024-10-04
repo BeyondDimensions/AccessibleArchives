@@ -1,9 +1,9 @@
+from utils import logger
 from io import BytesIO
 import streamlit as st
 from utils import encode_data_base64
 from storage import get_known_docs
 from formatting.pdf_pagination import extract_pages
-from utils import logger
 
 # how many PDF pages to display at once
 PAGES_PER_CHUNK = 1

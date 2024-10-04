@@ -3,8 +3,6 @@ from langchain_community.llms.ollama import Ollama
 from config import TEMP_MODELS
 from openai import OpenAI
 
-client = OpenAI()
-
 
 def prompt_llm(prompt: str, model_name: str) -> str:
     """Prompt the specified LLM model and return the response.
@@ -29,6 +27,7 @@ def prompt_llm(prompt: str, model_name: str) -> str:
             case 'ChatGPT':
                 # Logic for using the ChatGPT model
                 logger.info("Using ChatGPT model")
+                client = OpenAI()
                 completion = client.chat.completions.create(
                     model=TEMP_MODELS.get(model_name),
                     messages=[
@@ -36,8 +35,8 @@ def prompt_llm(prompt: str, model_name: str) -> str:
                             "role": "user",
                             "content": [
                                 {
-                                  "type": "text",
-                                  "text": prompt
+                                    "type": "text",
+                                    "text": prompt
                                 }
                             ]
                         }

@@ -64,14 +64,15 @@ def chat_view():
             # Display chat messages
             for message in st.session_state.messages:
                 st.chat_message(message['role']).markdown(message['content'])
+                display_sources(message)
 
             if prompt:
                 # Add user message to chat
                 st.chat_message(USER_NAME).markdown(prompt)
                 st.session_state.messages.append(
-                    {'role': 'user', 'content': prompt})
+                    {'role': USER_NAME, 'content': prompt})
 
-                with st.chat_message("assistant"):
+                with st.chat_message(AI_NAME):
                     response_placeholder = st.empty()
 
                     # Handle commands like /reset_db or /load_files
@@ -80,7 +81,8 @@ def chat_view():
                         return
                     if prompt == "/load_files":
                         initialize_database(
-                            st.session_state["current_doc_collection"].transcripts_dir, load_files=True)
+                            st.session_state["current_doc_collection"].transcripts_dir,
+                            load_files=True)
                         return
 
                     # Generate the response

@@ -1,0 +1,47 @@
+# Hauptabteilung VI
+128
+
+BERLIN 04.03.83  
+ABT. AGV  
+13.45 Uhr
+
+**MES XXII BOROSTOWSKI S1992**
+
+---
+
+**000232**
+
+---
+
+**REG.-NR.: 271603  HINWEIS ZUM REISENDEN**
+
+- **ANTRAG:** 121212-2501-37-7027
+- **B-SCHEIN-NR:** J1907936
+- **NACHREF.:** 115951
+
+---
+
+## REISENDER:
+
+- **NAME:** GOETTING
+- **WICHELMINE**
+- **GEBO:RT:**
+- **STAAT:**
+
+* **GES;B;NAME:** 
+* **PERS.DO.K**
+* **ANSCHRIFT:** 4630 BOCHUM
+* **TÄTIGKEIT:** JOURNALISTIN
+
+---
+
+**BEANTRAGTE EINREISE:**  
+13.02.83. - 17.02.83
+
+**REISEZIEL:**  
+KR;H
+
+- **GUEST:**  .FRI
+- **KRZ:**
+
+---

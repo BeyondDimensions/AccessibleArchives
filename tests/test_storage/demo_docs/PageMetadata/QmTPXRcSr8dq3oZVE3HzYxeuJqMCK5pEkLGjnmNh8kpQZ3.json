@@ -1,0 +1,17 @@
+{
+    "ipfs_id": "QmTPXRcSr8dq3oZVE3HzYxeuJqMCK5pEkLGjnmNh8kpQZ3",
+    "transcripts": [
+        {
+            "ipfs_id": "QmemHVb3Upvy6KjotvH3o9BgiYJDWeDezgmoH1nfDbtkRK",
+            "transcriber": "ChatGPT-4o-2024-08-06",
+            "timestamp": "2024-09-25T16:41:38.967067+00:00"
+        }
+    ],
+    "content": {},
+    "source": {
+        "original_medium": "Photocopy of Folder from BSTU",
+        "digitisation_date": "2024-09-25T16:41:38.967090+00:00",
+        "digitiser": "anonymous"
+    },
+    "format": "png"
+}

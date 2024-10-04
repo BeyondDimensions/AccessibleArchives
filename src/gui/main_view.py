@@ -33,6 +33,6 @@ def main_view():
         # Layout for buttons and spacing
         chat_col, pdf_col, = st.columns([1, 1])
         with chat_col:
-            chat_view()
+            chat_view()  # IMPORTANT: load chat view before PDF-View
         with pdf_col:
-            pdf_view()
+            pdf_view()  # IMPORTANT: load PDF-View after Chat view

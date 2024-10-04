@@ -1,3 +1,4 @@
+from _load_src import SRC_PATH
 import pytest
 from llm import prompt_llm
 from utils import logger
