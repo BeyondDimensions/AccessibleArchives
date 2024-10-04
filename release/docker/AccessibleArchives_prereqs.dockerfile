@@ -16,3 +16,4 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 RUN touch /opt/AccessibleArchives/release/web/we_are_in_docker
 RUN /opt/AccessibleArchives/release/web/install_webui.sh
 RUN /opt/AccessibleArchives/release/web/ipfs/install_ipfs_monitor.sh
+RUN ln -s /opt/AccessibleArchives/DocumentCollection /opt/AccessibleArchives/.data

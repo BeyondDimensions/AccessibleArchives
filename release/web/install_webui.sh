@@ -124,6 +124,8 @@ check_status "Python Environment installed" "install Python Environment"
 pip3 install -r $PY_REQUIREMENTS
 check_status "Python Dependencies installed" "install Python Dependencies"
 
+
+
 if sudo systemctl is-active --quiet ollama; then
   echo "Ollama is already installed and running."
 else
@@ -146,6 +148,11 @@ else
     sudo systemctl is-active --quiet ollama
     check_status "Ollama initialized" "initialize Ollama"
   fi
+fi
+
+if [ -e $SCRIPT_DIR/we_are_in_docker ];then
+  echo "Finished installing for docker."
+  exit 0
 fi
 
 # Download Ollama model
