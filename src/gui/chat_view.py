@@ -2,6 +2,7 @@ import streamlit as st
 from rag import generate_response
 from rag.database import initialize_database, reset_database
 from config import TEMP_MODELS
+from config.rag_config import INITIAL_CHAT_HISTORY, AI_NAME, USER_NAME
 
 
 def update_model(model_name):
@@ -36,31 +37,35 @@ def chat_view():
         with output_container:
             # Initialize session state variables if they don't exist
             if 'messages' not in st.session_state:
-                st.session_state.messages = []
+                st.session_state.messages = INITIAL_CHAT_HISTORY
             # Display chat messages
             for message in st.session_state.messages:
                 st.chat_message(message['role']).markdown(message['content'])
 
             if prompt:
-                st.chat_message('user').markdown(prompt)
+                st.chat_message(USER_NAME).markdown(prompt)
                 st.session_state.messages.append(
-                    {'role': 'user', 'content': prompt})
+                    {'role': USER_NAME, 'content': prompt})
 
-                with st.chat_message("assistant"):
+                with st.chat_message(AI_NAME):
                     response_placeholder = st.empty()
                     if prompt == "/reset_db":
                         reset_database()
                         return
                     if prompt == "/load_files":
                         initialize_database(
-                            st.session_state["current_doc_collection"].transcripts_dir, load_files=True)
+                            st.session_state["current_doc_collection"].transcripts_dir,
+                            load_files=True)
                         return
                     # Generate the response
                     with st.spinner("Generating response..."):
                         response, sources = generate_response(
-                            prompt, st.session_state["current_doc_collection"])
+                            model_name,
+                            prompt,
+                            st.session_state.messages,
+                            st.session_state["current_doc_collection"])
                         response_text = response + \
                             "\n\nSources:\n" + "\n".join(sources)
                         response_placeholder.markdown(response_text)
                         st.session_state.messages.append(
-                            {'role': 'assistant', 'content': response_text})
+                            {'role': AI_NAME, 'content': response_text, 'sources': sources})

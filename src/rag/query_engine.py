@@ -1,28 +1,52 @@
+from config.rag_config import DB_QUERY_GEN_PROMPT, PROMPT_WRAPPER, PROMPT_SOURCES_WRAPPER, HISTORY_MESSAGE_FORMATTING, SOURCES_FORMATTING
 from utils import logger
 from config import CHROMA_WORKING_PATH
 from config import RAG_CONFIG
 from config import SOURCE_DOC_FORMATTING
 from langchain_chroma import Chroma
 from .common import get_embedding_function
-from .conversation_chain import get_conversation_chain, get_query_chain, get_conversation_sources_chain
 from storage import DocumentCollection, Page
+
+from llm import prompt_llm
 
 
 def flatten(xss):
     return [x for xs in xss for x in xs]
 
 
-def generate_response(query_text: str, docs_clxn: DocumentCollection):
+def format_history(history: list[dict[str, str]]) -> str:
+    formatted_history = ""
+    for message in history:
+        content = "\n    ".join([""]+[line.strip("\n") for line in message["content"].split("\n")])
+        formatted_sources = ""
+        if "sources" in message:
+            formatted_sources = SOURCES_FORMATTING.replace(
+                "{sources}",
+                "\n- ".join([""]+[str(source) for source in message["sources"]])
+            )
+        formatted_history += HISTORY_MESSAGE_FORMATTING.replace(
+            "{sources}", formatted_sources
+        ).replace(
+            "{role}", message["role"]
+        ).replace(
+            "{content}", content
+        )
+    return formatted_history
+
+
+def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]], docs_clxn: DocumentCollection):
     """Generate a response using retrieved documents."""
     try:
 
         # Create the conversation chain
-        conversation_chain = get_conversation_chain()
-
-        query_chain = get_query_chain(conversation_chain.memory.copy())
-
-        database_query = query_chain.run(
-            input=f"{query_text}")
+        formatted_history = format_history(history)
+        db_query_prompt = DB_QUERY_GEN_PROMPT.replace(
+            "{history}", formatted_history
+        ).replace(
+            "{input}", prompt
+        )
+        logger.info(f"Generating DB-Query: {db_query_prompt}")
+        database_query = prompt_llm(db_query_prompt, llm_name)
         logger.info(f"Database query: {database_query}")
         logger.info("Querying database...")
         # Retrieve relevant documents
@@ -70,11 +94,22 @@ def generate_response(query_text: str, docs_clxn: DocumentCollection):
                 for id, text in list(source_files.items())
             ])
 
-            # Use conversation chain to generate a final response, adding the new user query and context
-            response = get_conversation_sources_chain(
-                conversation_chain.memory, formatted_sources).run(query_text)
+            llm_prompt = PROMPT_SOURCES_WRAPPER.replace(
+                "{relevant_documents}", formatted_sources
+            ).replace(
+                "{history}", formatted_history
+            ).replace(
+                "{input}", prompt
+            )
         else:   # we found no relevant documents
-            response = conversation_chain.run(input=f"{query_text}")
+            llm_prompt = PROMPT_WRAPPER.replace(
+                "{history}", formatted_history
+            ).replace(
+                "{input}", prompt
+            )
+        logger.info(f"Generating final response: {llm_prompt}")
+
+        response = prompt_llm(llm_prompt, llm_name)
         logger.success(f"Got final response: {response}")
         return response, sources
     except Exception as e:
@@ -82,7 +117,7 @@ def generate_response(query_text: str, docs_clxn: DocumentCollection):
         raise e
 
 
-def query_database(query_text: str) -> dict[str, str] | None:
+def query_database(query_text: str) -> dict[str, str]:
     """Query the database for similar documents and generate a response."""
     try:
         db = Chroma(persist_directory=CHROMA_WORKING_PATH,
@@ -93,7 +128,7 @@ def query_database(query_text: str) -> dict[str, str] | None:
 
         if not results:
             logger.warning("No relevant documents found.")
-            return None
+            return dict()
             raise Exception("No relevant documents found.")
 
         # sort results by score
@@ -103,12 +138,6 @@ def query_database(query_text: str) -> dict[str, str] | None:
             (doc.metadata["id"], doc.page_content)
             for doc, score in results if doc.metadata.get("id", None)
         ])
-
-        context_text = "\n\n---\n\n".join(
-            doc.page_content for doc, _score in results)
-
-        sources = [doc.metadata.get("id", None) for doc, _score in results]
-        return context_text, sources  # You can keep this if needed elsewhere
     except Exception as e:
         logger.error(f"Error querying database: {e}")
         raise e
