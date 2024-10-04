@@ -87,14 +87,17 @@ def chat_view():
 
                     # Generate the response
                     with st.spinner("Generating response..."):
-                        response, sources = generate_response(
-                            model_name,
-                            prompt,
-                            st.session_state.messages,
-                            st.session_state["current_doc_collection"])
-                        message = {'role': AI_NAME,
-                                   'content': response, 'sources': sources}
-                        st.session_state.messages.append(message)
-                        response_placeholder.markdown(response)
-                        display_sources(message)
-                        st.session_state["llm-recommended-pdf"] = sources[0]
+                        try:
+                            response, sources = generate_response(
+                                model_name,
+                                prompt,
+                                st.session_state.messages,
+                                st.session_state["current_doc_collection"])
+                            message = {'role': AI_NAME,
+                                       'content': response, 'sources': sources}
+                            st.session_state.messages.append(message)
+                            response_placeholder.markdown(response)
+                            display_sources(message)
+                            st.session_state["llm-recommended-pdf"] = sources[0]
+                        except Exception as e:
+                            logger.error(str(e))

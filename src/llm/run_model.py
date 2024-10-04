@@ -2,6 +2,7 @@ from utils import logger
 from langchain_community.llms.ollama import Ollama
 from config import TEMP_MODELS
 from openai import OpenAI
+from utils import openai_api_error
 
 
 def prompt_llm(prompt: str, model_name: str) -> str:
@@ -54,5 +55,9 @@ def prompt_llm(prompt: str, model_name: str) -> str:
         return response
 
     except Exception as e:
-        logger.error(f"Failed to generate response: {e}")
-        raise e
+        if model_name == 'ChatGPT':  # Check if the error is from OpenAI
+            # Call the openai_api_error function to format the error message
+            openai_api_error(e)
+        else:
+            logger.error(f"Failed to generate response: {e}")
+            raise e
