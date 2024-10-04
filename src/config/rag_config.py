@@ -12,11 +12,11 @@ platform.system()
 if platform.system().lower() == "linux":
     CHROMA_WORKING_PATH = os.getenv(
         'CHROMA_WORKING_PATH',
-        ensure_dir_exists(os.path.join("opt", "AccessibleArchives",  'ChromaDB', "current"))
+        ensure_dir_exists("/opt/AccessibleArchives/ChromaDB/current")
     )
     CHROMA_BACKUP_PATH = os.getenv(
         'CHROMA_WORKING_PATH',
-        ensure_dir_exists(os.path.join("opt", "AccessibleArchives",  'ChromaDB', "backup"))
+        ensure_dir_exists("/opt/AccessibleArchives/ChromaDB/backup")
     )
 
 else:
@@ -64,7 +64,7 @@ Aktuelle Frage: {input}
 
 PROMPT_SOURCES_WRAPPER = """
 Wir sind im Jahr 3000.
-Du hast einige sehr alte geschichtliche Dokumente aus dem 20. Jahrhundert, die 
+Du hast einige sehr alte geschichtliche Dokumente aus dem 20. Jahrhundert, die
 für unseren geschichtlichen Recherchen relavant sind.
 Hier sind diese uralte Dokumente:
 
