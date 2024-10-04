@@ -168,3 +168,4 @@ src/config/credentials.env
 #*.spec
 curated_files
 chroma-backup
+chroma-backup*

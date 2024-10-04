@@ -7,9 +7,12 @@ from storage.ipfs_localfs_interop import read_file, get_ipfs_cid
 TEST_COLLECTION_PATH = os.path.join(
     SRC_PATH, "..", "tests", "test_storage", "demo_docs"
 )
-TEST_COLLECTION_PATH = os.path.abspath(os.path.join(
-    SRC_PATH, "..", ".data5"
-))
+# TEST_COLLECTION_PATH = os.path.join(
+#     SRC_PATH, "..", "tests", "test_curation", ".output"
+# )
+# TEST_COLLECTION_PATH = os.path.abspath(os.path.join(
+#     SRC_PATH, "..", ".data5"
+# ))
 PAGE_ID = "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou"
 DOC_ID = "QmPjudoU1LuKkA65Xw1aC6qJHhqon5iicUdr5AcA63QpjE"
 COMPILATION_ID = "QmUYF3CWuUKs2VAtXqrYyvbZ7bHRciYZRXGhUK2uy2a4yh"

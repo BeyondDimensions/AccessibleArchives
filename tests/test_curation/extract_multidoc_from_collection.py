@@ -1,10 +1,11 @@
+import shutil
 from _load_src import SRC_PATH
 from tqdm import tqdm
 from utils import ensure_dir_exists
 from storage import DocumentCollection, Page
 import os
 from rag import initialize_database
-
+import ipfs_api
 DOCUMENTS_PATH = os.path.abspath(os.path.join(
     SRC_PATH, "..", ".data2"
 ))
@@ -35,28 +36,38 @@ for page in tqdm(longest_doc.get_pages()):
     print(page.ipfs_id, "Page")
     page_path = os.path.join(OUTPUT_PAGES_DIR, page.ipfs_id+"."+page.format)
     if not os.path.exists(page_path):
-        with open(page_path, "wb+") as file:
-            file.write(page.get_data())
+        # with open(page_path, "wb+") as file:
+        #     file.write(page.get_data())
+        shutil.copy(
+            os.path.join(docs_clxn.pages_dir, page.ipfs_id+f".{page.format}"),
+            page_path
+        )
     print(page.ipfs_id, "Metadata")
     metadata_path = os.path.join(OUTPUT_PAGES_METADAT_DIR, page.ipfs_id+".json")
     if not os.path.exists(metadata_path):
-        with open(metadata_path, "w+") as file:
-            file.write(page.to_json())
+        # with open(metadata_path, "w+") as file:
+        #     file.write(page.to_json())
+        shutil.copy(
+            os.path.join(docs_clxn.pagemetadata_dir, page.ipfs_id+".json"),
+            metadata_path
+        )
+
+        assert ipfs_api.predict_cid(metadata_path) in longest_doc._metadata_ids
     print(page.ipfs_id, "Transcrip")
     transcript_path = os.path.join(OUTPUT_TRANSCRIPTS_DIR, page.ipfs_id+".md")
     if not os.path.exists(transcript_path):
         print("Writing...")
-        with open(transcript_path, "w+") as file:
-            transcript = page.transcripts[0]
-            print(page.transcripts[0].ipfs_id)
-            if page.transcripts[0].ipfs_id == "QmbFMke1KXqnYyBBWxB74N4c5SBnJMVAiMNRcGu6x1AwQH":
-                file.write("")
-            else:
-                try:
-                    file.write(page.transcripts[0].get_text())
-                except:
-                    file.write("")
-
+        # with open(transcript_path, "w+") as file:
+        #     transcript = page.transcripts[0]
+        #     print(page.transcripts[0].ipfs_id)
+        #     if page.transcripts[0].ipfs_id == "QmbFMke1KXqnYyBBWxB74N4c5SBnJMVAiMNRcGu6x1AwQH":
+        #         file.write("")
+        #     else:
+        #         try:
+        #             file.write(page.transcripts[0].get_text())
+        #         except:
+        #             file.write("")
+        shutil.copy(os.path.join(docs_clxn.transcripts_dir, page.ipfs_id+".md"), transcript_path)
     print(page.ipfs_id, "Done!")
 
 with open(os.path.join(OUTPUT_MULTI_DOC_DIR, longest_doc.ipfs_id+".json"), "w+") as file:
