@@ -16,7 +16,15 @@ def update_model(model_name):
     # TODO it should initialize the conversation chain
 
 
+def display_sources(message: dict):
+    if "sources" in message:
+        for source in message["sources"]:
+            st.markdown(source)
+
+
 def chat_view():
+    if 'llm-recommended-pdf' not in st.session_state:
+        st.session_state["llm-recommended-pdf"] = ""
     with st.container(height=900, border=False):
         st.markdown(
             "<h4 style='text-align: center;'>Select a model</h4>", unsafe_allow_html=True)
@@ -41,6 +49,7 @@ def chat_view():
             # Display chat messages
             for message in st.session_state.messages:
                 st.chat_message(message['role']).markdown(message['content'])
+                display_sources(message)
 
             if prompt:
                 st.chat_message(USER_NAME).markdown(prompt)
@@ -64,8 +73,8 @@ def chat_view():
                             prompt,
                             st.session_state.messages,
                             st.session_state["current_doc_collection"])
-                        response_text = response + \
-                            "\n\nSources:\n" + "\n".join(sources)
-                        response_placeholder.markdown(response_text)
-                        st.session_state.messages.append(
-                            {'role': AI_NAME, 'content': response_text, 'sources': sources})
+                        message = {'role': AI_NAME, 'content': response, 'sources': sources}
+                        st.session_state.messages.append(message)
+                        response_placeholder.markdown(response)
+                        display_sources(message)
+                        st.session_state["llm-recommended-pdf"] = sources[0]

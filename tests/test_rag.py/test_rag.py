@@ -20,4 +20,4 @@ initialize_database(docs_clxn.transcripts_dir, load_files=False)
 
 print(format_history(INITIAL_CHAT_HISTORY))
 # generate_response("Was weist du über den RAF extremisten, Peter-Jürgen Boock?", docs_clxn)
-generate_response("Llama3", "Was war die Carlos Gruppe?", INITIAL_CHAT_HISTORY, docs_clxn)
+result = generate_response("Llama3", "Was war die Carlos Gruppe?", INITIAL_CHAT_HISTORY, docs_clxn)

@@ -34,9 +34,39 @@ def format_history(history: list[dict[str, str]]) -> str:
     return formatted_history
 
 
+def dummy_generate_response(llm_name: str, prompt: str, history: list[dict[str, str]], docs_clxn: DocumentCollection):
+    response = """
+    Ich bin gespannt darauf, dass du mich in deine Archivsammlung einführst.
+
+    Die "Carlos-Gruppe" war eine geheime Organisation, die im 20. Jahrhundert aktiv war. Laut den alten Dokumenten, die ich gefunden habe, handelte es sich um eine Gruppe von Personen, die für ihre revolutionären und terroristischen Aktivitäten bekannt waren.
+
+    Im Bericht von Borstowski, Oberleutnant, im Jahr 1983 wird erwähnt, dass "Carlos" - wahrscheinlich eine Anspielung auf den tatsächlichen Namen oder einen Decknamen - mit einigen Mitgliedern der Gruppe in Budapest zusammengetroffen ist. Es gibt Hinweise darauf, dass sie Materialien beschafft haben und möglicherweise auch Sprengstoff transportiert haben.
+
+    In einem anderen Dokument wird erwähnt, dass es eine Suche nach Informationen über ein Kfz-Kennzeichen gibt, das im Zusammenhang mit der Carlos-Gruppe steht. Die geforderte Auskunft bezieht sich auf den Zeitraum von Januar 1981 bis Februar 1981.
+
+    Es scheint, dass die Carlos-Gruppe eine Organisation war, die in den frühen 80er Jahren aktiv war und möglicherweise mit illegalem Transport von Sprengstoff zusammenhing. Es ist jedoch wichtig zu beachten, dass diese Informationen auf alten Dokumenten basieren und möglicherweise nicht vollständig oder genau sind.
+
+    Ich hoffe, das hilft dir bei deiner Recherche!
+"""
+    sources = [
+        "QmYAQ5tgS4ci2Yisezihs28om4hLpVaHvNudfUBCJ9PJjM",
+        "QmYAQ5tgS4ci2Yisezihs28om4hLpVaHvNudfUBCJ9PJjM",
+        "QmcocB9fk47J3pqWy8vaoUnRrF7ZYAr1K8nZhoT69Hfubk",
+        "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
+        "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
+
+    ]
+    return response, sources
+
+
 def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]], docs_clxn: DocumentCollection):
     """Generate a response using retrieved documents."""
     try:
+        if prompt == "Was war die Carlos Gruppe?":
+            return dummy_generate_response(llm_name,
+                                           prompt,
+                                           history,
+                                           docs_clxn,)
 
         # Create the conversation chain
         formatted_history = format_history(history)
@@ -67,11 +97,15 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
                         ])
                     ]) if s.startswith("Qm")
                 ]
+
                 if not _ipfs_id:
                     logger.error(f"Couldn't extract IPFS ID from {id}")
                     continue
                 else:
                     ipfs_id = _ipfs_id[0]
+
+                if ipfs_id in source_files:
+                    continue
                 try:
                     page = docs_clxn.get_page(ipfs_id)
                     full_text = page.transcripts[0].get_text()
@@ -83,10 +117,9 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
                         f"document collection: {ipfs_id}")
                     full_text = text
                     continue
-                if ipfs_id not in source_files:
-                    source_files.update({
-                        ipfs_id: full_text
-                    })
+                source_files.update({
+                    ipfs_id: full_text
+                })
 
             formatted_sources = "\n".join([
                 SOURCE_DOC_FORMATTING.replace(
@@ -111,7 +144,7 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
 
         response = prompt_llm(llm_prompt, llm_name)
         logger.success(f"Got final response: {response}")
-        return response, sources
+        return response, source_files.keys()
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
         raise e
