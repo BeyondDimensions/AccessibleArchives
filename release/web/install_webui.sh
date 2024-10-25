@@ -1,6 +1,11 @@
 #!/bin/bash
 # Script for deploying the webui app
 
+## IMPORTANT: The docker container only runs half of this script.
+## Therefore, when reordering its steps, make sure that every step that needs
+## to be run on the docker container is run before the DOCKER-INSTALLATION-END
+## flag below.
+
 # Define text colors for output
 GREEN="\033[0;32m"
 RED="\033[0;31m"
@@ -23,13 +28,15 @@ OLLAMA_DIR=/tmp/Ollama
 OLLAMA_INSTALL_SCRIPT=$OLLAMA_DIR/install_ollama.sh
 INSTALL_DIR=/opt/AccessibleArchives
 DATA_DIR=/opt/AccessibleArchives/data
-SYMLINK_TARGET=$INSTALL_DIR/release/web/run_webui.sh
-SYMLINK_PATH=/usr/local/bin/accessible-archives
 APP_DATA=$HOME/.local/share/
 DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
 # CHROMADB_DIR=/var/lib/AccessibleArchives/ChromaDB
 CHROMADB_DIR=$INSTALL_DIR/ChromaDB
 
+APP_EXEC_PATH=$INSTALL_DIR/release/web/run_webui.sh
+BIN_PATH=/usr/local/bin/accessible_archives
+
+SYSTEMD_INSTALLER_SCRIPT=$SCRIPT_DIR/accessible_archives.service.sh
 # Function to create a directory if it doesn't yet exist and check permissions
 ensure_dir() {
 if ! [ -e $1 ];then
@@ -84,6 +91,18 @@ update_hosts_file() {
     check_status "/etc/hosts file updated" "update /etc/hosts file"
   fi
 }
+
+
+# Copy project source code to installation directory
+show_progress "Copying" "files"
+rsync -XAva $PROJ_DIR $INSTALL_DIR/
+check_status "Files copied" "copy files"
+
+# create Systemd service
+show_progress "Creating" "systemd service"
+$SYSTEMD_INSTALLER_SCRIPT
+check_status "Systemd service created" "create systemd service"
+
 
 # Update and upgrade packages
 show_progress "Installing" "System Update"
@@ -155,6 +174,10 @@ if [ -e $SCRIPT_DIR/we_are_in_docker ];then
   exit 0
 fi
 
+###############################################################################
+## DOCKER-INSTALLATION-END -----------------------------------------------------
+###############################################################################
+
 # Download Ollama model
 show_progress "Pulling" "Ollama Model: llama3.1:8b"
 ollama pull llama3.1:8b
@@ -173,80 +196,35 @@ show_progress "Starting" "Ollama Service"
 nohup ollama serve &> /dev/null &
 check_status "Ollama Service started" "start Ollama Service"
 
-# Update hosts file
-# update_hosts_file
 
-# # Install Nginx
-# show_progress "Installing" "Nginx"
-# sudo apt-get install nginx -y
-# check_status "Nginx installed" "install Nginx"
-#
-# # Configure Nginx for the Streamlit app
-# show_progress "Configuring" "Nginx"
-# NGINX_CONF="/etc/nginx/sites-available/accessible-archives"
-# cat <<EOF | sudo tee $NGINX_CONF
-# server {
-#     listen 80;
-#     server_name accessible-archives.local;
-#
-#     location / {
-#         proxy_pass http://localhost:8501;  # Default Streamlit port
-#         proxy_set_header Host \$host;
-#         proxy_set_header X-Real-IP \$remote_addr;
-#         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-#         proxy_set_header X-Forwarded-Proto \$scheme;
-#     }
-# }
-# EOF
-# check_status "Nginx configured" "configure Nginx"
-#
-# # Enable the Nginx configuration
-# show_progress "Enabling" "Nginx"
-# sudo ln -s $NGINX_CONF /etc/nginx/sites-enabled/
-# check_status "Nginx enabled" "enable Nginx"
-#
-# # Test Nginx configuration and reload
-# show_progress "Testing" "Nginx"
-# sudo nginx -t
-# check_status "Nginx tested" "test Nginx"
-#
-# # Reload Nginx
-# show_progress "Reloading" "Nginx"
-# sudo systemctl reload nginx
-# check_status "Nginx reloaded" "reload Nginx"
-#
-# # Enable Nginx in firewall
-# show_progress "Enabling" "Nginx in firewall"
-# sudo ufw allow 'Nginx Full'
-# check_status "Nginx in firewall enabled" "enable Nginx in firewall"
-
-# Copy the entire project folder to ~/.local/share/
-show_progress "Copying" "files"
-rsync -XAva $PROJ_DIR $INSTALL_DIR/
-check_status "Files copied" "copy files"
 
 # Create symlink to run the app
 show_progress "Creating" "symlink to run the app"
-sudo ln -sf $SYMLINK_TARGET $SYMLINK_PATH
+sudo ln -sf $APP_EXEC_PATH $BIN_PATH
 check_status "Symlink created" "create symlink"
+
 
 if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
   # Create desktop entry
   show_progress "Creating" "desktop entry"
 
-  cat <<EOF > $DESKTOP_ENTRY
+  echo "
   [Desktop Entry]
   Name=Accessible Archives
-  Exec=$SYMLINK_PATH
+  Exec=$BIN_PATH
   Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
   Terminal=true
   Type=Application
   Comment=RAG based Chat assistant
   Categories=Utility;
-  EOF
-
+" | tee $DESKTOP_ENTRY
   # Make the desktop entry executable
   chmod +x $DESKTOP_ENTRY
   check_status "Desktop entry created" "create desktop entry"
 fi
-printf "${GREEN}✔ Installation complete! You can now run 'accessible-archives' to start the app.${NC}\n"
+printf "${GREEN}✔ Installation complete!
+You can now run `accessible_archives` in a terminal,
+or if you have a desktop-environment you shoudl find an app shortcut.
+
+If you want AccessibleArchives to run automatically on boot, run:${NC}"
+echo "sudo systemctl enable accessible_archives"

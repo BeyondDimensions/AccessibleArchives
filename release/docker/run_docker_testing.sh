@@ -1,4 +1,4 @@
-docker run -it --privileged \
+docker run -d --privileged \
   -p 8501:8501 \
   -v /opt/AccessibleArchives/ChromaDB:/opt/AccessibleArchives/ChromaDB \
   -v /opt/AccessibleArchives/DocumentCollection:/opt/AccessibleArchives/DocumentCollection \
