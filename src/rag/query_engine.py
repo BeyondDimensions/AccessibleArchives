@@ -1,13 +1,10 @@
 from config.rag_config import DB_QUERY_GEN_PROMPT, PROMPT_WRAPPER, PROMPT_SOURCES_WRAPPER, HISTORY_MESSAGE_FORMATTING, SOURCES_FORMATTING
 from utils import logger
-from config import CHROMA_WORKING_PATH
-from config import RAG_CONFIG
 from config import SOURCE_DOC_FORMATTING
-from langchain_chroma import Chroma
-from .common import get_embedding_function
 from storage import DocumentCollection, Page
 
 from llm import prompt_llm
+from .database import DocsEmbedding
 
 
 def flatten(xss):
@@ -34,39 +31,15 @@ def format_history(history: list[dict[str, str]]) -> str:
     return formatted_history
 
 
-def dummy_generate_response(llm_name: str, prompt: str, history: list[dict[str, str]], docs_clxn: DocumentCollection):
-    response = """
-    Ich bin gespannt darauf, dass du mich in deine Archivsammlung einführst.
-
-    Die "Carlos-Gruppe" war eine geheime Organisation, die im 20. Jahrhundert aktiv war. Laut den alten Dokumenten, die ich gefunden habe, handelte es sich um eine Gruppe von Personen, die für ihre revolutionären und terroristischen Aktivitäten bekannt waren.
-
-    Im Bericht von Borstowski, Oberleutnant, im Jahr 1983 wird erwähnt, dass "Carlos" - wahrscheinlich eine Anspielung auf den tatsächlichen Namen oder einen Decknamen - mit einigen Mitgliedern der Gruppe in Budapest zusammengetroffen ist. Es gibt Hinweise darauf, dass sie Materialien beschafft haben und möglicherweise auch Sprengstoff transportiert haben.
-
-    In einem anderen Dokument wird erwähnt, dass es eine Suche nach Informationen über ein Kfz-Kennzeichen gibt, das im Zusammenhang mit der Carlos-Gruppe steht. Die geforderte Auskunft bezieht sich auf den Zeitraum von Januar 1981 bis Februar 1981.
-
-    Es scheint, dass die Carlos-Gruppe eine Organisation war, die in den frühen 80er Jahren aktiv war und möglicherweise mit illegalem Transport von Sprengstoff zusammenhing. Es ist jedoch wichtig zu beachten, dass diese Informationen auf alten Dokumenten basieren und möglicherweise nicht vollständig oder genau sind.
-
-    Ich hoffe, das hilft dir bei deiner Recherche!
-"""
-    sources = [
-        "QmYAQ5tgS4ci2Yisezihs28om4hLpVaHvNudfUBCJ9PJjM",
-        "QmYAQ5tgS4ci2Yisezihs28om4hLpVaHvNudfUBCJ9PJjM",
-        "QmcocB9fk47J3pqWy8vaoUnRrF7ZYAr1K8nZhoT69Hfubk",
-        "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
-        "QmT2LqjR5byrsXcrMs84T7RtkFW9x6LyivarCfBoMynKou",
-    ]
-    return response, sources
-
-
-def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]], docs_clxn: DocumentCollection):
+def generate_response(
+        llm_name: str,
+        prompt: str,
+        history: list[dict[str, str]],
+        docs_clxn: DocumentCollection,
+        docs_embedding: DocsEmbedding
+):
     """Generate a response using retrieved documents."""
     try:
-        if prompt == "Was war die Carlos Gruppe?":
-            return dummy_generate_response(llm_name,
-                                           prompt,
-                                           history,
-                                           docs_clxn,)
-
         # Create the conversation chain
         formatted_history = format_history(history)
         db_query_prompt = DB_QUERY_GEN_PROMPT.replace(
@@ -79,7 +52,7 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
         logger.info(f"Database query: {database_query}")
         logger.info("Querying database...")
         # Retrieve relevant documents
-        sources = query_database(database_query)
+        sources = docs_embedding.query_database(database_query)
         logger.success("Queried database.")
 
         # TODO
@@ -148,30 +121,4 @@ def generate_response(llm_name: str, prompt: str, history: list[dict[str, str]],
         return response, source_ids
     except Exception as e:
         logger.error(f"Failed to generate response: {e}")
-        raise e
-
-
-def query_database(query_text: str) -> dict[str, str]:
-    """Query the database for similar documents and generate a response."""
-    try:
-        db = Chroma(persist_directory=CHROMA_WORKING_PATH,
-                    embedding_function=get_embedding_function())
-
-        results = db.similarity_search_with_score(
-            query_text, k=RAG_CONFIG['number_of_contexts'])
-
-        if not results:
-            logger.warning("No relevant documents found.")
-            return dict()
-            raise Exception("No relevant documents found.")
-
-        # sort results by score
-        results.sort(key=lambda result: result[1], reverse=True)
-
-        return dict([
-            (doc.metadata["id"], doc.page_content)
-            for doc, score in results if doc.metadata.get("id", None)
-        ])
-    except Exception as e:
-        logger.error(f"Error querying database: {e}")
         raise e

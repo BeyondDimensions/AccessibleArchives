@@ -2,15 +2,10 @@ import streamlit as st
 from .chat_view import chat_view
 from .pdf_view import pdf_view
 from config import APP_NAME, FAVICON
-from rag.database import initialize_database
-from storage import load_known_docs, get_known_docs
+from storage import get_doc_colxns_names, get_doc_colxn
+from rag import DocsEmbedding
 
-
-def load_data():
-    load_known_docs()
-    st.session_state["current_doc_collection"] = get_known_docs()[0]
-    initialize_database(
-        st.session_state["current_doc_collection"].transcripts_dir, load_files=False)
+from utils import logger
 
 
 def streamlit_config():
@@ -27,10 +22,22 @@ def main_view():
 
     streamlit_config()
 
-    load_data()
-
     with st.container(height=None):
-        # Layout for buttons and spacing
+        label_col, selector_col, = st.columns([1, 3])
+        with label_col:
+            st.html('<b style="font-size: 2em">Document Collection:</b>')
+        with selector_col:
+            doc_colxn_name = st.selectbox(
+                'Select DocColxn', get_doc_colxns_names(),
+                label_visibility="collapsed"
+            )
+            logger.info(f"Selected DocColxn: {doc_colxn_name}")
+            st.session_state['current_doc_collection'] = get_doc_colxn(doc_colxn_name)
+            st.session_state['current_doc_embeddings'] = DocsEmbedding(
+                doc_colxn_name,
+                st.session_state['current_doc_collection'].transcripts_dir
+            )
+        # # Layout for buttons and spacing
         chat_col, pdf_col, = st.columns([1, 1])
         with chat_col:
             chat_view()  # IMPORTANT: load chat view before PDF-View

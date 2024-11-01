@@ -10,26 +10,18 @@ FAVICON = os.path.abspath(os.path.join(
 
 platform.system()
 if platform.system().lower() == "linux":
-    CHROMA_WORKING_PATH = os.getenv(
-        'CHROMA_WORKING_PATH',
-        ensure_dir_exists("/opt/AccessibleArchives/ChromaDB/current")
-    )
-    CHROMA_BACKUP_PATH = os.getenv(
-        'CHROMA_WORKING_PATH',
-        ensure_dir_exists("/opt/AccessibleArchives/ChromaDB/backup")
+    DOC_EMBEDDINGS_PATH = os.getenv(
+        'DOC_EMBEDDINGS_PATH',
+        ensure_dir_exists("/opt/AccessibleArchives/DocEmbeddings")
     )
 
 else:
-    CHROMA_WORKING_PATH = os.getenv(
-        'CHROMA_WORKING_PATH',
+    DOC_EMBEDDINGS_PATH = os.getenv(
+        'DOC_EMBEDDINGS_PATH',
         ensure_dir_exists(os.path.join(
-            user_data_dir(APP_NAME, APP_AUTHOR), 'ChromaDB', 'current'))
+            user_data_dir(APP_NAME, APP_AUTHOR), 'DocEmbeddings'))
     )
-    CHROMA_BACKUP_PATH = os.getenv(
-        'CHROMA_WORKING_PATH',
-        ensure_dir_exists(os.path.join(user_data_dir(
-            APP_NAME, APP_AUTHOR), 'ChromaDB', 'backup'))
-    )
+
 
 RAG_CONFIG = {
     'number_of_contexts': 5,

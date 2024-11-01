@@ -4,7 +4,6 @@ from tqdm import tqdm
 from utils import ensure_dir_exists
 from storage import DocumentCollection, Page
 import os
-from rag import initialize_database
 import ipfs_api
 DOCUMENTS_PATH = os.path.abspath(os.path.join(
     SRC_PATH, "..", ".data2"

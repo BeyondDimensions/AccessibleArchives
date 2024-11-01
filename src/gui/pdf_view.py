@@ -2,7 +2,6 @@ from utils import logger
 from io import BytesIO
 import streamlit as st
 from utils import encode_data_base64
-from storage import get_known_docs
 from formatting.pdf_pagination import extract_pages
 
 # how many PDF pages to display at once
@@ -18,43 +17,24 @@ def display_pdf(pdf_data: bytes, page_number: int):
     base64_pdf = encode_data_base64(pdf_data_chunk)
 
     # Embedding PDF in HTML
-    pdf_display = f'''
-    <style>
-        body {{
-            overflow: hidden;  /* Hide scrollbar */
-        }}
+    pdf_display = f''' <style>
+        body {{             overflow: hidden;  /* Hide scrollbar */ 
+
+    }}
         #pdf-container {{
             display: flex;
             justify-content: center;  /* Center horizontally */
             align-items: center;  /* Center vertically if needed */
             height: calc(100vh - 250px);  /* Adjust based on your layout */
-        }}
+}}
         #pdf-iframe {{
             width: 75%;  /* Adjust width as needed */
             height: 100%;
             border: none;  /* Remove border */
-        }}
+}}
     </style>
     <div id="pdf-container">
-        <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}#zoom=58" type="application/pdf"></iframe>
-    </div>
-    <script>
-        // Function to resize the iframe on window resize
-        function resizeIframe() {{
-            const iframe = document.getElementById('pdf-iframe');
-            iframe.style.height = window.innerHeight + 'px';
-        }}
-
-        window.addEventListener('resize', resizeIframe);
-        // Initial call to set the height
-        resizeIframe();
-    </script>
-'''
-
-    # Display the PDF file
-    st.markdown(pdf_display, unsafe_allow_html=True)
-
-    display_page_navigation(num_pages, start_page + 1, end_page + 1)
+        <iframe id="pdf-iframe" src="data: application/pdf; base64, {base64_pdf}# zoom=58" ty p e="applicat i on/pdf"></if rame>     </div>     <script>         // Func t ion to resiz e the iframe on window resiz e  function resizeIframe() {{const ifram e = document. getElementById('pdf-iframe');             iframe .style.height = window.innerHeight + 'px';}}         window.addEventListener('resi ze', resizeIfram e); // Initial call to set the height         resizeIframe();     </script>  '''     # Displa y the PD F file     st.markdown(pdf_display, unsafe_al l ow_html=True)     dis p lay_page_navigation(num_pages, start_page + 1, end_page + 1)
 
 
 def display_page_navigation(num_pages, start_page, end_page=None):
@@ -92,17 +72,17 @@ def pdf_view():
     """Display a PDF viewer with a document selector, download button etc."""
     # st.header("Document Viewer")
     with st.container(height=900, border=False):
-        # TODO: ask user to select a document collection
-        st.markdown(
-            "<h4 style='text-align: center;'>Select a Document</h4>", unsafe_allow_html=True)
-        selected_doc_collection = get_known_docs()[0]
+
+        selected_doc_collection = st.session_state["current_doc_collection"]
         pdf_files = selected_doc_collection.get_multipagedoc_ids()
 
         if not pdf_files:
             st.write("No PDF files found in the folder.")
         else:
-            selector_col, download_col = st.columns(
-                [5, 1])  # Layout for buttons and spacing
+
+            label_col, selector_col, download_col = st.columns([1, 3, 1])
+            with label_col:
+                st.html('<b style="font-size: 2em">Document:</b>')
 
             with selector_col:
                 selected_pdf = st.selectbox(

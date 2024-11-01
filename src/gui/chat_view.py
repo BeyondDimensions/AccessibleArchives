@@ -1,6 +1,6 @@
 import streamlit as st
 from rag import generate_response
-from rag.database import initialize_database, reset_database
+from rag.database import DocsEmbedding
 from config import TEMP_MODELS, OPENAI_API_KEY
 from config.rag_config import INITIAL_CHAT_HISTORY, AI_NAME, USER_NAME
 from utils import logger
@@ -27,13 +27,14 @@ def chat_view():
     if 'llm-recommended-pdf' not in st.session_state:
         st.session_state["llm-recommended-pdf"] = ""
     with st.container(height=900, border=False):
-        # st.header("Ask me a question!")
-        st.markdown(
-            "<h4 style='text-align: center;'>Select a model</h4>", unsafe_allow_html=True)
+        label_col, selector_col, = st.columns([1, 3])
 
-        # Model selection
-        model_name = st.selectbox('Select Model', list(
-            TEMP_MODELS.keys()), label_visibility="collapsed")
+        # Model selector
+        with label_col:
+            st.html('<b style="font-size: 2em">Model:</b>')
+        with selector_col:
+            model_name = st.selectbox('Select Model', list(
+                TEMP_MODELS.keys()), label_visibility="collapsed")
 
         update_model(model_name)
 
@@ -77,12 +78,12 @@ def chat_view():
 
                     # Handle commands like /reset_db or /load_files
                     if prompt == "/reset_db":
-                        reset_database()
+                        st.session_state["current_doc_embeddings"].reset_database()
                         return
                     if prompt == "/load_files":
-                        initialize_database(
-                            st.session_state["current_doc_collection"].transcripts_dir,
-                            load_files=True)
+                        st.session_state["current_doc_embeddings"].initialize_database(
+                            load_files=True
+                        )
                         return
 
                     # Generate the response
@@ -92,7 +93,9 @@ def chat_view():
                                 model_name,
                                 prompt,
                                 st.session_state.messages,
-                                st.session_state["current_doc_collection"])
+                                st.session_state["current_doc_collection"],
+                                st.session_state["current_doc_embeddings"],
+                            )
                             message = {'role': AI_NAME,
                                        'content': response, 'sources': sources}
                             st.session_state.messages.append(message)
