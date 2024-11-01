@@ -12,14 +12,14 @@ platform.system()
 if platform.system().lower() == "linux":
     DOC_EMBEDDINGS_PATH = os.getenv(
         'DOC_EMBEDDINGS_PATH',
-        ensure_dir_exists("/opt/AccessibleArchives/DocEmbeddings")
+        ensure_dir_exists("/opt/AccessibleArchives/DocumentEmbeddings")
     )
 
 else:
     DOC_EMBEDDINGS_PATH = os.getenv(
         'DOC_EMBEDDINGS_PATH',
         ensure_dir_exists(os.path.join(
-            user_data_dir(APP_NAME, APP_AUTHOR), 'DocEmbeddings'))
+            user_data_dir(APP_NAME, APP_AUTHOR), 'DocumentEmbeddings'))
     )
 
 

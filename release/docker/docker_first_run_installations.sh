@@ -41,5 +41,5 @@ ollama pull mxbai-embed-large
 nohup ollama serve &> /dev/null &
 # check_status "Ollama Service started" "start Ollama Service"
 
-ipfs add -r /opt/AccessibleArchives/DocumentCollection
+ipfs add -r /opt/AccessibleArchives/DocumentCollections
 /opt/AccessibleArchives/release/web/accessible_archives.service.sh
