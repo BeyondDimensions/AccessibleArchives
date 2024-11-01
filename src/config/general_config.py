@@ -28,12 +28,8 @@ if not OPENAI_API_KEY:
     logger.warning(
         "OPENAI_API_KEY is not set. Some features may not work.")
 
-# Base data folder
-DATA_FOLDER = '.data'
-
-# Subfolders
-ORIGINAL_FOLDER = os.path.join(DATA_FOLDER, 'pdfs')
-TEMP_FOLDER = os.path.join(DATA_FOLDER, '.temp')
-TRANSCRIPTS_FOLDER = os.path.join(DATA_FOLDER, 'transcripts')
-PROCESSED_FOLDER = os.path.join(TRANSCRIPTS_FOLDER, 'pdfs')
-MARKDOWN_FOLDER = os.path.join(DATA_FOLDER, 'markdown')
+SRC_PATH = os.path.abspath(os.path.join(__file__, "..", ".."))
+# Path where document collections are stored
+DOC_COLLECTIONS_PATH = os.path.abspath(os.path.join(
+    SRC_PATH, "..", ".data"
+))
