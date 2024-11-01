@@ -17,24 +17,43 @@ def display_pdf(pdf_data: bytes, page_number: int):
     base64_pdf = encode_data_base64(pdf_data_chunk)
 
     # Embedding PDF in HTML
-    pdf_display = f''' <style>
-        body {{             overflow: hidden;  /* Hide scrollbar */ 
-
-    }}
+    pdf_display = f'''
+    <style>
+        body {{
+            overflow: hidden;  /* Hide scrollbar */
+        }}
         #pdf-container {{
             display: flex;
             justify-content: center;  /* Center horizontally */
             align-items: center;  /* Center vertically if needed */
             height: calc(100vh - 250px);  /* Adjust based on your layout */
-}}
+        }}
         #pdf-iframe {{
             width: 75%;  /* Adjust width as needed */
             height: 100%;
             border: none;  /* Remove border */
-}}
+        }}
     </style>
     <div id="pdf-container">
-        <iframe id="pdf-iframe" src="data: application/pdf; base64, {base64_pdf}# zoom=58" ty p e="applicat i on/pdf"></if rame>     </div>     <script>         // Func t ion to resiz e the iframe on window resiz e  function resizeIframe() {{const ifram e = document. getElementById('pdf-iframe');             iframe .style.height = window.innerHeight + 'px';}}         window.addEventListener('resi ze', resizeIfram e); // Initial call to set the height         resizeIframe();     </script>  '''     # Displa y the PD F file     st.markdown(pdf_display, unsafe_al l ow_html=True)     dis p lay_page_navigation(num_pages, start_page + 1, end_page + 1)
+        <iframe id="pdf-iframe" src="data:application/pdf;base64,{base64_pdf}#zoom=58" type="application/pdf"></iframe>
+    </div>
+    <script>
+        // Function to resize the iframe on window resize
+        function resizeIframe() {{
+            const iframe = document.getElementById('pdf-iframe');
+            iframe.style.height = window.innerHeight + 'px';
+        }}
+
+        window.addEventListener('resize', resizeIframe);
+        // Initial call to set the height
+        resizeIframe();
+    </script>
+'''
+
+    # Display the PDF file
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+    display_page_navigation(num_pages, start_page + 1, end_page + 1)
 
 
 def display_page_navigation(num_pages, start_page, end_page=None):
@@ -72,12 +91,13 @@ def pdf_view():
     """Display a PDF viewer with a document selector, download button etc."""
     # st.header("Document Viewer")
     with st.container(height=900, border=False):
-
-        selected_doc_collection = st.session_state["current_doc_collection"]
-        pdf_files = selected_doc_collection.get_multipagedoc_ids()
-
+        if "current_doc_collection" in st.session_state:
+            selected_doc_collection = st.session_state["current_doc_collection"]
+            pdf_files = selected_doc_collection.get_multipagedoc_ids()
+        else:
+            pdf_files = None
         if not pdf_files:
-            st.write("No PDF files found in the folder.")
+            st.write("No PDF files to display.")
         else:
 
             label_col, selector_col, download_col = st.columns([1, 3, 1])
@@ -94,7 +114,6 @@ def pdf_view():
                 selected_pdf = doc.ipfs_id
                 page_num = doc.get_page_number(
                     st.session_state["llm-recommended-pdf"])+1
-                logger.info(page_num)
                 st.session_state['current_page'] = page_num
                 logger.info(
                     f"Recommended PDF: {st.session_state['llm-recommended-pdf']} {st.session_state['current_page']}")
@@ -105,8 +124,6 @@ def pdf_view():
                     st.session_state['current_page'] = 0
                 document = selected_doc_collection.get_multipagedoc(
                     selected_pdf)
-                logger.info(
-                    f"Displaying PDF: {selected_pdf} {st.session_state['current_page']}")
                 st.session_state["pdf_data"] = document.compilations[0].get_data()
                 virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 

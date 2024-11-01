@@ -8,6 +8,10 @@ from rag import DocsEmbedding
 from utils import logger
 
 
+def initialise_st_session():
+    set_selected_doc_colxn(get_doc_colxns_names()[0])
+
+
 def streamlit_config():
     st.set_page_config(
         page_title=APP_NAME,
@@ -15,6 +19,17 @@ def streamlit_config():
         layout="wide"
     )
     st.html("<style> .main {overflow: hidden} </style>")
+
+
+def set_selected_doc_colxn(doc_colxn_name: str):
+    st.session_state['current_doc_collection'] = get_doc_colxn(
+        doc_colxn_name
+    )
+    st.session_state['current_doc_embeddings'] = DocsEmbedding(
+        doc_colxn_name,
+        st.session_state['current_doc_collection'].transcripts_dir
+    )
+    st.session_state['current_doc_colxn_name'] = doc_colxn_name
 
 
 def main_view():
@@ -31,12 +46,10 @@ def main_view():
                 'Select DocColxn', get_doc_colxns_names(),
                 label_visibility="collapsed"
             )
-            logger.info(f"Selected DocColxn: {doc_colxn_name}")
-            st.session_state['current_doc_collection'] = get_doc_colxn(doc_colxn_name)
-            st.session_state['current_doc_embeddings'] = DocsEmbedding(
-                doc_colxn_name,
-                st.session_state['current_doc_collection'].transcripts_dir
-            )
+            if doc_colxn_name != st.session_state["current_doc_colxn_name"]:
+                set_selected_doc_colxn(doc_colxn_name)
+
+
         # # Layout for buttons and spacing
         chat_col, pdf_col, = st.columns([1, 1])
         with chat_col:
