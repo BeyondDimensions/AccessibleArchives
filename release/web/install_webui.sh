@@ -116,9 +116,9 @@ sudo apt-get install -y curl rsync git
 check_status "Curl installed" "install Curl"
 
 # Install Pandoc
-show_progress "Installing" "Pandoc and texlive"
-sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra -y
-check_status "Pandoc and texlive installed" "install Pandoc and texlive"
+show_progress "Installing" "Pandoc, texlive & libmagic-dev"
+sudo apt-get install pandoc texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra libmagic-dev -y
+check_status "Pandoc, texlive & libmagic-dev installed" "install Pandoc, texlive & libmagic-dev"
 
 # Install IPFS
 if sudo systemctl is-active --quiet ipfs || [ -e $SCRIPT_DIR/we_are_in_docker ]; then

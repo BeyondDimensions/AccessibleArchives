@@ -78,7 +78,7 @@ def load_documents(data_path):
             f"Loaded {len(documents)} documents from {data_path}")
         return documents
     except Exception as e:
-        logger.error(f"Error loading documents: {e}")
+        logger.error(f"RAG-Chunker: Error loading documents: {e}")
         raise e
 
 
