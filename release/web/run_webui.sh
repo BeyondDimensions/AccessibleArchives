@@ -37,7 +37,7 @@ fi
 if [ -d "$PY_VENV_DIR" ]; then
   source "$PY_VENV_DIR/bin/activate"
 else
-  printf "${RED}✘ Virtual environment not found.${NC}\n"
+  printf "${RED}✘ Virtual environment not found at ${PY_VENV_DIR}\n${NC}"
   exit 1
 fi
 

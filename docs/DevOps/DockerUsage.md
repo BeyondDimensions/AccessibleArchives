@@ -1,7 +1,10 @@
 ## Understanding Docker Volume Mounts
+
 ### Rationale
+
 _why we use docker volume mounting_
 This docker container works with various folders that contain large amounts of data or take a long time to generate
+
 - IPFS: all files in a DocumentCollection are processed and stored under `~/.ipfs`
 - Ollama: downloaded models are rather large!
   - Linux `/usr/share/ollama/.ollama/models`
@@ -14,6 +17,7 @@ To avoid downloading models, processing documents for IPFS and generating text e
 Likewise it is practical to store the DocumentCollections we want the AccessibleArchives docker container to process to be stored on our host machine.
 
 ### Implementation
+
 _how we implement docker volume mounting_
 
 In [run_docker_testing.sh](/release/docker/run_docker_testing.sh), when creating a docker container, we pass several arguments labelled `-v` which consist of two paths separated by a colon.
@@ -24,8 +28,39 @@ The path on the left specifies the path on the host machine that needs to be mou
 ```
 
 You can adjust the value of the path on your host machine in this definition:
+
 ```sh
 CONTAINER_DATA_PATH=/opt/AccessibleArchives
 ```
 
-Make sure that this path contains the subfolders which are mounted by [run_docker_testing.sh](/release/docker/run_docker_testing.sh), and place your DocumentCollections in the DocumentCollections subfolder.
+Make sure that this path contains the subfolders which are mounted by [run_docker_testing.sh](/release/docker/run_docker_testing.sh), and place your DocumentCollections in the DocumentCollections subfolder, and the text-embeddings in the DocumentEmbeddings subfolder.
+Also, put credentials.env in the Config subfolder with the OPENAI_API_KEY field set.
+
+The folder should look something like this:
+```
+.
+├── Config
+│   └── credentials.env
+├── DocumentCollections
+│   ├── Demo
+│   └── RAF
+├── DocumentEmbeddings
+│   ├── Demo
+│   └── RAF
+├── ipfs
+└── Ollama
+```
+
+## Logs
+
+```sh
+docker exec -it $CONTAINER_ID /bin/journalctl -ef -u accessible_archives
+```
+
+## Notes
+
+- If you add documents to your DocumentCollections folder, you will have to manually get them processed by IPFS in the docker container:
+
+```sh
+docker exec -it $CONTAINER_ID /usr/local/bin/ipfs add -r /opt/AccessibleArchives/DocumentCollections
+```

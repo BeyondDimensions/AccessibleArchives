@@ -10,6 +10,7 @@
 GREEN="\033[0;32m"
 RED="\033[0;31m"
 YELLOW="\033[1;33m"
+BLUE='\033[0;34m'
 NC="\033[0m" # No color
 
 USERNAME=$(whoami)
@@ -19,7 +20,6 @@ SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJ_DIR=$SCRIPT_DIR/../..
 SRC_DIR=$PROJ_DIR/src
 PY_REQUIREMENTS=$PROJ_DIR/release/requirements.txt
-PY_VENV_DIR=$PROJ_DIR/.venv
 
 # TODO add data from the project to DATA_DIR!!!
 # TODO clean after ipfs installation or is it done?
@@ -27,6 +27,7 @@ PY_VENV_DIR=$PROJ_DIR/.venv
 OLLAMA_DIR=/tmp/Ollama
 OLLAMA_INSTALL_SCRIPT=$OLLAMA_DIR/install_ollama.sh
 INSTALL_DIR=/opt/AccessibleArchives
+PY_VENV_DIR=$INSTALL_DIR/.venv
 DATA_DIR=/opt/AccessibleArchives/data
 APP_DATA=$HOME/.local/share/
 DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
@@ -34,7 +35,6 @@ DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
 CHROMADB_DIR=$INSTALL_DIR/ChromaDB
 
 APP_EXEC_PATH=$INSTALL_DIR/release/web/run_webui.sh
-BIN_PATH=/usr/local/bin/accessible_archives
 
 SYSTEMD_INSTALLER_SCRIPT=$SCRIPT_DIR/accessible_archives.service.sh
 # Function to create a directory if it doesn't yet exist and check permissions
@@ -50,6 +50,7 @@ ensure_dir $INSTALL_DIR
 ensure_dir $CHROMADB_DIR
 ensure_dir $DATA_DIR
 ensure_dir $APP_DATA
+ensure_dir $PY_VENV_DIR
 
 # Function to show progress bar
 show_progress() {
@@ -95,7 +96,11 @@ update_hosts_file() {
 
 # Copy project source code to installation directory
 show_progress "Copying" "files"
-rsync -XAva $PROJ_DIR $INSTALL_DIR/
+GITIGNORE_PATH=$PROJ_DIR/.gitignore
+if ! [ -e $GITIGNORE_PATH ];then
+  touch $GITIGNORE_PATH
+fi
+rsync -XAva --exclude-from=$GITIGNORE_PATH $PROJ_DIR $INSTALL_DIR/
 check_status "Files copied" "copy files"
 
 # create Systemd service
@@ -198,10 +203,6 @@ check_status "Ollama Service started" "start Ollama Service"
 
 
 
-# Create symlink to run the app
-show_progress "Creating" "symlink to run the app"
-sudo ln -sf $APP_EXEC_PATH $BIN_PATH
-check_status "Symlink created" "create symlink"
 
 
 if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
@@ -211,7 +212,7 @@ if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
   echo "
   [Desktop Entry]
   Name=Accessible Archives
-  Exec=$BIN_PATH
+  Exec=$APP_EXEC_PATH
   Icon=/home/$USERNAME/.local/share/AccessibleArchives/release/icon.png
   Terminal=true
   Type=Application
@@ -223,8 +224,16 @@ if ! [ -e $SCRIPT_DIR/we_are_in_docker ];then
   check_status "Desktop entry created" "create desktop entry"
 fi
 printf "${GREEN}✔ Installation complete!
-You can now run `accessible_archives` in a terminal,
-or if you have a desktop-environment you shoudl find an app shortcut.
+If you have a desktop-environment you shoudl find an app shortcut.
 
-If you want AccessibleArchives to run automatically on boot, run:${NC}"
-echo "sudo systemctl enable accessible_archives"
+You can now run AccessibleArchives.
+For CLI, you have the following options
+${NC}
+
+${BLUE}Run AccessibleArchives directly:${NC}
+$APP_EXEC_PATH
+
+${BLUE}Run with Systemd, check logs:${NC}
+sudo systemctl start accessible_archives
+journalctl -ef -u accessible_archives
+"
