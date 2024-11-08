@@ -31,8 +31,7 @@ PY_VENV_DIR=$INSTALL_DIR/.venv
 DATA_DIR=/opt/AccessibleArchives/data
 APP_DATA=$HOME/.local/share/
 DESKTOP_ENTRY=$APP_DATA/applications/AccessibleArchives.desktop
-# CHROMADB_DIR=/var/lib/AccessibleArchives/ChromaDB
-CHROMADB_DIR=$INSTALL_DIR/ChromaDB
+EMBEDDINGS_PATH=$INSTALL_DIR/DocumentEmbeddings
 
 APP_EXEC_PATH=$INSTALL_DIR/release/web/run_webui.sh
 
@@ -47,7 +46,7 @@ sudo chown $USER:$USER $1
 
 ensure_dir $OLLAMA_DIR
 ensure_dir $INSTALL_DIR
-ensure_dir $CHROMADB_DIR
+ensure_dir $EMBEDDINGS_PATH
 ensure_dir $DATA_DIR
 ensure_dir $APP_DATA
 ensure_dir $PY_VENV_DIR

@@ -51,6 +51,16 @@ The folder should look something like this:
 └── Ollama
 ```
 
+## Using for Development
+
+If you want to use the docker container for development to avoid installing all the prerequisites on your main machine, mount this project's `/src` directory to `/opt/AccessibleArchives/src` in the docker container by adding the follwoing line to [run_docker_testing.sh](/release/docker/run_docker_testing.sh):
+
+```sh
+  -v path/to/src:/opt/AccessibleArchives/src \
+```
+
+Create a new docker container using that script, and now whenever you update the source code, the Streamlit WebUI should notify you and offer to rerun in the top right corner of is window.
+
 ## Logs
 
 ```sh
