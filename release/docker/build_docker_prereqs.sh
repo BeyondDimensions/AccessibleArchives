@@ -11,4 +11,4 @@ docker save -o /tmp/AccessibleArchives.tar local/accessible_archives_prereqs
 
 ## Run with:
 # docker run -it --privileged local/accessible_archives_prereqs
-release/docker/run_docker_prereqs.sh
+# release/docker/run_docker_prereqs.sh

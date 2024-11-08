@@ -5,7 +5,7 @@ COPY src /opt/AccessibleArchives/src
 COPY release /opt/AccessibleArchives/release
 
 RUN apt update
-RUN apt install -y sudo
+RUN apt install -y sudo rsync
 ENV DEBIAN_FRONTEND=noninteractive
 
 # install some packages manually to avoid getting stuck in  install_webui.sh

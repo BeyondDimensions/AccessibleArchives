@@ -21,6 +21,11 @@ Run this docker image by running `run_docker_prereqs.sh`.
 The `build_docker_testing.sh` shell script uses the `AccessibleArchives_testing.dockerfile` dockerfile definition to create a docker image based on the `build_docker_prereqs` image in which only the AccessibleArchives source code is updated.
 It takes a short amount of time (~40sec) to build this docker image.
 Run this docker image by running `run_docker_testing.sh`. It will print the container ID.
+```sh
+CONTAINER_ID=$(
+release/docker/run_docker_testing.sh
+)
+```
 
 When running a docker container for the first time, the models will be downloaded and the document collections processed before it becomes usable.
 This might take 5-10min.
