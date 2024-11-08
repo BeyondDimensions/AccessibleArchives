@@ -47,6 +47,14 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## Docker
+
+A docker container can be used for development.
+Distribution is not recommended due to these [security risks](https://github.com/emendir/Docker-Systemd-IPFS/tree/a473ae2bc614a056ddd437928599c573c5aaf1ea?tab=readme-ov-file#security-considerations).
+
+1. [build docker image](docs/DevOps/BuildingDockerImage.md)
+2. [create and use docker container](docs/DevOps/BuildingDockerImage.md)
+
 ## Technologies Used
 
 - Python: primary programming language
