@@ -1,26 +1,56 @@
 import streamlit as st
 from .chat_view import chat_view
 from .pdf_view import pdf_view
-from .ocr_view import ocr_view
 from config import APP_NAME, FAVICON
+from storage import get_doc_colxns_names, get_doc_colxn
+from rag import DocsEmbedding
+
+from utils import logger
 
 
-def set_page_style():
+def initialise_st_session():
+    set_selected_doc_colxn(get_doc_colxns_names()[0])
+
+
+def streamlit_config():
+    st.set_page_config(
+        page_title=APP_NAME,
+        page_icon=FAVICON,
+        layout="wide"
+    )
     st.html("<style> .main {overflow: hidden} </style>")
 
 
-st.set_page_config(
-    page_title=APP_NAME,
-    page_icon=FAVICON,
-    layout="wide"
-)
+def set_selected_doc_colxn(doc_colxn_name: str):
+    st.session_state['current_doc_collection'] = get_doc_colxn(
+        doc_colxn_name
+    )
+    st.session_state['current_doc_embeddings'] = DocsEmbedding(
+        doc_colxn_name,
+        st.session_state['current_doc_collection'].transcripts_dir
+    )
+    st.session_state['current_doc_colxn_name'] = doc_colxn_name
 
 
 def main_view():
-    # st.title('Accessible Archives')
-    set_page_style()
+    # st.title('APP_NAME')
+
+    streamlit_config()
+
     with st.container(height=None):
-        # Layout for buttons and spacing
+        label_col, selector_col, = st.columns([1, 3])
+        with label_col:
+            st.html('<b style="font-size: 2em">Document Collection:</b>')
+        with selector_col:
+            doc_colxn_name = st.selectbox(
+                'Select DocColxn', get_doc_colxns_names(),
+                label_visibility="collapsed"
+            )
+            if doc_colxn_name != st.session_state["current_doc_colxn_name"]:
+                set_selected_doc_colxn(doc_colxn_name)
+
+
+        # # Layout for buttons and spacing
         chat_col, pdf_col, = st.columns([1, 1])
         with chat_col:
             chat_view()  # IMPORTANT: load chat view before PDF-View

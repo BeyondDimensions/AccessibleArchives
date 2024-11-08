@@ -2,7 +2,6 @@ from utils import logger
 from io import BytesIO
 import streamlit as st
 from utils import encode_data_base64
-from storage import get_known_docs
 from formatting.pdf_pagination import extract_pages
 
 # how many PDF pages to display at once
@@ -92,17 +91,18 @@ def pdf_view():
     """Display a PDF viewer with a document selector, download button etc."""
     # st.header("Document Viewer")
     with st.container(height=900, border=False):
-        # TODO: ask user to select a document collection
-        st.markdown(
-            "<h4 style='text-align: center;'>Select a Document</h4>", unsafe_allow_html=True)
-        selected_doc_collection = get_known_docs()[0]
-        pdf_files = selected_doc_collection.get_multipagedoc_ids()
-
-        if not pdf_files:
-            st.write("No PDF files found in the folder.")
+        if "current_doc_collection" in st.session_state:
+            selected_doc_collection = st.session_state["current_doc_collection"]
+            pdf_files = selected_doc_collection.get_multipagedoc_ids()
         else:
-            selector_col, download_col = st.columns(
-                [5, 1])  # Layout for buttons and spacing
+            pdf_files = None
+        if not pdf_files:
+            st.write("No PDF files to display.")
+        else:
+
+            label_col, selector_col, download_col = st.columns([1, 3, 1])
+            with label_col:
+                st.html('<b style="font-size: 2em">Document:</b>')
 
             with selector_col:
                 selected_pdf = st.selectbox(
@@ -114,10 +114,9 @@ def pdf_view():
                 selected_pdf = doc.ipfs_id
                 page_num = doc.get_page_number(
                     st.session_state["llm-recommended-pdf"])+1
-                logger.info(page_num)
                 st.session_state['current_page'] = page_num
-                logger.info(f"Recommended PDF: {
-                            st.session_state["llm-recommended-pdf"]} {st.session_state['current_page']}")
+                logger.info(
+                    f"Recommended PDF: {st.session_state['llm-recommended-pdf']} {st.session_state['current_page']}")
                 # except Exception as e:
                 #     logger.error(e)
             if selected_pdf:
@@ -125,7 +124,6 @@ def pdf_view():
                     st.session_state['current_page'] = 0
                 document = selected_doc_collection.get_multipagedoc(
                     selected_pdf)
-                logger.info(f"Displaying PDF: {selected_pdf} {st.session_state['current_page']}")
                 st.session_state["pdf_data"] = document.compilations[0].get_data()
                 virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 

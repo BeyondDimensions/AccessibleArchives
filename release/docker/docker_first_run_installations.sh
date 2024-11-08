@@ -15,7 +15,7 @@ ollama pull mxbai-embed-large
 nohup ollama serve &> /dev/null &
 
 echo "Adding DocumentCollection to IPFS..." >> $LOG_FILE
-ipfs add -r /opt/AccessibleArchives/DocumentCollection
+ipfs add -r /opt/AccessibleArchives/DocumentCollections
 
 sudo systemctl enable accessible_archives
 sudo systemctl start accessible_archives

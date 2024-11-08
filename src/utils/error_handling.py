@@ -5,8 +5,6 @@ from utils import logger
 def openai_api_error(exception):
     """Handle and format errors."""
 
-    print(exception)  # debug
-
     if hasattr(exception, 'response') and exception.response and exception.response.text:
         try:
             error_info = json.loads(exception.response.text)
@@ -25,4 +23,5 @@ def openai_api_error(exception):
     else:
         formatted_error_message = f"Error: {str(exception)}"
 
-    logger.error(f"Error processing an image: {formatted_error_message}", True)
+    logger.error(f"{formatted_error_message}", True)
+    raise exception
