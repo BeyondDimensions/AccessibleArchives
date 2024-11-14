@@ -2,7 +2,7 @@ from _load_src import SRC_PATH
 from storage import DocumentCollection
 import os
 from rag import DocsEmbedding
-from config.rag_config import INITIAL_CHAT_HISTORY
+from config.chat_configs import get_chat_config
 
 
 from rag.query_engine import generate_response
@@ -13,6 +13,9 @@ DOCUMENTS_PATH = os.path.abspath(os.path.join(
     SRC_PATH, "..", ".data", "Demo"
 ))
 
+# select a language
+chat_config = get_chat_config("de-de")
+
 # load DocumentCollection
 docs_clxn = DocumentCollection(DOCUMENTS_PATH)
 
@@ -22,12 +25,12 @@ docs_embedding = DocsEmbedding(
     docs_clxn.transcripts_dir
 )
 
-print(format_history(INITIAL_CHAT_HISTORY))
+print(format_history(chat_config.INITIAL_CHAT_HISTORY))
 # generate_response("WasK
 response, sources = generate_response(
     "ChatGPT",
     "Was wissen wir über die Zusammenarbeit zwischen Johannes Weinrich und Beatrix Odenal?",
-    INITIAL_CHAT_HISTORY,
+    chat_config.INITIAL_CHAT_HISTORY,
     docs_clxn,
     docs_embedding,
 )
