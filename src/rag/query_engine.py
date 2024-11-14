@@ -37,7 +37,7 @@ def generate_response(
         history: list[dict[str, str]],
         docs_clxn: DocumentCollection,
         docs_embedding: DocsEmbedding
-):
+) -> tuple[str, list[str]]:
     """Generate a response using retrieved documents."""
     try:
         # Create the conversation chain
