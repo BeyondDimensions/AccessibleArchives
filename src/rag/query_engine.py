@@ -1,6 +1,6 @@
-from config.rag_config import DB_QUERY_GEN_PROMPT, PROMPT_WRAPPER, PROMPT_SOURCES_WRAPPER, HISTORY_MESSAGE_FORMATTING, SOURCES_FORMATTING
+from config.language_templates.chat_config import ChatConfigTemplate
+
 from utils import logger
-from config import SOURCE_DOC_FORMATTING
 from storage import DocumentCollection, Page
 
 from llm import prompt_llm
@@ -11,17 +11,17 @@ def flatten(xss):
     return [x for xs in xss for x in xs]
 
 
-def format_history(history: list[dict[str, str]]) -> str:
+def format_history(history: list[dict[str, str]], chat_config:ChatConfigTemplate) -> str:
     formatted_history = ""
     for message in history:
         content = "\n    ".join([""]+[line.strip("\n") for line in message["content"].split("\n")])
         formatted_sources = ""
         if "sources" in message:
-            formatted_sources = SOURCES_FORMATTING.replace(
+            formatted_sources = chat_config.SOURCES_FORMATTING.replace(
                 "{sources}",
                 "\n- ".join([""]+[str(source) for source in message["sources"]])
             )
-        formatted_history += HISTORY_MESSAGE_FORMATTING.replace(
+        formatted_history += chat_config.HISTORY_MESSAGE_FORMATTING.replace(
             "{sources}", formatted_sources
         ).replace(
             "{role}", message["role"]
@@ -36,13 +36,14 @@ def generate_response(
         prompt: str,
         history: list[dict[str, str]],
         docs_clxn: DocumentCollection,
-        docs_embedding: DocsEmbedding
+        docs_embedding: DocsEmbedding,
+        chat_config:ChatConfigTemplate
 ) -> tuple[str, list[str]]:
     """Generate a response using retrieved documents."""
     try:
         # Create the conversation chain
-        formatted_history = format_history(history)
-        db_query_prompt = DB_QUERY_GEN_PROMPT.replace(
+        formatted_history = format_history(chat_config.INITIAL_CHAT_HISTORY+history, chat_config)
+        db_query_prompt = chat_config.DB_QUERY_GEN_PROMPT.replace(
             "{history}", formatted_history
         ).replace(
             "{input}", prompt
@@ -94,12 +95,12 @@ def generate_response(
                 })
 
             formatted_sources = "\n".join([
-                SOURCE_DOC_FORMATTING.replace(
+                chat_config.SOURCE_DOC_FORMATTING.replace(
                     "{id}", id).replace("{text}", text)
                 for id, text in list(source_files.items())
             ])
 
-            llm_prompt = PROMPT_SOURCES_WRAPPER.replace(
+            llm_prompt = chat_config.PROMPT_SOURCES_WRAPPER.replace(
                 "{relevant_documents}", formatted_sources
             ).replace(
                 "{history}", formatted_history
@@ -108,7 +109,7 @@ def generate_response(
             )
             source_ids = list(source_files.keys())
         else:   # we found no relevant documents
-            llm_prompt = PROMPT_WRAPPER.replace(
+            llm_prompt = chat_config.PROMPT_WRAPPER.replace(
                 "{history}", formatted_history
             ).replace(
                 "{input}", prompt

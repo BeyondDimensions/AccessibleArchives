@@ -71,6 +71,7 @@ def chat_view():
             if 'messages' not in st.session_state:
                 st.session_state.messages = state_data.get_language_config(
                 ).chat_config.INITIAL_CHAT_HISTORY
+                st.session_state.messages = []
 
             # Display chat messages
             for message in st.session_state.messages:
@@ -112,6 +113,7 @@ def chat_view():
                                 st.session_state.messages,
                                 st.session_state["current_doc_collection"],
                                 st.session_state["current_doc_embeddings"],
+                                state_data.get_language_config().chat_config
                             )
                             message = {
                                 'role': state_data.get_language_config().chat_config.AI_NAME,

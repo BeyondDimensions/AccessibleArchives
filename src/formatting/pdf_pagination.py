@@ -5,7 +5,8 @@ from io import BytesIO
 def extract_pages(pdf_data: bytes, pages: list):
     pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
     pdf_writer = PyPDF2.PdfWriter()
-
+    if not pages:
+        raise ValueError("extract_pages: Received empty list of pages")
     # Ensure we don't exceed the total number of pages
     num_pages = len(pdf_reader.pages)
     start_page = None

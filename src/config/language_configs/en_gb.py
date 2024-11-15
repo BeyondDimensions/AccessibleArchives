@@ -8,31 +8,31 @@ class ChatConfigImplementation(ChatConfigTemplate):
     INITIAL_CHAT_HISTORY = [
         {
             "role": "Librarian",
-            "content": "Mein lieber freund, Hallo! Wie kann ich dir heute helfen?"
+            "content": "My dear friend, hello! How can I help you today?"
         },
         {
             "role": "Historian",
-            "content": "Morgen! Ich habe mit einem neuen Rechercheprojekt übers 20. Jahrhundert angefangen. Ich würde gerne ein paar Dokumente aus dem Archiv durchsuchen."
+            "content": "Good morning! I’ve started a new research project about the 20th century. I’d like to browse some documents from the archive."
         },
         {
             "role": "Librarian",
-            "content": "Sehr gut! Das war ein spannendes Zeitalter. Ich kenne alle Dokumente die es dazu im Archiv gibt. Was interessiert dich denn?"
+            "content": "Very good! That was an exciting era. I know all the documents that are available in the archive about it. What specifically interests you?"
         },
     ]
 
     PROMPT_WRAPPER = """
-    Für das folgende Gespräch, gebe zur aktuellen Frage eine hilfreiche Antwort.
+    For the following conversation, provide a helpful answer to the current question.
 
-    Gespräch: {history}
+    Conversation: {history}
 
-    Aktuelle Frage: {input}
+    Current question: {input}
     """
 
     PROMPT_SOURCES_WRAPPER = """
-    Wir sind im Jahr 3000.
-    Du hast einige sehr alte geschichtliche Dokumente aus dem 20. Jahrhundert, die
-    für unseren geschichtlichen Recherchen relavant sind.
-    Hier sind diese uralte Dokumente:
+    We are in the year 3000.
+    You have some very old historical documents from the 20th century that
+    are relevant to our historical research.
+    Here are these ancient documents:
 
     ---
 
@@ -40,23 +40,23 @@ class ChatConfigImplementation(ChatConfigTemplate):
 
     ---
 
-    Wir haben schon ein bisschen miteinander geredet, erinnerst du dich?
+    We’ve already talked a bit, do you remember?
 
-    Gespräch: {history}
+    Conversation: {history}
 
-    Aktuelle Frage: {input}
+    Current question: {input}
 
-    Für die aktuelle Frage, die sich auf uralte Vorfällen von vor mehr wie tausend
-    Jahren bezieht, formuliere eine hilfreiche Antwort.
+    For the current question, which refers to ancient events more than a thousand
+    years ago, formulate a helpful answer.
     """
 
     DB_QUERY_GEN_PROMPT = """
-    Gesprächshistorie:
+    Conversation history:
     {history}
 
-    Aktuelle Frage: {input}
+    Current question: {input}
 
-    Formuliere genau, wonach man suchen muss, um diese Frage zu beantworten.
+    Precisely formulate what to search for in order to answer this question.
     """
 
     SOURCE_DOC_FORMATTING = """
@@ -66,7 +66,7 @@ class ChatConfigImplementation(ChatConfigTemplate):
     ```
     """
     SOURCES_FORMATTING = """
-    Hier sind die relevanteste Dokumente:
+    Here are the most relevant documents:
     {sources}
     """
 

@@ -41,7 +41,7 @@ def main_view():
         label_col, selector_col, lang_selector_col = st.columns([1, 3, 1])
         with lang_selector_col: 
             language_code = st.selectbox(
-                '', get_languages(),
+                'language', get_languages(),
                 label_visibility="collapsed"
             )
             state_data.set_language(language_code)
