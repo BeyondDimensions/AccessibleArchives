@@ -1,18 +1,8 @@
 from abc import ABC, abstractproperty
 
 
-class ChatConfig(ABC):
-
-    @abstractproperty
-    def language_code(self) -> str:
-        pass
-
-    @abstractproperty
-    def language_icon(self) -> str:
-        pass
-
-    def get_language_str(self) -> str:
-        return f"{self.language_icon} {self.language_code}"
+class ChatConfigTemplate(ABC):
+    
 
     @abstractproperty
     def AI_NAME(self) -> str:

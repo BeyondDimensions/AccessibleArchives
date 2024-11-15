@@ -2,7 +2,7 @@ from _load_src import SRC_PATH
 from storage import DocumentCollection
 import os
 from rag import DocsEmbedding
-from config.chat_configs import get_chat_config
+from config.language_templates.languages import get_language_config
 
 
 from rag.query_engine import generate_response
@@ -14,7 +14,7 @@ DOCUMENTS_PATH = os.path.abspath(os.path.join(
 ))
 
 # select a language
-chat_config = get_chat_config("de-de")
+chat_config = get_language_config("de-de")
 
 # load DocumentCollection
 docs_clxn = DocumentCollection(DOCUMENTS_PATH)

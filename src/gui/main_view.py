@@ -2,12 +2,11 @@ import streamlit as st
 from .chat_view import chat_view
 from .pdf_view import pdf_view
 from config import APP_NAME, FAVICON
-from config.chat_configs import get_languages,get_chat_config
+from config.languages import get_languages
 from storage import get_doc_colxns_names, get_doc_colxn
 from rag import DocsEmbedding
-
+from . import state_data
 from utils import logger
-
 
 def initialise_st_session():
     set_selected_doc_colxn(get_doc_colxns_names()[0])
@@ -40,21 +39,26 @@ def main_view():
 
     with st.container(height=None):
         label_col, selector_col, lang_selector_col = st.columns([1, 3, 1])
+        with lang_selector_col: 
+            language_code = st.selectbox(
+                '', get_languages(),
+                label_visibility="collapsed"
+            )
+            state_data.set_language(language_code)
+            
         with label_col:
-            st.html('<b style="font-size: 2em">Document Collection:</b>')
+            label = state_data.get_language_config().gui_text.DOCUMENT_COLLECTION
+            st.html(f'<b style="font-size: 2em">{label}:</b>')
         with selector_col:
+            label = state_data.get_language_config().gui_text.SELECT_DOC_COLXN
+            
             doc_colxn_name = st.selectbox(
-                'Select DocColxn', get_doc_colxns_names(),
+                label, get_doc_colxns_names(),
                 label_visibility="collapsed"
             )
             if doc_colxn_name != st.session_state["current_doc_colxn_name"]:
                 set_selected_doc_colxn(doc_colxn_name)
-        with lang_selector_col: 
-            doc_colxn_name = st.selectbox(
-                '', get_languages(),
-                label_visibility="collapsed"
-            )
-            st.session_state["chat_config"]=get_chat_config(doc_colxn_name)
+        
             
 
         # # Layout for buttons and spacing

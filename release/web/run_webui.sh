@@ -44,9 +44,4 @@ fi
 # Run your Streamlit app
 printf "${GREEN}✔ Starting the application...${NC}\n"
 streamlit run "$PROJ_DIR/src/app.py" --server.port 8501
-if [ $? -eq 0 ]; then
-  printf "${GREEN}✔ Application started successfully!${NC}\n"
-else
-  printf "${RED}✘ Failed to start the application.${NC}\n"
-  exit 1
-fi
+printf "${GREEN}Stopped Streamlit application.${NC}\n"

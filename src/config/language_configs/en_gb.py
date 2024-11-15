@@ -1,9 +1,8 @@
-from config.chat_config import ChatConfig
+from config.language_templates.chat_config import ChatConfigTemplate
+from config.language_templates.gui_text import GuiTextTemplate
 
+class ChatConfigImplementation(ChatConfigTemplate):
 
-class ChatConfig_EnGb(ChatConfig):
-    language_code="en-gb"
-    language_icon="🇬🇧"
     AI_NAME = "Librarian"
     USER_NAME = "Historian"
     INITIAL_CHAT_HISTORY = [
@@ -75,5 +74,19 @@ class ChatConfig_EnGb(ChatConfig):
     {sources}
     """
 
+class GuiTextImplementation(GuiTextTemplate):
+    DOCUMENT_COLLECTION="Document Collection"
+    LLM_MODEL="LLM Model"
+    DOCUMENT="Document"
+    SELECT_DOC_COLXN="Select Document Collection"
+    SELECT_DOCUMENT="Select Document"
+    SELECT_LLM_MODEL="Choose an LLM"
+    PROMPT_BOX="Write your prompt here"
+    DOWNLOAD_DOCUMENT="download PDF"
+    PAGE="page"
+    PAGES="pages"
+    LAST_PAGE="last"
+    NEXT_PAGE="next"
 
-chat_config = ChatConfig_EnGb()
+language_code="en-gb"
+language_icon="🇬🇧"

@@ -1,3 +1,4 @@
+from . import state_data
 from utils import logger
 from io import BytesIO
 import streamlit as st
@@ -65,24 +66,30 @@ def display_page_navigation(num_pages, start_page, end_page=None):
     # Display navigation buttons
 
     with last_col:
-        if st.button("Last"):
+        label = state_data.get_language_config().gui_text.LAST_PAGE
+        if st.button(label):
             # Ensure we don't go below the first page
             if st.session_state['current_page'] >= PAGES_PER_CHUNK:
                 st.session_state['current_page'] -= PAGES_PER_CHUNK
 
     # "Next" button
     with next_col:
-        if st.button("Next"):
+        label = state_data.get_language_config().gui_text.LAST_PAGE
+        
+        if st.button(label=label, key=2345):
             # Ensure we don't exceed the total pages
             if st.session_state['current_page'] + PAGES_PER_CHUNK < num_pages:
                 st.session_state['current_page'] += PAGES_PER_CHUNK
             # Add a button to download the PDF
             # with open(pdf_path, "rb") as pdf_file:
     with col2:
+        
         if end_page is None or start_page == end_page:
-            text = f"Page  {start_page}"
+            label = state_data.get_language_config().gui_text.PAGE
+            text = f"{label}  {start_page}"
         else:
-            text = f"Pages {start_page} - {end_page}"
+            label = state_data.get_language_config().gui_text.PAGES
+            text = f"{label} {start_page} - {end_page}"
 
         st.markdown(text)
 
@@ -102,18 +109,22 @@ def pdf_view():
 
             label_col, selector_col, download_col = st.columns([1, 3, 1])
             with label_col:
-                st.html('<b style="font-size: 2em">Document:</b>')
+                label = state_data.get_language_config().gui_text.DOCUMENT
+                
+                st.html(f'<b style="font-size: 2em">{label}:</b>')
 
             with selector_col:
+                label = state_data.get_language_config().gui_text.PAGE
                 selected_pdf = st.selectbox(
-                    'Select Document', pdf_files, label_visibility="collapsed")
+                    label, pdf_files, label_visibility="collapsed"
+                )
             if st.session_state["llm-recommended-pdf"]:
                 # try:
                 doc = selected_doc_collection.get_page_docs(
                     st.session_state["llm-recommended-pdf"])[0]
                 selected_pdf = doc.ipfs_id
                 page_num = doc.get_page_number(
-                    st.session_state["llm-recommended-pdf"])+1
+                    st.session_state["llm-recommended-pdf"]) + 1
                 st.session_state['current_page'] = page_num
                 logger.info(
                     f"Recommended PDF: {st.session_state['llm-recommended-pdf']} {st.session_state['current_page']}")
@@ -128,10 +139,12 @@ def pdf_view():
                 virtual_pdf_file = BytesIO(st.session_state["pdf_data"])
 
             with download_col:
+                label = state_data.get_language_config().gui_text.DOWNLOAD_DOCUMENT
+                
                 st.download_button(
-                    label="Download PDF",
+                    label=label,
                     data=virtual_pdf_file,
-                    file_name=selected_pdf+".pdf",
+                    file_name=selected_pdf + ".pdf",
                     mime="application/pdf"
                 )
 

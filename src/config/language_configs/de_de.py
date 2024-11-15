@@ -1,9 +1,9 @@
-from config.chat_config import ChatConfig
+from config.language_templates.chat_config import ChatConfigTemplate
+from config.language_templates.gui_text import GuiTextTemplate
 
 
-class ChatConfig_DeDe(ChatConfig):
-    language_code="de-de"
-    language_icon="🇩🇪"
+class ChatConfigImplementation(ChatConfigTemplate):
+
     AI_NAME = "Librarian"
     USER_NAME = "Historian"
     INITIAL_CHAT_HISTORY = [
@@ -76,4 +76,21 @@ class ChatConfig_DeDe(ChatConfig):
     """
 
 
-chat_config = ChatConfig_DeDe()
+
+class GuiTextImplementation(GuiTextTemplate):
+    DOCUMENT_COLLECTION="Dokementensammlung"
+    LLM_MODEL="LLM Modell"
+    DOCUMENT="Dokument"
+    SELECT_DOC_COLXN="Wähle eine Dokumentensammlung"
+    SELECT_DOCUMENT="Wähle ein Dokument"
+    SELECT_LLM_MODEL="Wähle eine LLM"
+    PROMPT_BOX="Schreibe deine Anfrage hier"
+    DOWNLOAD_DOCUMENT="PDF herunterladen"
+    PAGE="Seite"
+    PAGES="Seiten"
+    LAST_PAGE="nächste Seite"
+    NEXT_PAGE="letzte Seite"
+    
+language_code="de-de"
+language_icon="🇩🇪"
+

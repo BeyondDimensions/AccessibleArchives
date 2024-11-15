@@ -2,8 +2,8 @@ import streamlit as st
 from rag import generate_response
 from rag.database import DocsEmbedding
 from config import TEMP_MODELS, OPENAI_API_KEY
-from config.rag_config import INITIAL_CHAT_HISTORY, AI_NAME, USER_NAME
 from utils import logger
+from . import state_data
 
 
 def update_model(model_name):
@@ -31,10 +31,17 @@ def chat_view():
 
         # Model selector
         with label_col:
-            st.html('<b style="font-size: 2em">Model:</b>')
+            label = state_data.get_language_config().gui_text.LLM_MODEL
+
+            st.html(f'<b style="font-size: 2em">{label}</b>')
         with selector_col:
-            model_name = st.selectbox('Select Model', list(
-                TEMP_MODELS.keys()), label_visibility="collapsed")
+            label = state_data.get_language_config().gui_text.SELECT_LLM_MODEL
+
+            model_name = st.selectbox(
+                label,
+                list(TEMP_MODELS.keys()),
+                label_visibility="collapsed"
+            )
 
         update_model(model_name)
 
@@ -50,7 +57,9 @@ def chat_view():
                 openai_api_key_valid = False
                 prompt = None  # Set prompt to None to skip execution
             else:
-                prompt = st.chat_input('Pass your prompt here')
+                label = state_data.get_language_config().gui_text.PROMPT_BOX
+
+                prompt = st.chat_input(label)
 
         with output_container:
             if not openai_api_key_valid:
@@ -60,7 +69,8 @@ def chat_view():
 
             # Initialize session state variables if they don't exist
             if 'messages' not in st.session_state:
-                st.session_state.messages = INITIAL_CHAT_HISTORY
+                st.session_state.messages = state_data.get_language_config(
+                ).chat_config.INITIAL_CHAT_HISTORY
 
             # Display chat messages
             for message in st.session_state.messages:
@@ -69,16 +79,23 @@ def chat_view():
 
             if prompt:
                 # Add user message to chat
-                st.chat_message(USER_NAME).markdown(prompt)
-                st.session_state.messages.append(
-                    {'role': USER_NAME, 'content': prompt})
+                st.chat_message(
+                    state_data.get_language_config().chat_config.USER_NAME
+                ).markdown(prompt)
+                st.session_state.messages.append({
+                    'role': state_data.get_language_config().chat_config.USER_NAME,
+                    'content': prompt
+                })
 
-                with st.chat_message(AI_NAME):
+                with st.chat_message(
+                    state_data.get_language_config().chat_config.AI_NAME
+                ):
                     response_placeholder = st.empty()
 
                     # Handle commands like /reset_db or /load_files
                     if prompt == "/reset_db":
-                        st.session_state["current_doc_embeddings"].reset_database()
+                        st.session_state["current_doc_embeddings"].reset_database(
+                        )
                         return
                     if prompt == "/load_files":
                         st.session_state["current_doc_embeddings"].initialize_database(
@@ -96,8 +113,11 @@ def chat_view():
                                 st.session_state["current_doc_collection"],
                                 st.session_state["current_doc_embeddings"],
                             )
-                            message = {'role': AI_NAME,
-                                       'content': response, 'sources': sources}
+                            message = {
+                                'role': state_data.get_language_config().chat_config.AI_NAME,
+                                'content': response,
+                                'sources': sources
+                            }
                             st.session_state.messages.append(message)
                             response_placeholder.markdown(response)
                             display_sources(message)
