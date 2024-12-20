@@ -88,8 +88,8 @@ class GuiTextImplementation(GuiTextTemplate):
     DOWNLOAD_DOCUMENT="PDF herunterladen"
     PAGE="Seite"
     PAGES="Seiten"
-    LAST_PAGE="nächste Seite"
-    NEXT_PAGE="letzte Seite"
+    NEXT_PAGE="nächste Seite"
+    LAST_PAGE="letzte Seite"
     
 language_code="de-de"
 language_icon="🇩🇪"

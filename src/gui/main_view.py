@@ -10,6 +10,9 @@ from utils import logger
 
 def initialise_st_session():
     set_selected_doc_colxn(get_doc_colxns_names()[0])
+    
+    st.session_state['display_pdf'] = st.session_state.get('display_pdf',True)
+    st.session_state['display_txt'] = st.session_state.get('display_txt',True)
 
 
 def streamlit_config():
@@ -30,6 +33,7 @@ def set_selected_doc_colxn(doc_colxn_name: str):
         st.session_state['current_doc_collection'].transcripts_dir
     )
     st.session_state['current_doc_colxn_name'] = doc_colxn_name
+    print("HERE")
 
 
 def main_view():
@@ -38,7 +42,7 @@ def main_view():
     streamlit_config()
 
     with st.container(height=None):
-        label_col, selector_col, lang_selector_col = st.columns([1, 3, 1])
+        label_col, doc_selector_col, pdf_chkbx,txt_chkbx,lang_selector_col = st.columns([2, 3,1,1, 1])
         with lang_selector_col: 
             language_code = st.selectbox(
                 'language', get_languages(),
@@ -49,7 +53,7 @@ def main_view():
         with label_col:
             label = state_data.get_language_config().gui_text.DOCUMENT_COLLECTION
             st.html(f'<b style="font-size: 2em">{label}:</b>')
-        with selector_col:
+        with doc_selector_col:
             label = state_data.get_language_config().gui_text.SELECT_DOC_COLXN
             
             doc_colxn_name = st.selectbox(
@@ -58,12 +62,22 @@ def main_view():
             )
             if doc_colxn_name != st.session_state["current_doc_colxn_name"]:
                 set_selected_doc_colxn(doc_colxn_name)
-        
+        with pdf_chkbx:
+            st.session_state['display_pdf'] = st.checkbox("PDF")
+        with txt_chkbx:
+            st.session_state['display_txt'] = st.checkbox("TXT")
             
-
-        # # Layout for buttons and spacing
-        chat_col, pdf_col, = st.columns([1, 1])
+            
+        pdf_col = None
+        if st.session_state['display_txt'] and st.session_state['display_pdf']:
+            chat_col, pdf_col = st.columns([1, 2])
+        elif not  st.session_state['display_txt'] and not  st.session_state['display_pdf']:
+            chat_col = st.columns([1])[0]
+        else:
+            chat_col, pdf_col, = st.columns([1, 1])
+             
         with chat_col:
             chat_view()  # IMPORTANT: load chat view before PDF-View
-        with pdf_col:
-            pdf_view()  # IMPORTANT: load PDF-View after Chat view
+        if pdf_col:
+            with pdf_col:
+                pdf_view()  # IMPORTANT: load PDF-View after Chat view

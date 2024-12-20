@@ -26,7 +26,9 @@ def display_sources(message: dict):
 def chat_view():
     if 'llm-recommended-pdf' not in st.session_state:
         st.session_state["llm-recommended-pdf"] = ""
-    with st.container(height=900, border=False):
+    
+    with st.container(height=800, border=False):
+        
         label_col, selector_col, = st.columns([1, 3])
 
         # Model selector
@@ -44,9 +46,12 @@ def chat_view():
             )
 
         update_model(model_name)
-
+        
+        
+        
+        
         # Containers for input and output
-        output_container = st.container(height=705, border=False)
+        output_container = st.container(height=505, border=False)
         input_container = st.container(height=50, border=False)
 
         openai_api_key_valid = True  # Flag to check API key validity
