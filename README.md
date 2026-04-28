@@ -15,7 +15,7 @@ To achieve the above goal, this project is includes the following components:
 - Data Curation: organises source material, transcriptions, multi-page documents and categorising them
 - decentralised storage: supports **IPFS** data storage for easy sharing
 - LLM chat-assistant: uses **large language models (LLM)** to allow the user to ask about the documents' contents
-- RAG: uses **retrieval augmented generation (RAG)** to allow 
+- RAG: uses **retrieval augmented generation (RAG)** to retrieve relevant information from a knowledge base or database first, then provides that retrieved context to the LLM so it can generate a more accurate response.
 
 These components are bundled into a web-application (OCR & data-curation are still missing in the GUI), and we are working on bundling it into a stand-alone executable.
 
@@ -59,7 +59,7 @@ Distribution is not recommended due to these [security risks](https://github.com
 
 - Python: primary programming language
 - Streamlit: GUI framework
-- 
+- Langchain/Ollama
 - ChatGPT: for OCR (transcribing images)
 - IPFS: for de
 
